@@ -1,9 +1,6 @@
 // Standard headers
 #include <iostream>
 
-// gstreamermm headers
-#include <gstreamermm.h>
-
 // gtkmm headers
 #include <glibmm/main.h>
 
@@ -29,30 +26,40 @@ bool on_bus_callback(const Glib::RefPtr<Gst::Bus> &bus, const Glib::RefPtr<Gst::
   return true;
 }
 
-void cGStreamermmPlayer::Run(int argc, char** argv)
+void cGStreamermmPlayer::Create(int argc, char** argv)
 {
+  std::cout<<"cGStreamermmPlayer::Create\n";
+
   Gst::init(argc, argv);
-  std::cout<<"cGStreamermmPlayer::Run 1\n";
-  Glib::RefPtr<Glib::MainLoop> loop = Glib::MainLoop::create();
-  std::cout<<"cGStreamermmPlayer::Run 2\n";
-  Glib::RefPtr<Gst::PlayBin> playbin = Gst::PlayBin::create();
-  std::cout<<"cGStreamermmPlayer::Run 3\n";
-  Glib::ustring sPath = "/home/chris/Music/collection/classic rock/Jefferson Airplane  -  White Rabbit.mp3";
-  std::cout<<"cGStreamermmPlayer::Run 4\n";
+
+  std::cout<<"cGStreamermmPlayer::Create 1\n";
+  loop = Glib::MainLoop::create();
+  std::cout<<"cGStreamermmPlayer::Create 2\n";
+  playbin = Gst::PlayBin::create();
+}
+
+void cGStreamermmPlayer::Play(const std::string& sFilePath)
+{
+  std::cout<<"cGStreamermmPlayer::Play \""<<sFilePath<<"\"\n";
+
+  Glib::ustring sPath = sFilePath.c_str();
   Glib::ustring sURL = "file://" + sPath;
-  std::cout<<"cGStreamermmPlayer::Run 5\n";
   playbin->set_property("uri", sURL);
-  std::cout<<"cGStreamermmPlayer::Run 6\n";
 
   // get the bus
-  Glib::RefPtr<Gst::Bus> bus = playbin->get_bus();
+  bus = playbin->get_bus();
   // Add a bus watch. Bind to the slot the loop variable so you don't
   // have to declare it as global.
   bus->add_watch(sigc::bind(sigc::ptr_fun(&on_bus_callback), loop));
   playbin->set_state(Gst::STATE_PLAYING);
   loop->run(); // execution blocks here until loop->quit() is called
   // loop->quit() has been called.
-  std::cout<<"cGStreamermmPlayer::Run done\n";
+  std::cout<<"cGStreamermmPlayer::Play returning\n";
+}
+
+void cGStreamermmPlayer::Destroy()
+{
+  std::cout<<"cGStreamermmPlayer::Destroy\n";
+
   playbin->set_state(Gst::STATE_NULL);
-  std::cout<<"cGStreamermmPlayer::Run returning\n";
 }

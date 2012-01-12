@@ -1,5 +1,6 @@
 // Standard headers
 #include <iostream>
+#include <string>
 
 // TODO: INCLUDE SPITFIRE.H INSTEAD
 #define nullptr NULL
@@ -22,7 +23,9 @@ int main(int argc, char* argv[])
 
   cGStreamermmPlayer player;
 
-  player.Run(argc, argv);
+  player.Create(argc, argv);
+  player.Play("/home/chris/Music/collection/classic rock/Jefferson Airplane - White Rabbit.mp3");
+  player.Destroy();
 
   return 0;
 }
