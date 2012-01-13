@@ -1,6 +1,9 @@
 #ifndef model_h
 #define model_h
 
+// TODO: INCLUDE SPITFIRE.H INSTEAD
+#define nullptr NULL
+
 class cController;
 
 class cModel

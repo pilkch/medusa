@@ -2,9 +2,6 @@
 #include <iostream>
 #include <string>
 
-// TODO: INCLUDE SPITFIRE.H INSTEAD
-#define nullptr NULL
-
 // Medusa headers
 #include "model.h"
 #include "gtkmmview.h"
@@ -19,9 +16,9 @@ int main(int argc, char* argv[])
   cGtkmmView view;
   cController controller(model, view);
 
-  view.Run();
+  view.Create(argc, argv);
 
-  cGStreamermmPlayer player;
+  cGStreamermmPlayer player(view);
 
   player.Create(argc, argv);
   player.Play("/home/chris/Music/collection/classic rock/Jefferson Airplane - White Rabbit.mp3");

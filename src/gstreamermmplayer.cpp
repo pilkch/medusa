@@ -2,9 +2,10 @@
 #include <iostream>
 
 // gtkmm headers
-#include <glibmm/main.h>
+//#include <glibmm/main.h>
 
 // Medusa headers
+#include "gtkmmview.h"
 #include "gstreamermmplayer.h"
 
 // NOTE:
@@ -24,6 +25,11 @@ bool on_bus_callback(const Glib::RefPtr<Gst::Bus> &bus, const Glib::RefPtr<Gst::
   }
 
   return true;
+}
+
+cGStreamermmPlayer::cGStreamermmPlayer(cGtkmmView& view) :
+  pView(&view)
+{
 }
 
 void cGStreamermmPlayer::Create(int argc, char** argv)
@@ -52,8 +58,11 @@ void cGStreamermmPlayer::Play(const std::string& sFilePath)
   // have to declare it as global.
   bus->add_watch(sigc::bind(sigc::ptr_fun(&on_bus_callback), loop));
   playbin->set_state(Gst::STATE_PLAYING);
-  loop->run(); // execution blocks here until loop->quit() is called
-  // loop->quit() has been called.
+
+  // TODO: DO NOT BLOCK, use gtkmm to show a dialog and use the loop for the dialog instead
+  loop->run(); // execution blocks here until pMain->quit() is called
+  // pMain->quit() has now been called.
+
   std::cout<<"cGStreamermmPlayer::Play returning\n";
 }
 

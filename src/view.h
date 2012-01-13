@@ -1,6 +1,9 @@
 #ifndef view_h
 #define view_h
 
+// TODO: INCLUDE SPITFIRE.H INSTEAD
+#define nullptr NULL
+
 class cController;
 
 class cView
