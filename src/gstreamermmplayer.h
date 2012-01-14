@@ -37,7 +37,6 @@ private:
 
   STATE state;
 
-  Glib::RefPtr<Glib::MainLoop> loop;
   Glib::RefPtr<Gst::PlayBin> playbin;
   Glib::RefPtr<Gst::Bus> bus;
   guint uiWatchID;
