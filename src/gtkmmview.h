@@ -1,33 +1,32 @@
 #ifndef gtkmmview_h
 #define gtkmmview_h
 
-// glib headers
-//#include <glibmm/main.h>
-
 // gtkmm headers
 #include <gtkmm.h>
 
 #include "view.h"
-
-class cGStreamermmPlayer;
+#include "gstreamermmplayer.h"
+#include "gtkmmmainwindow.h"
 
 class cGtkmmView : public cView
 {
 public:
-  friend class cGStreamermmPlayer;
+  friend class cGtkmmMainWindow;
 
-  cGtkmmView();
-
-  void Create(int argc, char** argv);
+  cGtkmmView(int argc, char** argv);
+  ~cGtkmmView();
 
 protected:
-  const Gtk::Main* GetMainLoop() const { return pMain; }
-  Gtk::Main* GetMainLoop() { return pMain; }
+  void OnActionPlayPause();
 
 private:
   void _Run();
 
-  Gtk::Main* pMain;
+  Gtk::Main kit;
+
+  cGtkmmMainWindow mainWindow;
+
+  cGStreamermmPlayer player;
 };
 
 #endif // gtkmmview_h

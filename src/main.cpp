@@ -13,16 +13,10 @@ int main(int argc, char* argv[])
   std::cout<<"main\n";
 
   cModel model;
-  cGtkmmView view;
+  cGtkmmView view(argc, argv);
   cController controller(model, view);
 
-  view.Create(argc, argv);
-
-  cGStreamermmPlayer player(view);
-
-  player.Create(argc, argv);
-  player.Play("/home/chris/Music/collection/classic rock/Jefferson Airplane - White Rabbit.mp3");
-  player.Destroy();
+  view.Run();
 
   return 0;
 }

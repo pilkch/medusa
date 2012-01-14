@@ -1,24 +1,36 @@
 // Medusa headers
 #include "gtkmmview.h"
+#include "gtkmmmainwindow.h"
 
-cGtkmmView::cGtkmmView() :
-  pMain(nullptr)
+cGtkmmView::cGtkmmView(int argc, char** argv) :
+  kit(argc, argv),
+  mainWindow(*this),
+  player(*this)
 {
+  player.Create(argc, argv);
 }
 
-void cGtkmmView::Create(int argc, char** argv)
+cGtkmmView::~cGtkmmView()
 {
-  //pMain = new Gtk::Main(argc, argv);
+  player.Destroy();
+}
+
+void cGtkmmView::OnActionPlayPause()
+{
+  if (player.IsStopped()) player.Play();
+  else player.Pause();
+
+  // Now we want to query the player again in case it failed to start or stop playback
+  if (player.IsStopped()) mainWindow.SetStatePaused();
+  else mainWindow.SetStatePlaying();
 }
 
 void cGtkmmView::_Run()
 {
-  // Run gtkmm main loop
-  // NOTE: If you call run() without a window argument, hide() won't quit().
-  //Gtk::Main::run();
-  //Gtk::Main::run(mainWindow);
+  player.LoadFile("/home/chris/Music/collection/classic rock/Jefferson Airplane - White Rabbit.mp3");
 
-  //pMain->run(); // execution blocks here until pMain->quit() is called
+  OnActionPlayPause();
 
-  // pMain->quit() has now been called.
+  // Display our window
+  Gtk::Main::run(mainWindow);
 }
