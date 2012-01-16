@@ -7,6 +7,11 @@
 // gstreamermm headers
 #include <gstreamermm.h>
 
+// Spitfire headers
+#include <spitfire/util/cString.h>
+
+typedef uint64_t timepositionms_t;
+
 class cGtkmmView;
 
 class cGStreamermmPlayer
@@ -17,10 +22,12 @@ public:
   void Create(int argc, char** argv);
   void Destroy();
 
-  void LoadFile(const std::string& sFilePath);
+  void SetFile(const spitfire::string_t& sFilePath);
+
   void Play();
   void Pause();
   void Stop();
+  void SeekMS(timepositionms_t timeMS);
 
   bool IsPlaying() const { return (state == STATE::PLAYING); }
   bool IsStopped() const { return (state == STATE::STOPPED); }

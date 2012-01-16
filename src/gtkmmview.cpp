@@ -27,7 +27,7 @@ void cGtkmmView::OnActionPlayPause()
 
 void cGtkmmView::_Run()
 {
-  player.LoadFile("/home/chris/Music/collection/classic rock/Jefferson Airplane - White Rabbit.mp3");
+  player.SetFile(TEXT("/home/chris/Music/collection/classic rock/Jefferson Airplane - White Rabbit.mp3"));
 
   OnActionPlayPause();
 
