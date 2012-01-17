@@ -17,7 +17,9 @@ public:
   ~cGtkmmView();
 
 protected:
+  void OnActionPlaybackPositionChanged(uint64_t seconds);
   void OnActionPlayPause();
+  void OnActionTimerUpdatePlaybackPosition();
 
 private:
   void _Run();

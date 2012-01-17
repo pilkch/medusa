@@ -15,7 +15,8 @@
 cGStreamermmPlayer::cGStreamermmPlayer(cGtkmmView& view) :
   pView(&view),
   state(STATE::STOPPED),
-  uiWatchID(0)
+  uiWatchID(0),
+  positionMS(0)
 {
 }
 
@@ -84,4 +85,15 @@ void cGStreamermmPlayer::SeekMS(timepositionms_t timeMS)
 {
   const uint64_t timeNS = timeMS * 1000000; // Convert to nanoseconds
   playbin->seek(Gst::FORMAT_TIME, Gst::SEEK_FLAG_FLUSH | Gst::SEEK_FLAG_KEY_UNIT, timeNS);
+}
+
+uint64_t cGStreamermmPlayer::GetPlaybackPositionMS() const
+{
+  Gst::Format fmt = Gst::FORMAT_TIME;
+  gint64 pos = 0;
+  if (playbin->query_position(fmt, pos)) {
+    positionMS = pos / 1000000; // Convert to milliseconds
+  }
+
+  return positionMS;
 }

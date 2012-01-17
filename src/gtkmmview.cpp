@@ -1,3 +1,6 @@
+// Standard headers
+#include <iostream>
+
 // Medusa headers
 #include "gtkmmview.h"
 #include "gtkmmmainwindow.h"
@@ -15,6 +18,11 @@ cGtkmmView::~cGtkmmView()
   player.Destroy();
 }
 
+void cGtkmmView::OnActionPlaybackPositionChanged(uint64_t seconds)
+{
+  player.SeekMS(seconds * 1000);
+}
+
 void cGtkmmView::OnActionPlayPause()
 {
   if (player.IsStopped()) player.Play();
@@ -23,6 +31,11 @@ void cGtkmmView::OnActionPlayPause()
   // Now we want to query the player again in case it failed to start or stop playback
   if (player.IsStopped()) mainWindow.SetStatePaused();
   else mainWindow.SetStatePlaying();
+}
+
+void cGtkmmView::OnActionTimerUpdatePlaybackPosition()
+{
+  mainWindow.SetPlaybackPositionMS(player.GetPlaybackPositionMS());
 }
 
 void cGtkmmView::_Run()

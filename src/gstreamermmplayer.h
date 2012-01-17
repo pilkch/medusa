@@ -32,6 +32,9 @@ public:
   bool IsPlaying() const { return (state == STATE::PLAYING); }
   bool IsStopped() const { return (state == STATE::STOPPED); }
 
+  uint64_t GetLengthMS() const;
+  uint64_t GetPlaybackPositionMS() const;
+
 private:
   bool _OnBusMessage(const Glib::RefPtr<Gst::Bus>& bus, const Glib::RefPtr<Gst::Message>& message);
 
@@ -47,6 +50,7 @@ private:
   Glib::RefPtr<Gst::PlayBin> playbin;
   Glib::RefPtr<Gst::Bus> bus;
   guint uiWatchID;
+  mutable uint64_t positionMS;
 };
 
 #endif // gstreamermmplayer_h
