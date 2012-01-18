@@ -35,7 +35,9 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET);
   boxPlaybackButtons.pack_start(buttonVolume, Gtk::PACK_SHRINK);
 
-  boxCategoriesAndPlaylist.pack_start(dummyCategories, Gtk::PACK_EXPAND_WIDGET);
+  dummyCategories.set_size_request(150, -1);
+
+  boxCategoriesAndPlaylist.pack_start(dummyCategories, Gtk::PACK_SHRINK);
   boxCategoriesAndPlaylist.pack_start(dummyPlaylist, Gtk::PACK_EXPAND_WIDGET);
 
   boxPositionSlider.pack_start(textPosition, Gtk::PACK_SHRINK);
