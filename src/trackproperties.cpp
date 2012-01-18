@@ -15,28 +15,6 @@
 // Meduasa headers
 #include "trackproperties.h"
 
-// ** cTrackProperties
-
-cTrackProperties::cTrackProperties() :
-  uiYear(0),
-  uiTracknum(0),
-  uiDurationMilliSeconds(0)
-{
-}
-
-void cTrackProperties::Clear()
-{
-  sArtist.clear();
-  sCompilationArtist.clear();
-  sAlbum.clear();
-  sTitle.clear();
-  sGenre.clear();
-  sComment.clear();
-  uiYear = 0;
-  uiTracknum = 0;
-  uiDurationMilliSeconds = 0;
-}
-
 
 #define MYTH_ID3_FRAME_COMPILATIONARTIST "TPE4"
 #define MYTH_ID3_FRAME_COMMENT "TXXX"
@@ -54,7 +32,7 @@ void cTrackProperties::Clear()
 class cLibID3Tag
 {
 public:
-  bool ReadTrackTags(cTrackProperties& properties, const spitfire::string_t& sFilePath) const;
+  bool ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const;
 
 private:
   bool IsNumbersOnly(const spitfire::string_t& sText) const;
@@ -73,9 +51,9 @@ bool cLibID3Tag::IsNumbersOnly(const spitfire::string_t& sText) const
   return true;
 }
 
-bool cLibID3Tag::ReadTrackTags(cTrackProperties& properties, const spitfire::string_t& sFilePath) const
+bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
 {
-  properties.Clear();
+  metaData.Clear();
 
   id3_file* p_input = id3_file_open(spitfire::string::ToUTF8(sFilePath).c_str(), ID3_FILE_MODE_READONLY);
   if (p_input == nullptr) p_input = id3_file_open(spitfire::string::ToASCII(sFilePath).c_str(), ID3_FILE_MODE_READONLY);
@@ -87,13 +65,13 @@ bool cLibID3Tag::ReadTrackTags(cTrackProperties& properties, const spitfire::str
       return false;
     }
 
-    properties.sTitle = GetTag(tag, ID3_FRAME_TITLE);
-    properties.sArtist = GetTag(tag, ID3_FRAME_ARTIST);
-    properties.sCompilationArtist = GetTag(tag, MYTH_ID3_FRAME_COMPILATIONARTIST);
-    properties.sAlbum = GetTag(tag, ID3_FRAME_ALBUM);
+    metaData.sTitle = GetTag(tag, ID3_FRAME_TITLE);
+    metaData.sArtist = GetTag(tag, ID3_FRAME_ARTIST);
+    metaData.sCompilationArtist = GetTag(tag, MYTH_ID3_FRAME_COMPILATIONARTIST);
+    metaData.sAlbum = GetTag(tag, ID3_FRAME_ALBUM);
 
     // Get Track Num dealing with 1/16, 2/16 etc. format
-    properties.uiTracknum = spitfire::string::ToUnsignedInt(GetTag(tag, ID3_FRAME_TRACK));
+    metaData.uiTracknum = spitfire::string::ToUnsignedInt(GetTag(tag, ID3_FRAME_TRACK));
 
     // NB Year could be TDRC or TYER depending on version....
     // From: http://www.id3.org/id3v2.4.0-structure.txt
@@ -103,48 +81,48 @@ bool cLibID3Tag::ReadTrackTags(cTrackProperties& properties, const spitfire::str
 
     // Depending on the version of libid3tag, it will reassign a #define,
     // but we want to look for both.
-    properties.uiYear = spitfire::string::ToUnsignedInt(GetTag(tag, ID3_FRAME_YEAR));
-    if (0 == properties.uiYear) properties.uiYear = spitfire::string::ToUnsignedInt(GetTag(tag, "TYER"));
+    metaData.uiYear = spitfire::string::ToUnsignedInt(GetTag(tag, ID3_FRAME_YEAR));
+    if (0 == metaData.uiYear) metaData.uiYear = spitfire::string::ToUnsignedInt(GetTag(tag, "TYER"));
 
     // Genre
-    properties.sGenre = GetTag(tag, ID3_FRAME_GENRE);
+    metaData.sGenre = GetTag(tag, ID3_FRAME_GENRE);
 
     // Genre in ID3v2 = "genrenum|Genre Name"
-    if (IsNumbersOnly(properties.sGenre)) {
+    if (IsNumbersOnly(metaData.sGenre)) {
       // This means the genre is 100% numeric
       // Try and decode genre number
-      const std::string sGenreUTF8(spitfire::string::ToUTF8(properties.sGenre));
+      const std::string sGenreUTF8(spitfire::string::ToUTF8(metaData.sGenre));
       id3_ucs4_t* p_tmp = id3_utf8_ucs4duplicate((const id3_utf8_t*)(const char*)sGenreUTF8.c_str());
 
       const id3_ucs4_t* p_ucs4 = id3_genre_name(p_tmp);
       free(p_tmp);
 
       id3_utf8_t* p_utf8 = id3_ucs4_utf8duplicate(p_ucs4);
-      properties.sGenre = spitfire::string::ToString_t((const char*)p_utf8);
+      metaData.sGenre = spitfire::string::ToString_t((const char*)p_utf8);
 
       free(p_utf8);
     }
 
     // Comment
-    properties.sComment = GetTag(tag, ID3_FRAME_COMMENT);
+    metaData.sComment = GetTag(tag, ID3_FRAME_COMMENT);
 
     id3_file_close(p_input);
   }
 
   // If we don't have title and artist return false
-  if (properties.sTitle.empty() && properties.sArtist.empty()) {
+  if (metaData.sTitle.empty() && metaData.sArtist.empty()) {
     std::wcerr<<"cLibID3Tag::ReadTrackTags FAILED to read metadata from \""<<sFilePath<<"\"\n";
     return false;
   }
 
-  //std::wcout<<"artist: \""<<properties.sArtist<<"\"\n";
-  //std::wcout<<"compilation_artist: \""<<properties.sCompilationArtist<<"\"\n";
-  //std::wcout<<"album: \""<<properties.sAlbum<<"\"\n";
-  //std::wcout<<"title: \""<<properties.sTitle<<"\"\n";
-  //std::wcout<<"genre: \""<<properties.sGenre<<"\"\n";
-  //std::wcout<<"comment: \""<<properties.sComment<<"\"\n";
-  //std::wcout<<"year: \""<<properties.uiYear<<"\"\n";
-  //std::wcout<<"tracknum: \""<<properties.uiTracknum<<"\"\n";
+  //std::wcout<<"artist: \""<<metaData.sArtist<<"\"\n";
+  //std::wcout<<"compilation_artist: \""<<metaData.sCompilationArtist<<"\"\n";
+  //std::wcout<<"album: \""<<metaData.sAlbum<<"\"\n";
+  //std::wcout<<"title: \""<<metaData.sTitle<<"\"\n";
+  //std::wcout<<"genre: \""<<metaData.sGenre<<"\"\n";
+  //std::wcout<<"comment: \""<<metaData.sComment<<"\"\n";
+  //std::wcout<<"year: \""<<metaData.uiYear<<"\"\n";
+  //std::wcout<<"tracknum: \""<<metaData.uiTracknum<<"\"\n";
 
   return true;
 }
@@ -220,32 +198,32 @@ spitfire::string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* pLabel, const s
 
 // ** cTrackPropertiesReader
 
-bool cTrackPropertiesReader::ReadTrackProperties(cTrackProperties& properties, const spitfire::string_t& sFilePath) const
+bool cTrackPropertiesReader::ReadTrackProperties(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
 {
-  properties.Clear();
+  metaData.Clear();
 
   bool bResult = true;
 
-  if (!ReadTrackTags(properties, sFilePath)) bResult = false;
-  if (!ReadTrackLength(properties, sFilePath)) bResult = false;
+  if (!ReadTrackTags(metaData, sFilePath)) bResult = false;
+  if (!ReadTrackLength(metaData, sFilePath)) bResult = false;
 
   return bResult;
 }
 
-bool cTrackPropertiesReader::ReadTrackTags(cTrackProperties& properties, const spitfire::string_t& sFilePath) const
+bool cTrackPropertiesReader::ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
 {
   cLibID3Tag libID3Tag;
-  return libID3Tag.ReadTrackTags(properties, sFilePath);
+  return libID3Tag.ReadTrackTags(metaData, sFilePath);
 }
 
 // Use libmad to read the track length
 // http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaioid3v2.cpp
 
-bool cTrackPropertiesReader::ReadTrackLength(cTrackProperties& properties, const spitfire::string_t& sFilePath) const
+bool cTrackPropertiesReader::ReadTrackLength(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
 {
   // TODO: CLEAN UP THIS FUNCTION
 
-  properties.uiDurationMilliSeconds = 0;
+  metaData.uiDurationMilliSeconds = 0;
 
   const std::string sFileNameUTF8 = spitfire::string::ToUTF8(sFilePath);
   FILE* file = fopen(sFileNameUTF8.c_str(), "r");
@@ -316,8 +294,8 @@ bool cTrackPropertiesReader::ReadTrackLength(cTrackProperties& properties, const
 
   fclose(file);
 
-  if (bIsVBR) properties.uiDurationMilliSeconds = mad_timer_count(timer, MAD_UNITS_MILLISECONDS);
-  else properties.uiDurationMilliSeconds = alt_length;
+  if (bIsVBR) metaData.uiDurationMilliSeconds = mad_timer_count(timer, MAD_UNITS_MILLISECONDS);
+  else metaData.uiDurationMilliSeconds = alt_length;
 
   return true;
 }
