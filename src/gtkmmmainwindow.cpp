@@ -1,5 +1,6 @@
 // Standard headers
 #include <iostream>
+#include <iomanip>
 
 // Medusa headers
 #include "gtkmmview.h"
@@ -7,21 +8,29 @@
 
 cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   view(_view),
-  button("Play")
+  button("Play"),
+  textPosition("0:00"),
+  textLength("0:00")
 {
   set_title("Medusa");
 
   SetPlaybackLengthMS(1000);
 
+  positionSlider.set_draw_value(false);
+
   positionSlider.signal_change_value().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPositionChanged));
 
   button.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlayPauseClicked));
 
-  vBox.pack_start(positionSlider, Gtk::PACK_SHRINK);
-  vBox.pack_start(button, Gtk::PACK_SHRINK);
+  boxPositionSlider.pack_start(textPosition, Gtk::PACK_SHRINK);
+  boxPositionSlider.pack_start(positionSlider, Gtk::PACK_EXPAND_WIDGET);
+  boxPositionSlider.pack_start(textLength, Gtk::PACK_SHRINK);
+
+  boxMainWindow.pack_start(boxPositionSlider, Gtk::PACK_SHRINK);
+  boxMainWindow.pack_start(button, Gtk::PACK_SHRINK);
 
   // Add the box layout to the main window
-  add(vBox);
+  add(boxMainWindow);
 
   show_all_children();
 }
@@ -47,10 +56,47 @@ bool cGtkmmMainWindow::OnTimerPlaybackPosition()
   return true;
 }
 
+std::string cGtkmmMainWindow::TimeToString(uint64_t milliseconds) const
+{
+  std::ostringstream o;
+
+  o<<std::right<<std::setfill('0');
+
+  uint64_t time = milliseconds / 1000;
+
+  const uint64_t seconds = time % 60;
+  time /= 60;
+
+  const uint64_t minutes = time % 60;
+  time /= 60;
+
+  const uint64_t hours = time % 24;
+  time /= 24;
+
+  const uint64_t days = hours;
+
+  if (days != 0) {
+    o<<days<<":";
+    o<<std::setw(2); // Set width of 2 for the next value
+  }
+
+  if (hours != 0)  {
+    o<<hours<<":";
+    o<<std::setw(2); // Set width of 2 for the next value
+  }
+
+  o<<minutes<<":";
+  o<<std::setw(2)<<seconds;
+
+  return o.str();
+}
+
 void cGtkmmMainWindow::SetPlaybackPositionMS(uint64_t milliseconds)
 {
   std::cout<<"cGtkmmMainWindow::SetPlaybackPositionMS "<<milliseconds<<"\n";
   positionSlider.set_value(double(milliseconds) / 1000.0f);
+
+  textPosition.set_text(TimeToString(milliseconds).c_str());
 }
 
 void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
@@ -58,6 +104,8 @@ void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
   std::cout<<"cGtkmmMainWindow::SetPlaybackLengthMS "<<milliseconds<<"\n";
   positionSlider.set_range(0, double(milliseconds) / 1000.0f);
   positionSlider.set_increments(5, 5);
+
+  textLength.set_text(TimeToString(milliseconds).c_str());
 }
 
 void cGtkmmMainWindow::SetStatePlaying()
