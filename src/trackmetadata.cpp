@@ -13,7 +13,7 @@
 #include <mad.h>
 
 // Meduasa headers
-#include "trackproperties.h"
+#include "trackmetadata.h"
 
 
 #define MYTH_ID3_FRAME_COMPILATIONARTIST "TPE4"
@@ -193,7 +193,6 @@ spitfire::string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* pLabel, const s
   // Not found.
   return TEXT("");
 }
-
 
 
 // ** cTrackPropertiesReader
