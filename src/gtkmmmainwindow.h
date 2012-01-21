@@ -8,6 +8,7 @@
 #include "track.h"
 
 class cGtkmmView;
+class cGtkmmTrackList;
 
 class cGtkmmMainWindow : public Gtk::Window {
 public:
@@ -19,24 +20,32 @@ public:
   void SetPlaybackPositionMS(uint64_t milliseconds);
   void SetPlaybackLengthMS(uint64_t milliseconds);
 
+  void OnActionPlayTrack(const cTrack* pTrack);
+
 private:
   std::string TimeToString(uint64_t milliseconds) const;
+
+  void on_menu_file_new_generic();
+  void on_menu_file_quit();
+  void on_menu_others();
 
   bool OnPlaybackPositionChanged(Gtk::ScrollType scrollType, double value);
   void OnPlayPauseClicked();
   bool OnTimerPlaybackPosition();
-  void OnListSelectionChanged();
-  void OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
-
-  void AddTrack(const int id, const cTrack& track);
 
   cGtkmmView& view;
 
+  // Menu and toolbar
+  Glib::RefPtr<Gtk::UIManager> m_refUIManager;
+  Glib::RefPtr<Gtk::ActionGroup> m_refActionGroup;
+
+  // Layouts
   Gtk::VBox boxMainWindow;
   Gtk::HBox boxPlaybackButtons;
   Gtk::HBox boxPositionSlider;
   Gtk::HBox boxCategoriesAndPlaylist;
 
+  // Controls
   Gtk::Button buttonPrevious;
   Gtk::Button buttonPlay;
   Gtk::Button buttonNext;
@@ -49,35 +58,7 @@ private:
 
   Gtk::Label dummyStatusBar;
 
-
-  // Tree view
-  typedef Glib::RefPtr<Gdk::Pixbuf> cPixbufPtr;
-  class cUserData : public Glib::Object {
-  public:
-    const cTrack* pTrack;
-  };
-  typedef Glib::RefPtr<cUserData> cUserDataPtr;
-
-  class cModelColumns : public Gtk::TreeModel::ColumnRecord
-  {
-  public:
-    cModelColumns()
-    { add(id); add(pixbuf); add(artist); add(title); add(album); add(userdata); }
-
-    Gtk::TreeModelColumn<int> id;
-    Gtk::TreeModelColumn<cPixbufPtr> pixbuf;
-    Gtk::TreeModelColumn<Glib::ustring> artist;
-    Gtk::TreeModelColumn<Glib::ustring> title;
-    Gtk::TreeModelColumn<Glib::ustring> album;
-    Gtk::TreeModelColumn<cUserDataPtr> userdata;
-  };
-
-  cModelColumns columns;
-
-  Gtk::ScrolledWindow playlistScrolledWindow;
-  Gtk::TreeView playlistTreeView;
-  Glib::RefPtr<Gtk::ListStore> playlistTreeModelRef;
-  Glib::RefPtr<Gtk::TreeSelection> playlistTreeSelectionRef;
+  cGtkmmTrackList* pTrackList;
 
   sigc::connection timeoutConnection;
 };

@@ -16,6 +16,8 @@ public:
   cGtkmmView(int argc, char** argv);
   ~cGtkmmView();
 
+  const cTrack* GetTrack() const { return player.GetTrack(); }
+
 protected:
   void OnActionPlayTrack(const cTrack* pTrack);
   void OnActionPlaybackPositionChanged(uint64_t seconds);
