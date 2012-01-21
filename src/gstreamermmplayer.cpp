@@ -54,13 +54,19 @@ bool cGStreamermmPlayer::_OnBusMessage(const Glib::RefPtr<Gst::Bus>& bus, const 
   return true;
 }
 
-void cGStreamermmPlayer::SetFile(const spitfire::string_t& sFilePath)
+void cGStreamermmPlayer::SetTrack(const cTrack* pTrack)
 {
-  std::wcout<<"cGStreamermmPlayer::SetFile \""<<sFilePath<<"\"\n";
+  std::wcout<<"cGStreamermmPlayer::SetTrack"<<std::endl;
 
-  const Glib::ustring sPath = spitfire::string::ToUTF8(sFilePath).c_str();
-  const Glib::ustring sURL = "file://" + sPath;
-  playbin->set_property("uri", sURL);
+  if (pTrack != nullptr) {
+    const Glib::ustring sPath = spitfire::string::ToUTF8(pTrack->sFilePath).c_str();
+    const Glib::ustring sURL = "file://" + sPath;
+    playbin->set_property("uri", sURL);
+  } else playbin->set_property("uri", Glib::ustring(""));
+
+  Stop();
+
+  pActiveTrack = pTrack;
 }
 
 void cGStreamermmPlayer::Play()
@@ -85,6 +91,11 @@ void cGStreamermmPlayer::SeekMS(timepositionms_t timeMS)
 {
   const uint64_t timeNS = timeMS * 1000000; // Convert to nanoseconds
   playbin->seek(Gst::FORMAT_TIME, Gst::SEEK_FLAG_FLUSH | Gst::SEEK_FLAG_KEY_UNIT, timeNS);
+}
+
+uint64_t cGStreamermmPlayer::GetLengthMS() const
+{
+  return (pActiveTrack != nullptr) ? pActiveTrack->metaData.uiDurationMilliSeconds : 0;
 }
 
 uint64_t cGStreamermmPlayer::GetPlaybackPositionMS() const

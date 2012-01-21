@@ -10,6 +10,9 @@
 // Spitfire headers
 #include <spitfire/util/cString.h>
 
+// Medusa headers
+#include "track.h"
+
 typedef uint64_t timepositionms_t;
 
 class cGtkmmView;
@@ -22,7 +25,8 @@ public:
   void Create(int argc, char** argv);
   void Destroy();
 
-  void SetFile(const spitfire::string_t& sFilePath);
+  const cTrack* GetTrack() const { return pActiveTrack; }
+  void SetTrack(const cTrack* pTrack);
 
   void Play();
   void Pause();
@@ -51,6 +55,8 @@ private:
   Glib::RefPtr<Gst::Bus> bus;
   guint uiWatchID;
   mutable uint64_t positionMS;
+
+  const cTrack* pActiveTrack;
 };
 
 #endif // gstreamermmplayer_h

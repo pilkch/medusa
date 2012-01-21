@@ -18,9 +18,25 @@ cGtkmmView::~cGtkmmView()
   player.Destroy();
 }
 
+void cGtkmmView::OnActionPlayTrack(const cTrack* pTrack)
+{
+  player.SetTrack(pTrack);
+
+  OnActionPlay();
+}
+
 void cGtkmmView::OnActionPlaybackPositionChanged(uint64_t seconds)
 {
   player.SeekMS(seconds * 1000);
+}
+
+void cGtkmmView::OnActionPlay()
+{
+  if (player.IsStopped()) player.Play();
+
+  // Now we want to query the player again in case it failed to start or stop playback
+  if (player.IsStopped()) mainWindow.SetStatePaused();
+  else mainWindow.SetStatePlaying(player.GetTrack());
 }
 
 void cGtkmmView::OnActionPlayPause()
@@ -30,7 +46,7 @@ void cGtkmmView::OnActionPlayPause()
 
   // Now we want to query the player again in case it failed to start or stop playback
   if (player.IsStopped()) mainWindow.SetStatePaused();
-  else mainWindow.SetStatePlaying();
+  else mainWindow.SetStatePlaying(player.GetTrack());
 }
 
 void cGtkmmView::OnActionTimerUpdatePlaybackPosition()
@@ -40,10 +56,6 @@ void cGtkmmView::OnActionTimerUpdatePlaybackPosition()
 
 void cGtkmmView::_Run()
 {
-  player.SetFile(TEXT("/home/chris/Music/collection/classic rock/Jefferson Airplane - White Rabbit.mp3"));
-
-  OnActionPlayPause();
-
   // Display our window
   Gtk::Main::run(mainWindow);
 }

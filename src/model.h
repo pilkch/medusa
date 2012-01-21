@@ -1,8 +1,12 @@
 #ifndef model_h
 #define model_h
 
-// TODO: INCLUDE SPITFIRE.H INSTEAD
-#define nullptr NULL
+// Spitfire headers
+#include <spitfire/spitfire.h>
+#include <spitfire/audio/metadata.h>
+
+// Medusa headers
+#include "track.h"
 
 class cController;
 
@@ -15,6 +19,8 @@ public:
 
 private:
   cController* pController;
+
+  std::vector<cTrack*> tracks;
 };
 
 // ** cModel
