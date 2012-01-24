@@ -21,6 +21,7 @@ public:
   void SetPlaybackLengthMS(uint64_t milliseconds);
 
   void OnActionPlayTrack(const cTrack* pTrack);
+  void OnActionPlaylistRightClick(GdkEventButton* event);
 
 private:
   std::string TimeToString(uint64_t milliseconds) const;
@@ -28,6 +29,8 @@ private:
   void on_menu_file_new_generic();
   void on_menu_file_quit();
   void on_menu_others();
+
+  void on_menu_file_popup_generic();
 
   bool OnPlaybackPositionChanged(Gtk::ScrollType scrollType, double value);
   void OnPlayPauseClicked();
@@ -38,6 +41,11 @@ private:
   // Menu and toolbar
   Glib::RefPtr<Gtk::UIManager> m_refUIManager;
   Glib::RefPtr<Gtk::ActionGroup> m_refActionGroup;
+
+  // Popup menu
+  Glib::RefPtr<Gtk::UIManager> popupUIManagerRef;
+  Glib::RefPtr<Gtk::ActionGroup> popupActionGroupRef;
+  Gtk::Menu* pMenuPopup;
 
   // Layouts
   Gtk::VBox boxMainWindow;

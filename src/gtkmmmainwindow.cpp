@@ -9,6 +9,7 @@
 
 cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   view(_view),
+  pMenuPopup(nullptr),
   buttonPrevious("Previous"),
   buttonPlay("Play"),
   buttonNext("Next"),
@@ -70,38 +71,40 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   add_accel_group(m_refUIManager->get_accel_group());
 
   // Layout the actions in a menubar and toolbar
-  Glib::ustring ui_info =
-    "<ui>"
-    "  <menubar name='MenuBar'>"
-    "    <menu action='FileMenu'>"
-    "      <menu action='FileNew'>"
-    "        <menuitem action='FileNewStandard'/>"
-    "        <menuitem action='FileNewFoo'/>"
-    "        <menuitem action='FileNewGoo'/>"
-    "      </menu>"
-    "      <separator/>"
-    "      <menuitem action='FileQuit'/>"
-    "    </menu>"
-    "    <menu action='EditMenu'>"
-    "      <menuitem action='EditCopy'/>"
-    "      <menuitem action='EditPaste'/>"
-    "      <menuitem action='EditSomething'/>"
-    "    </menu>"
-    "    <menu action='HelpMenu'>"
-    "      <menuitem action='HelpAbout'/>"
-    "    </menu>"
-    "  </menubar>"
-    "  <toolbar  name='ToolBar'>"
-    "    <toolitem action='FileNewStandard'/>"
-    "    <toolitem action='FileQuit'/>"
-    "  </toolbar>"
-    "</ui>";
+  {
+    Glib::ustring ui_info =
+      "<ui>"
+      "  <menubar name='MenuBar'>"
+      "    <menu action='FileMenu'>"
+      "      <menu action='FileNew'>"
+      "        <menuitem action='FileNewStandard'/>"
+      "        <menuitem action='FileNewFoo'/>"
+      "        <menuitem action='FileNewGoo'/>"
+      "      </menu>"
+      "      <separator/>"
+      "      <menuitem action='FileQuit'/>"
+      "    </menu>"
+      "    <menu action='EditMenu'>"
+      "      <menuitem action='EditCopy'/>"
+      "      <menuitem action='EditPaste'/>"
+      "      <menuitem action='EditSomething'/>"
+      "    </menu>"
+      "    <menu action='HelpMenu'>"
+      "      <menuitem action='HelpAbout'/>"
+      "    </menu>"
+      "  </menubar>"
+      "  <toolbar  name='ToolBar'>"
+      "    <toolitem action='FileNewStandard'/>"
+      "    <toolitem action='FileQuit'/>"
+      "  </toolbar>"
+      "</ui>";
 
-  try {
-    m_refUIManager->add_ui_from_string(ui_info);
-  }
-  catch(const Glib::Error& ex) {
-    std::cerr << "building menus failed: " <<  ex.what();
+    try {
+      m_refUIManager->add_ui_from_string(ui_info);
+    }
+    catch(const Glib::Error& ex) {
+      std::cerr << "building menus failed: " <<  ex.what();
+    }
   }
 
   // Get the menubar and toolbar widgets, and add them to a container widget
@@ -110,6 +113,58 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
 
   Gtk::Widget* pToolbar = m_refUIManager->get_widget("/ToolBar") ;
   if(pToolbar != nullptr) boxMainWindow.pack_start(*pToolbar, Gtk::PACK_SHRINK);
+
+
+
+  // Popup menu
+  popupActionGroupRef = Gtk::ActionGroup::create();
+
+  //File|New sub menu:
+  //These menu actions would normally already exist for a main menu, because a
+  //context menu should not normally contain menu items that are only available
+  //via a context menu.
+  popupActionGroupRef->add(Gtk::Action::create("ContextMenu", "Context Menu"));
+
+  popupActionGroupRef->add(Gtk::Action::create("ContextEdit", "Edit"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_file_popup_generic));
+
+  popupActionGroupRef->add(Gtk::Action::create("ContextProcess", "Process"),
+          Gtk::AccelKey("<control>P"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_file_popup_generic));
+
+  popupActionGroupRef->add(Gtk::Action::create("ContextRemove", "Remove"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_file_popup_generic));
+
+  popupUIManagerRef = Gtk::UIManager::create();
+  popupUIManagerRef->insert_action_group(popupActionGroupRef);
+
+  add_accel_group(popupUIManagerRef->get_accel_group());
+
+  // Layout the actions in our popup menu
+  {
+    Glib::ustring ui_info =
+      "<ui>"
+      "  <popup name='PopupMenu'>"
+      "    <menuitem action='ContextEdit'/>"
+      "    <menuitem action='ContextProcess'/>"
+      "    <menuitem action='ContextRemove'/>"
+      "  </popup>"
+      "</ui>";
+
+    try
+    {
+      popupUIManagerRef->add_ui_from_string(ui_info);
+    }
+    catch(const Glib::Error& ex)
+    {
+      std::cerr << "building menus failed: " <<  ex.what();
+    }
+  }
+
+  //Get the menu:
+  pMenuPopup = dynamic_cast<Gtk::Menu*>(popupUIManagerRef->get_widget("/PopupMenu"));
+  if (pMenuPopup == nullptr) g_warning("menu not found");
+
 
 
   // Controls
@@ -168,6 +223,16 @@ void cGtkmmMainWindow::on_menu_file_new_generic()
 void cGtkmmMainWindow::on_menu_others()
 {
   std::cout << "A menu item was selected." << std::endl;
+}
+
+void cGtkmmMainWindow::on_menu_file_popup_generic()
+{
+   std::cout << "A popup menu item was selected." << std::endl;
+}
+
+void cGtkmmMainWindow::OnActionPlaylistRightClick(GdkEventButton* event)
+{
+  if (pMenuPopup != nullptr) pMenuPopup->popup(event->button, event->time);
 }
 
 bool cGtkmmMainWindow::OnPlaybackPositionChanged(Gtk::ScrollType scrollType, double value)

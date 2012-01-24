@@ -24,6 +24,7 @@ protected:
 
 private:
   void OnListSelectionChanged();
+  bool OnListButtonPressEvent(GdkEventButton* event);
   void OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 
   void AddTrack(const int id, const cTrack& track);

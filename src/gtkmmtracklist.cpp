@@ -27,9 +27,10 @@ cGtkmmTrackList::cGtkmmTrackList(cGtkmmMainWindow& _mainWindow) :
 
   // Handle tree selections
   playlistTreeSelectionRef = playlistTreeView.get_selection();
-  //playlistTreeSelectionRef->signal_changed().connect( sigc::mem_fun(*this, &cGtkmmTrackList::OnListSelectionChanged) );
+  playlistTreeSelectionRef->signal_changed().connect(sigc::mem_fun(*this, &cGtkmmTrackList::OnListSelectionChanged));
 
   playlistTreeView.signal_row_activated().connect(sigc::mem_fun(*this, &cGtkmmTrackList::OnListDoubleClick));
+  playlistTreeView.signal_button_press_event().connect(sigc::mem_fun(*this, &cGtkmmTrackList::OnListButtonPressEvent), false);
 
   // Add the TreeView's view columns:
   playlistTreeView.append_column(" ", columns.pixbuf);
@@ -58,6 +59,21 @@ void cGtkmmTrackList::OnListSelectionChanged()
 {
   std::cout<<"cGtkmmTrackList::OnListSelectionChanged\n";
   //m_Button_Delete.set_sensitive(playlistTreeSelectionRef->count_selected_rows() > 0);
+}
+
+bool cGtkmmTrackList::OnListButtonPressEvent(GdkEventButton* event)
+{
+  std::cout<<"cGtkmmTrackList::OnListButtonPressEvent\n";
+
+  if ((event->type == GDK_BUTTON_PRESS) && (event->button == 3)) {
+    std::cout<<"cGtkmmTrackList::OnListButtonPressEvent Show menu\n";
+    mainWindow.OnActionPlaylistRightClick(event);
+
+    // Tell Gtk that the event has been handled
+    return true;
+  }
+
+  return false;
 }
 
 void cGtkmmTrackList::OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column)
