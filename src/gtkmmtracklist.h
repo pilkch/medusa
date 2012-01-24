@@ -7,22 +7,51 @@
 // Medusa headers
 #include "track.h"
 
+class cGtkmmTrackListSelectedIterator
+{
+public:
+  explicit cGtkmmTrackListSelectedIterator(cGtkmmTrackList& trackList);
+
+  size_t GetCount() const { return selected.size(); }
+
+  bool IsValid() const;
+
+  void Next();
+
+  const Gtk::TreeRow& GetRow();
+
+private:
+  cGtkmmTrackList& trackList;
+
+  std::vector<Gtk::TreeModel::Path> selected;
+
+  size_t i;
+  size_t n;
+
+  Gtk::TreeModel::const_iterator iter;
+};
+
 class cGtkmmMainWindow;
 
 class cGtkmmTrackList : public Gtk::TreeView {
 public:
+  friend class cGtkmmTrackListSelectedIterator;
   friend class cGtkmmMainWindow;
 
   explicit cGtkmmTrackList(cGtkmmMainWindow& mainWindow);
-  virtual ~cGtkmmTrackList() {}
 
   void SetStatePlaying(const cTrack* pTrack);
   void SetStatePaused(const cTrack* pTrack);
+
+  int GetIDFromRow(const Gtk::TreeModel::Row& row) const;
+
+  const cTrack* GetTrackFromRow(const Gtk::TreeModel::Row& row) const;
 
 protected:
   Gtk::Widget& GetWidget() { return playlistScrolledWindow; }
 
 private:
+  bool OnSelectFunction(const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool path_currently_selected);
   void OnListSelectionChanged();
   bool OnListButtonPressEvent(GdkEventButton* event);
   void OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
@@ -56,7 +85,6 @@ private:
   cModelColumns columns;
 
   Gtk::ScrolledWindow playlistScrolledWindow;
-  Gtk::TreeView playlistTreeView;
   Glib::RefPtr<Gtk::ListStore> playlistTreeModelRef;
   Glib::RefPtr<Gtk::TreeSelection> playlistTreeSelectionRef;
 };

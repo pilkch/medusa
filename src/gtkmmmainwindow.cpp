@@ -103,7 +103,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
       m_refUIManager->add_ui_from_string(ui_info);
     }
     catch(const Glib::Error& ex) {
-      std::cerr << "building menus failed: " <<  ex.what();
+      std::cerr<<"building menus failed: "<<ex.what();
     }
   }
 
@@ -157,7 +157,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
     }
     catch(const Glib::Error& ex)
     {
-      std::cerr << "building menus failed: " <<  ex.what();
+      std::cerr<<"building menus failed: "<<ex.what();
     }
   }
 
@@ -217,17 +217,27 @@ void cGtkmmMainWindow::on_menu_file_quit()
 
 void cGtkmmMainWindow::on_menu_file_new_generic()
 {
-   std::cout << "A File|New menu item was selected." << std::endl;
+   std::cout<<"A File|New menu item was selected."<<std::endl;
 }
 
 void cGtkmmMainWindow::on_menu_others()
 {
-  std::cout << "A menu item was selected." << std::endl;
+  std::cout<<"A menu item was selected."<<std::endl;
 }
 
 void cGtkmmMainWindow::on_menu_file_popup_generic()
 {
-   std::cout << "A popup menu item was selected." << std::endl;
+   std::cout<<"cGtkmmMainWindow::on_menu_file_popup_generic A popup menu item was selected"<<std::endl;
+   cGtkmmTrackListSelectedIterator iter(*pTrackList);
+   while (iter.IsValid()) {
+     std::cout<<"cGtkmmMainWindow::on_menu_file_popup_generic Item was selected"<<std::endl;
+     const Gtk::TreeModel::Row& row = iter.GetRow();
+     const cTrack* pTrack = pTrackList->GetTrackFromRow(row);
+     if (pTrack != nullptr) std::wcout<<"Properties selected for track "<<pTrack->metaData.sArtist<<" - "<<pTrack->metaData.sTitle<<std::endl;
+     else std::cout<<"cGtkmmMainWindow::on_menu_file_popup_generic Could not get track from row"<<std::endl;
+
+     iter.Next();
+   }
 }
 
 void cGtkmmMainWindow::OnActionPlaylistRightClick(GdkEventButton* event)
