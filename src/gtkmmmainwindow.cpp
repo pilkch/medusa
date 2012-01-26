@@ -10,10 +10,10 @@
 cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   view(_view),
   pMenuPopup(nullptr),
+  boxToolbar(Gtk::ORIENTATION_VERTICAL),
   buttonPrevious("Previous"),
   buttonPlay("Play"),
   buttonNext("Next"),
-  buttonVolume("Volume"),
   textPosition("0:00"),
   textLength("0:00"),
   dummyCategories("Categories"),
@@ -109,10 +109,14 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
 
   // Get the menubar and toolbar widgets, and add them to a container widget
   Gtk::Widget* pMenubar = m_refUIManager->get_widget("/MenuBar");
-  if(pMenubar != nullptr) boxMainWindow.pack_start(*pMenubar, Gtk::PACK_SHRINK);
+  if (pMenubar != nullptr) boxMainWindow.pack_start(*pMenubar, Gtk::PACK_SHRINK);
 
-  Gtk::Widget* pToolbar = m_refUIManager->get_widget("/ToolBar") ;
-  if(pToolbar != nullptr) boxMainWindow.pack_start(*pToolbar, Gtk::PACK_SHRINK);
+  Gtk::Toolbar* pToolbar = dynamic_cast<Gtk::Toolbar*>(m_refUIManager->get_widget("/ToolBar"));
+  if (pToolbar != nullptr) {
+    pToolbar->set_orientation(Gtk::ORIENTATION_VERTICAL);
+    pToolbar->set_toolbar_style(Gtk::TOOLBAR_ICONS);
+    boxToolbar.pack_start(*pToolbar);
+  }
 
 
 
@@ -169,6 +173,15 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
 
   // Controls
 
+  // Set the currently playing song information
+  textCurrentlyPlaying.set_use_markup(true);
+  textCurrentlyPlaying.set_markup("<b><big>Artist</big></b> - <b><big>Title</big></b>, track <i>1</i> on <i>Album</i>");
+
+  volumeSlider.set_draw_value(false);
+  volumeSlider.set_value(100.0f);
+  volumeSlider.set_range(0.0f, 100.0f);
+  volumeSlider.set_increments(5, 5);
+
   SetPlaybackLengthMS(1000);
 
   positionSlider.set_draw_value(false);
@@ -177,16 +190,18 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
 
   buttonPlay.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlayPauseClicked));
 
-  boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET);
+  volumeSlider.set_size_request(100, -1);
+
+  boxPlaybackButtons.pack_start(textCurrentlyPlaying, Gtk::PACK_SHRINK);
+  boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
   boxPlaybackButtons.pack_start(buttonPrevious, Gtk::PACK_SHRINK);
   boxPlaybackButtons.pack_start(buttonPlay, Gtk::PACK_SHRINK);
   boxPlaybackButtons.pack_start(buttonNext, Gtk::PACK_SHRINK);
-  boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET);
-  boxPlaybackButtons.pack_start(buttonVolume, Gtk::PACK_SHRINK);
+  boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
+  boxPlaybackButtons.pack_start(volumeSlider, Gtk::PACK_SHRINK);
 
 
   dummyCategories.set_size_request(150, -1);
-
 
 
   pTrackList = new cGtkmmTrackList(*this);
@@ -199,9 +214,14 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   boxPositionSlider.pack_start(positionSlider, Gtk::PACK_EXPAND_WIDGET);
   boxPositionSlider.pack_start(textLength, Gtk::PACK_SHRINK);
 
-  boxMainWindow.pack_start(boxPlaybackButtons, Gtk::PACK_SHRINK);
-  boxMainWindow.pack_start(boxPositionSlider, Gtk::PACK_SHRINK);
-  boxMainWindow.pack_start(boxCategoriesAndPlaylist, Gtk::PACK_EXPAND_WIDGET);
+  boxControls.pack_start(boxPlaybackButtons, Gtk::PACK_SHRINK);
+  boxControls.pack_start(boxPositionSlider, Gtk::PACK_SHRINK);
+  boxControls.pack_start(boxCategoriesAndPlaylist, Gtk::PACK_EXPAND_WIDGET);
+
+  boxControlsAndToolbar.pack_start(boxControls, Gtk::PACK_EXPAND_WIDGET);
+  boxControlsAndToolbar.pack_start(boxToolbar, Gtk::PACK_SHRINK);
+
+  boxMainWindow.pack_start(boxControlsAndToolbar, Gtk::PACK_EXPAND_WIDGET);
   boxMainWindow.pack_start(dummyStatusBar, Gtk::PACK_SHRINK);
 
   // Add the box layout to the main window

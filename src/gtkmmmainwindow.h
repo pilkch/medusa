@@ -49,15 +49,19 @@ private:
 
   // Layouts
   Gtk::VBox boxMainWindow;
+  Gtk::VBox boxToolbar;
   Gtk::HBox boxPlaybackButtons;
   Gtk::HBox boxPositionSlider;
   Gtk::HBox boxCategoriesAndPlaylist;
+  Gtk::HBox boxControlsAndToolbar;
+  Gtk::VBox boxControls;
 
   // Controls
+  Gtk::Label textCurrentlyPlaying;
   Gtk::Button buttonPrevious;
   Gtk::Button buttonPlay;
   Gtk::Button buttonNext;
-  Gtk::Button buttonVolume;
+  Gtk::HScale volumeSlider;
   Gtk::Label textPosition;
   Gtk::HScale positionSlider;
   Gtk::Label textLength;
