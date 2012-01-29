@@ -12,11 +12,16 @@
 // libmad headers
 #include <mad.h>
 
-// Meduasa headers
+// Medusa headers
 #include "trackmetadata.h"
 
+// Spitfire headers
+#include <spitfire/storage/filesystem.h>
 
+
+#define MYTH_ID3_FRAME_ALBUMARTIST "TPE2"
 #define MYTH_ID3_FRAME_COMPILATIONARTIST "TPE4"
+#define MYTH_ID3_FRAME_YEAR "TYER"
 #define MYTH_ID3_FRAME_COMMENT "TXXX"
 #define MYTH_ID3_FRAME_MUSICBRAINZ_ALBUMARTISTDESC "MusicBrainz Album Artist Id"
 #define MYTH_MUSICBRAINZ_ALBUMARTIST_UUID "89ad4ac3-39f7-470e-963a-56509c546377"
@@ -29,16 +34,289 @@
 // http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaio.h
 // http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaio.cpp
 //
+
+
+#define BUILD_ID3_FILE_UPDATE_HACK
+
+#ifdef BUILD_ID3_FILE_UPDATE_HACK
+
+// The id3_file_update function has a feature deficit
+// http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaio_libid3hack.h
+// http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaio_libid3hack.c
+
+#define ID3_FILE_UPDATE myth_id3_file_update
+
+enum {
+  ID3_FILE_FLAG_ID3V1 = 0x0001
+};
+
+struct id3_file {
+  FILE *iofile;
+  enum id3_file_mode mode;
+  char *path;
+
+  int flags;
+
+  struct id3_tag *primary;
+
+  unsigned int ntags;
+  struct filetag *tags;
+};
+
+struct filetag {
+  struct id3_tag *tag;
+  unsigned long location;
+  id3_length_t length;
+};
+
+
+/*
+ * NAME: v2_write()
+ * DESCRIPTION:  write ID3v2 tag modifications to a file
+ */
+static
+int myth_v2_write(struct id3_file *file,
+                  id3_byte_t const *data, id3_length_t length)
+{
+  int result = 0;
+  int file_size, overlap;
+  char *buffer = NULL;
+  int buffersize;
+
+  int bytesread1, bytesread2, bytesread_tmp;
+  char *ring1 = NULL, *ring2 = NULL, *ring_tmp = NULL;
+
+  assert(!data || length > 0);
+
+  if (!data
+      || (!(file->ntags == 1 && !(file->flags & ID3_FILE_FLAG_ID3V1))
+          && !(file->ntags == 2 &&  (file->flags & ID3_FILE_FLAG_ID3V1)))) {
+    /* no v2 tag. we should create one */
+
+    /* ... */
+
+    goto done;
+  }
+
+  if (file->tags[0].length == length) {
+    /* easy special case: rewrite existing tag in-place */
+
+    if (fseek(file->iofile, file->tags[0].location, SEEK_SET) == -1 ||
+        fwrite(data, length, 1, file->iofile) != 1 ||
+        fflush(file->iofile) == EOF)
+      return -1;
+
+    goto done;
+
+  }
+
+  /* the new tag has a different size */
+
+  /* calculate the difference in tag sizes.
+   * we'll need at least double this difference to write the file again using
+   * optimal memory allocation, but avoiding a temporary file.
+   */
+  overlap = length - file->tags[0].length;
+
+  if (overlap > 0) {
+    buffersize = overlap*2;
+    buffer = (char*)malloc(buffersize);
+    if (!buffer)
+      return -1;
+
+    ring1 = buffer;
+    ring2 = &buffer[overlap];
+  } else {
+    /* let's use a 100kB buffer */
+    buffersize = 100*1024;
+    buffer = (char*)malloc(buffersize);
+  }
+
+  /* find out the filesize */
+  fseek(file->iofile, 0, SEEK_END);
+  file_size = ftell(file->iofile);
+
+  /* Seek to start of data */
+  if (-1 == fseek(file->iofile, file->tags[0].location + file->tags[0].length,
+                  SEEK_SET))
+    goto fail;
+
+  /* fill our buffer, if needed */
+  if (overlap > 0) {
+    if (1 != fread(buffer, buffersize, 1, file->iofile))
+      goto fail;
+  }
+
+  /* write the tag where the old one was */
+  if (-1 == fseek(file->iofile, file->tags[0].location, SEEK_SET)
+      || 1 != fwrite(data, length, 1, file->iofile))
+    goto fail;
+
+  /* loop through reading and writing the data */
+  if (overlap > 0) {
+
+    /* File is getting larger */
+    bytesread1 = bytesread2 = overlap;
+    while (0 != bytesread1 || 0 != bytesread2) {
+
+      /* Write the contents of ring1 */
+      if (1 != fwrite(ring1, bytesread1, 1, file->iofile))
+        goto fail;
+
+      /* Read the next "overlap" bytes into ring1 */
+      bytesread1 = fread(ring1, 1, overlap, file->iofile);
+
+      if (bytesread1 > 0) {
+        /* Seek back that many bytes */
+        if (-1 == fseek(file->iofile, -1*bytesread1, SEEK_CUR))
+          goto fail;
+      }
+
+      /* swap rings */
+      ring_tmp = ring1;
+      ring1 = ring2;
+      ring2 = ring_tmp;
+
+      bytesread_tmp = bytesread1;
+      bytesread1 = bytesread2;
+      bytesread2 = bytesread_tmp;
+    }
+  } else {
+
+    /* File is getting smaller */
+
+    /* remember "overlap" is negative so let's absolute it */
+    overlap *= -1;
+
+    while (0 == feof(file->iofile)) {
+
+      /* seek ahead "overlap" bytes */
+      if (-1 == fseek(file->iofile, overlap, SEEK_CUR))
+        goto fail;
+
+      /* read buffer */
+      bytesread1 = fread(buffer, 1, buffersize, file->iofile);
+
+      if (bytesread1 > 0) {
+        /* seek back that many bytes */
+        if (-1 == fseek(file->iofile, -1*(bytesread1+overlap), SEEK_CUR))
+          goto fail;
+
+        /* write the buffer contents */
+        if (1 != fwrite(buffer, bytesread1, 1, file->iofile))
+          goto fail;
+      } else {
+        /* just seek back to the point we should be at for truncation */
+        if (-1 == fseek(file->iofile, -1*overlap, SEEK_CUR))
+          goto fail;
+      }
+
+      /* Check to see if we've reached the end of the file */
+      if (bytesread1 != buffersize)
+        break;
+    }
+  }
+
+  if (buffer)
+  {
+    free(buffer);
+    buffer = NULL;
+  }
+
+  /* flush the FILE */
+  if (fflush(file->iofile) == EOF)
+    goto fail;
+
+  /* truncate if required */
+  if (ftell(file->iofile) < file_size) {
+    int iResult = ftruncate(fileno(file->iofile), ftell(file->iofile));
+    if (iResult != 0) std::cerr<<"myth_v2_write ftruncate FAILED result="<<iResult<<std::endl;
+  }
+
+  if (0) {
+  fail:
+    if (buffer) free(buffer);
+    result = -1;
+  }
+
+ done:
+  return result;
+}
+
+/*
+ * NAME: file->update()
+ * DESCRIPTION:  rewrite tag(s) to a file
+ */
+int myth_id3_file_update(struct id3_file *file)
+{
+  int options, result = 0;
+  id3_length_t v2size = 0;
+  id3_byte_t *id3v2 = 0;
+
+  assert(file);
+
+  if (file->mode != ID3_FILE_MODE_READWRITE)
+    return -1;
+
+  options = id3_tag_options(file->primary, 0, 0);
+
+  /* render ID3v2 */
+
+  id3_tag_options(file->primary, ID3_TAG_OPTION_ID3V1, 0);
+
+  v2size = id3_tag_render(file->primary, 0);
+  if (v2size) {
+    id3v2 = (id3_byte_t*)malloc(v2size);
+    if (id3v2 == 0)
+      goto fail;
+
+    v2size = id3_tag_render(file->primary, id3v2);
+    if (v2size == 0) {
+      free(id3v2);
+      id3v2 = 0;
+    }
+  }
+
+  /* write tags */
+
+  if (myth_v2_write(file, id3v2, v2size) == -1)
+    goto fail;
+
+  rewind(file->iofile);
+
+  /* update file tags array? ... */
+
+  if (0) {
+  fail:
+    result = -1;
+  }
+
+  /* clean up; restore tag options */
+
+  if (id3v2)
+    free(id3v2);
+
+  id3_tag_options(file->primary, ~0, options);
+
+  return result;
+}
+
+#endif
+
 class cLibID3Tag
 {
 public:
   bool ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const;
+  bool WriteTrackTags(const spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const;
 
 private:
   bool IsNumbersOnly(const spitfire::string_t& sText) const;
 
-  spitfire::string_t GetTag(id3_tag* pTag, const char* pLabel, const spitfire::string_t& desc = TEXT("")) const;
+  spitfire::string_t GetTag(id3_tag* pTag, const char* szLabel, const spitfire::string_t& desc = TEXT("")) const;
   spitfire::string_t GetRawID3String(union id3_field* pField) const;
+
+  bool SetTag(id3_tag *pTag, const char* szLabel, const spitfire::string_t& value, const spitfire::string_t& desc = TEXT("")) const;
+  void RemoveTag(id3_tag* pTag, const char* szLabel) const;
 };
 
 bool cLibID3Tag::IsNumbersOnly(const spitfire::string_t& sText) const
@@ -68,6 +346,7 @@ bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitf
     metaData.sTitle = GetTag(tag, ID3_FRAME_TITLE);
     metaData.sArtist = GetTag(tag, ID3_FRAME_ARTIST);
     metaData.sCompilationArtist = GetTag(tag, MYTH_ID3_FRAME_COMPILATIONARTIST);
+    if (metaData.sCompilationArtist.empty()) metaData.sCompilationArtist = GetTag(tag, MYTH_ID3_FRAME_ALBUMARTIST);
     metaData.sAlbum = GetTag(tag, ID3_FRAME_ALBUM);
 
     // Get Track Num dealing with 1/16, 2/16 etc. format
@@ -82,7 +361,7 @@ bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitf
     // Depending on the version of libid3tag, it will reassign a #define,
     // but we want to look for both.
     metaData.uiYear = spitfire::string::ToUnsignedInt(GetTag(tag, ID3_FRAME_YEAR));
-    if (0 == metaData.uiYear) metaData.uiYear = spitfire::string::ToUnsignedInt(GetTag(tag, "TYER"));
+    if (0 == metaData.uiYear) metaData.uiYear = spitfire::string::ToUnsignedInt(GetTag(tag, MYTH_ID3_FRAME_YEAR));
 
     // Genre
     metaData.sGenre = GetTag(tag, ID3_FRAME_GENRE);
@@ -162,13 +441,13 @@ spitfire::string_t cLibID3Tag::GetRawID3String(union id3_field* pField) const
   return tmp;
 }
 
-spitfire::string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* pLabel, const spitfire::string_t& desc) const
+spitfire::string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* szLabel, const spitfire::string_t& desc) const
 {
-  if (pLabel == nullptr) return TEXT("");
+  if (szLabel == nullptr) return TEXT("");
 
   struct id3_frame* p_frame = nullptr;
 
-  for (int i = 0; nullptr != (p_frame = id3_tag_findframe(pTag, pLabel, i)); ++i) {
+  for (int i = 0; nullptr != (p_frame = id3_tag_findframe(pTag, szLabel, i)); ++i) {
     int field_num = 1;
 
     spitfire::string_t tmp = TEXT("");
@@ -193,6 +472,166 @@ spitfire::string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* pLabel, const s
   // Not found.
   return TEXT("");
 }
+
+
+bool cLibID3Tag::WriteTrackTags(const spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
+{
+  std::wcout<<"cLibID3Tag::WriteTrackTags \""<<sFilePath<<"\""<<std::endl;
+
+  // The file must exist already
+  ASSERT(spitfire::filesystem::FileExists(sFilePath));
+
+  id3_file* p_input = id3_file_open(spitfire::string::ToUTF8(sFilePath).c_str(), ID3_FILE_MODE_READWRITE);
+  if (p_input == nullptr) p_input = id3_file_open(spitfire::string::ToASCII(sFilePath).c_str(), ID3_FILE_MODE_READWRITE);
+
+  if (p_input == nullptr) {
+    std::cout<<"cLibID3Tag::WriteTrackTags 1"<<std::endl;
+    return false;
+  }
+
+  std::cout<<"cLibID3Tag::WriteTrackTags 2"<<std::endl;
+  // We don't like id3v1 tags... too limiting.
+  // We don't write them on encoding, so we delete them if one exists.
+  id3_tag* tag = id3_file_tag(p_input);
+  if (tag == nullptr) {
+    id3_file_close(p_input);
+    std::cout<<"cLibID3Tag::WriteTrackTags 3"<<std::endl;
+    return false;
+  }
+
+  RemoveTag(tag, ID3_FRAME_ARTIST);
+  if (!metaData.sArtist.empty()) SetTag(tag, ID3_FRAME_ARTIST, metaData.sArtist);
+
+  RemoveTag(tag, MYTH_ID3_FRAME_ALBUMARTIST);
+  RemoveTag(tag, MYTH_ID3_FRAME_COMPILATIONARTIST);
+  if (!metaData.sCompilationArtist.empty()) {
+    SetTag(tag, MYTH_ID3_FRAME_ALBUMARTIST, metaData.sCompilationArtist);
+    SetTag(tag, MYTH_ID3_FRAME_COMPILATIONARTIST, metaData.sCompilationArtist);
+  }
+
+  RemoveTag(tag, ID3_FRAME_TITLE);
+  if (!metaData.sTitle.empty()) SetTag(tag, ID3_FRAME_TITLE, metaData.sTitle);
+
+  std::cout<<"Removing album"<<std::endl;
+  RemoveTag(tag, ID3_FRAME_ALBUM);
+  if (!metaData.sAlbum.empty()) {
+    std::wcout<<"Setting album \""<<metaData.sAlbum<<"\""<<std::endl;
+    SetTag(tag, ID3_FRAME_ALBUM, metaData.sAlbum);
+  }
+
+  RemoveTag(tag, ID3_FRAME_YEAR);
+  if ((metaData.uiYear > 999) && (metaData.uiYear < 10000)) { // 4 digit year
+    SetTag(tag, ID3_FRAME_YEAR, spitfire::string::ToString(metaData.uiYear));
+  }
+
+  // Write Genre maintaining the ID3v1 genre number if applicable
+  RemoveTag(tag, ID3_FRAME_GENRE);
+  if (!metaData.sGenre.empty()) {
+    id3_ucs4_t* p_ucs4 = id3_utf8_ucs4duplicate((const id3_utf8_t*)spitfire::string::ToUTF8(metaData.sGenre).c_str());
+
+    int genrenum = id3_genre_number(p_ucs4);
+
+    free(p_ucs4);
+
+    // Use the number if it's standard, otherwise just write it (valid in ID3v2)
+    if (genrenum >= 0) SetTag(tag, ID3_FRAME_GENRE, spitfire::string::ToString(genrenum));
+    else SetTag(tag, ID3_FRAME_GENRE, metaData.sGenre);
+  }
+
+  RemoveTag(tag, ID3_FRAME_TRACK);
+  if (0 != metaData.uiTracknum) SetTag(tag, ID3_FRAME_TRACK, spitfire::string::ToString(metaData.uiTracknum));
+
+
+  // Set ID3 tag options
+  id3_tag_options(tag, ID3_TAG_OPTION_COMPRESSION, 0);
+  id3_tag_options(tag, ID3_TAG_OPTION_CRC, 0);
+  id3_tag_options(tag, ID3_TAG_OPTION_UNSYNCHRONISATION, 0);
+  id3_tag_options(tag, ID3_TAG_OPTION_ID3V1, 0);
+
+  // The id3_file_update function has a feature deficit
+  bool bUpdateResult = (0 == ID3_FILE_UPDATE(p_input));
+
+  bool bCloseResult = (0 == id3_file_close(p_input));
+
+  std::cout<<"cLibID3Tag::WriteTrackTags returning "<<((bCloseResult && bUpdateResult) ? "true" : "false")<<std::endl;
+
+  return (bCloseResult && bUpdateResult);
+}
+
+void cLibID3Tag::RemoveTag(id3_tag* pTag, const char* szLabel) const
+{
+  std::cout<<"cLibID3Tag::RemoveTag \""<<szLabel<<"\""<<std::endl;
+
+  if (szLabel == nullptr) return;
+
+  struct id3_frame* p_frame = nullptr;
+
+  // Delete all tags with label
+  for (size_t i = 0; nullptr != (p_frame = id3_tag_findframe(pTag, szLabel, i)); ++i) {
+    std::cout<<"cLibID3Tag::RemoveTag Found tag "<<i<<std::endl;
+    // Delete it
+    if (0 == id3_tag_detachframe(pTag, p_frame)) {
+      std::cout<<"cLibID3Tag::RemoveTag Deleting frame"<<std::endl;
+      id3_frame_delete(p_frame);
+    } else std::cerr<<"cLibID3Tag::RemoveTag Could not detach frame"<<std::endl;
+  }
+}
+
+bool cLibID3Tag::SetTag(id3_tag* pTag, const char* szLabel, const spitfire::string_t& value, const spitfire::string_t& desc) const
+{
+  if ((szLabel == nullptr) || value.empty()) return false;
+
+  id3_frame* p_frame = id3_frame_new(szLabel);
+  if (p_frame == nullptr) return false;
+
+  if (id3_field_settextencoding(&p_frame->fields[0], ID3_FIELD_TEXTENCODING_UTF_16) != 0) {
+    id3_frame_delete(p_frame);
+    return false;
+  }
+
+  id3_ucs4_t* p_ucs4 = nullptr;
+
+  // Write a description in field 1 if needs be.
+  if (!desc.empty()) {
+    p_ucs4 = id3_utf8_ucs4duplicate((const id3_utf8_t*)spitfire::string::ToUTF8(desc).c_str());
+
+    if (!p_ucs4) {
+      id3_frame_delete(p_frame);
+      return false;
+    }
+
+    if (0 != id3_field_setstring(&p_frame->fields[1], p_ucs4)) {
+      free(p_ucs4);
+      id3_frame_delete(p_frame);
+      return false;
+    }
+
+    free(p_ucs4);
+  }
+
+  p_ucs4 = id3_utf8_ucs4duplicate((const id3_utf8_t*)spitfire::string::ToUTF8(value).c_str());
+
+  if (!p_ucs4) {
+    id3_frame_delete(p_frame);
+    return false;
+  }
+
+  if ((desc.empty() && id3_field_setstrings(&p_frame->fields[1], 1, &p_ucs4)) || (!desc.empty() && id3_field_setstring(&p_frame->fields[2], p_ucs4))) {
+    free(p_ucs4);
+    id3_frame_delete(p_frame);
+    return false;
+  }
+
+  free(p_ucs4);
+
+  if (0 != id3_tag_attachframe(pTag, p_frame)) {
+    id3_frame_delete(p_frame);
+    return false;
+  }
+
+  return true;
+}
+
 
 
 // ** cTrackPropertiesReader
@@ -297,4 +736,22 @@ bool cTrackPropertiesReader::ReadTrackLength(spitfire::audio::cMetaData& metaDat
   else metaData.uiDurationMilliSeconds = alt_length;
 
   return true;
+}
+
+
+// ** cTrackPropertiesWriter
+
+bool cTrackPropertiesWriter::WriteTrackProperties(const spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
+{
+  bool bResult = true;
+
+  if (!WriteTrackTags(metaData, sFilePath)) bResult = false;
+
+  return bResult;
+}
+
+bool cTrackPropertiesWriter::WriteTrackTags(const spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
+{
+  cLibID3Tag libID3Tag;
+  return libID3Tag.WriteTrackTags(metaData, sFilePath);
 }
