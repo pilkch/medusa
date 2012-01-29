@@ -19,21 +19,20 @@
 #include <spitfire/storage/filesystem.h>
 
 
-#define MYTH_ID3_FRAME_ALBUMARTIST "TPE2"
-#define MYTH_ID3_FRAME_COMPILATIONARTIST "TPE4"
-#define MYTH_ID3_FRAME_YEAR "TYER"
-#define MYTH_ID3_FRAME_COMMENT "TXXX"
-#define MYTH_ID3_FRAME_MUSICBRAINZ_ALBUMARTISTDESC "MusicBrainz Album Artist Id"
-#define MYTH_MUSICBRAINZ_ALBUMARTIST_UUID "89ad4ac3-39f7-470e-963a-56509c546377"
-
 // ** cLibID3Tag
 //
 // Use libid3tag to read the tag data
+// http://wiki.hydrogenaudio.org/index.php?title=Foobar2000:ID3_Tag_Mapping
 // http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaioid3v2.h
 // http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaioid3v2.cpp
 // http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaio.h
 // http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaio.cpp
 //
+
+#define MYTH_ID3_FRAME_ALBUMARTIST "TPE2"
+#define MYTH_ID3_FRAME_COMPILATIONARTIST "TPE4"
+#define MYTH_ID3_FRAME_YEAR "TYER"
+#define MYTH_ID3_FRAME_COMMENT "TXXX"
 
 
 #define BUILD_ID3_FILE_UPDATE_HACK
@@ -345,8 +344,8 @@ bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitf
 
     metaData.sTitle = GetTag(tag, ID3_FRAME_TITLE);
     metaData.sArtist = GetTag(tag, ID3_FRAME_ARTIST);
-    metaData.sCompilationArtist = GetTag(tag, MYTH_ID3_FRAME_COMPILATIONARTIST);
-    if (metaData.sCompilationArtist.empty()) metaData.sCompilationArtist = GetTag(tag, MYTH_ID3_FRAME_ALBUMARTIST);
+    metaData.sAlbumArtist = GetTag(tag, MYTH_ID3_FRAME_COMPILATIONARTIST);
+    if (metaData.sAlbumArtist.empty()) metaData.sAlbumArtist = GetTag(tag, MYTH_ID3_FRAME_ALBUMARTIST);
     metaData.sAlbum = GetTag(tag, ID3_FRAME_ALBUM);
 
     // Get Track Num dealing with 1/16, 2/16 etc. format
@@ -393,15 +392,6 @@ bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitf
     std::wcerr<<"cLibID3Tag::ReadTrackTags FAILED to read metadata from \""<<sFilePath<<"\"\n";
     return false;
   }
-
-  //std::wcout<<"artist: \""<<metaData.sArtist<<"\"\n";
-  //std::wcout<<"compilation_artist: \""<<metaData.sCompilationArtist<<"\"\n";
-  //std::wcout<<"album: \""<<metaData.sAlbum<<"\"\n";
-  //std::wcout<<"title: \""<<metaData.sTitle<<"\"\n";
-  //std::wcout<<"genre: \""<<metaData.sGenre<<"\"\n";
-  //std::wcout<<"comment: \""<<metaData.sComment<<"\"\n";
-  //std::wcout<<"year: \""<<metaData.uiYear<<"\"\n";
-  //std::wcout<<"tracknum: \""<<metaData.uiTracknum<<"\"\n";
 
   return true;
 }
@@ -504,9 +494,9 @@ bool cLibID3Tag::WriteTrackTags(const spitfire::audio::cMetaData& metaData, cons
 
   RemoveTag(tag, MYTH_ID3_FRAME_ALBUMARTIST);
   RemoveTag(tag, MYTH_ID3_FRAME_COMPILATIONARTIST);
-  if (!metaData.sCompilationArtist.empty()) {
-    SetTag(tag, MYTH_ID3_FRAME_ALBUMARTIST, metaData.sCompilationArtist);
-    SetTag(tag, MYTH_ID3_FRAME_COMPILATIONARTIST, metaData.sCompilationArtist);
+  if (!metaData.sAlbumArtist.empty()) {
+    SetTag(tag, MYTH_ID3_FRAME_ALBUMARTIST, metaData.sAlbumArtist);
+    SetTag(tag, MYTH_ID3_FRAME_COMPILATIONARTIST, metaData.sAlbumArtist);
   }
 
   RemoveTag(tag, ID3_FRAME_TITLE);
@@ -541,6 +531,8 @@ bool cLibID3Tag::WriteTrackTags(const spitfire::audio::cMetaData& metaData, cons
   RemoveTag(tag, ID3_FRAME_TRACK);
   if (0 != metaData.uiTracknum) SetTag(tag, ID3_FRAME_TRACK, spitfire::string::ToString(metaData.uiTracknum));
 
+  RemoveTag(tag, ID3_FRAME_COMMENT);
+  if (!metaData.sComment.empty()) SetTag(tag, ID3_FRAME_COMMENT, metaData.sComment);
 
   // Set ID3 tag options
   id3_tag_options(tag, ID3_TAG_OPTION_COMPRESSION, 0);
