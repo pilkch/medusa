@@ -7,8 +7,16 @@
 // Medusa headers
 #include "track.h"
 
+// http://git.gnome.org/browse/rhythmbox/tree/widgets/rb-header.c
+// HACK: we want the behaviour you get with the middle button, so we
+// mangle the event.  clicking with other buttons moves the slider in
+// step increments, clicking with the middle button moves the slider to
+// the location of the click.
+#define BUILD_SUPPORT_SLIDER_DONT_JUMP_HACK
+
 class cGtkmmView;
 class cGtkmmTrackList;
+class cGtkmmHorizontalSlider;
 
 class cGtkmmMainWindow : public Gtk::Window {
 public:
@@ -22,6 +30,10 @@ public:
 
   void OnActionPlayTrack(const cTrack* pTrack);
   void OnActionPlaylistRightClick(GdkEventButton* event);
+  void OnActionPlaybackPositionValueChanged(uint64_t uiValue);
+  void OnActionVolumeValueChanged(unsigned int uiVolume0To100);
+
+  void OnActionSliderValueChanged(const cGtkmmHorizontalSlider& slider, uint64_t uiValue);
 
 private:
   std::string TimeToString(uint64_t milliseconds) const;
@@ -32,7 +44,6 @@ private:
 
   void on_menu_file_popup_generic();
 
-  bool OnPlaybackPositionChanged(Gtk::ScrollType scrollType, double value);
   void OnPlayPauseClicked();
   bool OnTimerPlaybackPosition();
 
@@ -61,9 +72,9 @@ private:
   Gtk::Button buttonPrevious;
   Gtk::Button buttonPlay;
   Gtk::Button buttonNext;
-  Gtk::HScale volumeSlider;
+  cGtkmmHorizontalSlider* pVolumeSlider;
   Gtk::Label textPosition;
-  Gtk::HScale positionSlider;
+  cGtkmmHorizontalSlider* pPositionSlider;
   Gtk::Label textLength;
 
   Gtk::Button dummyCategories;

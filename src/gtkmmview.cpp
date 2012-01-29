@@ -30,6 +30,11 @@ void cGtkmmView::OnActionPlaybackPositionChanged(uint64_t seconds)
   player.SeekMS(seconds * 1000);
 }
 
+void cGtkmmView::OnActionVolumeChanged(unsigned int uiVolume0To100)
+{
+  player.SetVolume0To100(uiVolume0To100);
+}
+
 void cGtkmmView::OnActionPlay()
 {
   if (player.IsStopped()) player.Play();

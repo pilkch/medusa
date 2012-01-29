@@ -21,6 +21,7 @@ public:
 protected:
   void OnActionPlayTrack(const cTrack* pTrack);
   void OnActionPlaybackPositionChanged(uint64_t seconds);
+  void OnActionVolumeChanged(unsigned int uiVolume0To100);
   void OnActionPlay();
   void OnActionPlayPause();
   void OnActionTimerUpdatePlaybackPosition();

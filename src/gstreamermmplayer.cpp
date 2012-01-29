@@ -69,6 +69,11 @@ void cGStreamermmPlayer::SetTrack(const cTrack* pTrack)
   pActiveTrack = pTrack;
 }
 
+void cGStreamermmPlayer::SetVolume0To100(unsigned int uiVolume0To100)
+{
+  playbin->property_volume() = static_cast<double>(uiVolume0To100) / 100.0;
+}
+
 void cGStreamermmPlayer::Play()
 {
   state = STATE::PLAYING;

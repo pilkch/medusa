@@ -4,8 +4,11 @@
 
 // Medusa headers
 #include "gtkmmview.h"
+#include "gtkmmhorizontalslider.h"
 #include "gtkmmmainwindow.h"
 #include "gtkmmtracklist.h"
+
+// ** cGtkmmMainWindow
 
 cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   view(_view),
@@ -14,7 +17,9 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   buttonPrevious("Previous"),
   buttonPlay("Play"),
   buttonNext("Next"),
+  pVolumeSlider(nullptr),
   textPosition("0:00"),
+  pPositionSlider(nullptr),
   textLength("0:00"),
   dummyCategories("Categories"),
   dummyStatusBar("StatusBar"),
@@ -175,22 +180,20 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
 
   // Set the currently playing song information
   textCurrentlyPlaying.set_use_markup(true);
-  textCurrentlyPlaying.set_markup("<b><big>Artist</big></b> - <b><big>Title</big></b>, track <i>1</i> on <i>Album</i>");
+  textCurrentlyPlaying.set_markup("<b><big>Artist</big></b> - <b><big>Title</big></b>, track 1 on Album");
 
-  volumeSlider.set_draw_value(false);
-  volumeSlider.set_value(100.0f);
-  volumeSlider.set_range(0.0f, 100.0f);
-  volumeSlider.set_increments(5, 5);
+  pVolumeSlider = new cGtkmmHorizontalSlider(*this);
+  pVolumeSlider->SetValue(100);
+  pVolumeSlider->SetRange(0, 100);
+
+
+  pPositionSlider = new cGtkmmHorizontalSlider(*this);
 
   SetPlaybackLengthMS(1000);
 
-  positionSlider.set_draw_value(false);
-
-  positionSlider.signal_change_value().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPositionChanged));
-
   buttonPlay.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlayPauseClicked));
 
-  volumeSlider.set_size_request(100, -1);
+  pVolumeSlider->set_size_request(100, -1);
 
   boxPlaybackButtons.pack_start(textCurrentlyPlaying, Gtk::PACK_SHRINK);
   boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
@@ -198,7 +201,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   boxPlaybackButtons.pack_start(buttonPlay, Gtk::PACK_SHRINK);
   boxPlaybackButtons.pack_start(buttonNext, Gtk::PACK_SHRINK);
   boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
-  boxPlaybackButtons.pack_start(volumeSlider, Gtk::PACK_SHRINK);
+  boxPlaybackButtons.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
 
 
   dummyCategories.set_size_request(150, -1);
@@ -211,7 +214,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   boxCategoriesAndPlaylist.pack_start(pTrackList->GetWidget(), Gtk::PACK_EXPAND_WIDGET);
 
   boxPositionSlider.pack_start(textPosition, Gtk::PACK_SHRINK);
-  boxPositionSlider.pack_start(positionSlider, Gtk::PACK_EXPAND_WIDGET);
+  boxPositionSlider.pack_start(*pPositionSlider, Gtk::PACK_EXPAND_WIDGET);
   boxPositionSlider.pack_start(textLength, Gtk::PACK_SHRINK);
 
   boxControls.pack_start(boxPlaybackButtons, Gtk::PACK_SHRINK);
@@ -265,13 +268,20 @@ void cGtkmmMainWindow::OnActionPlaylistRightClick(GdkEventButton* event)
   if (pMenuPopup != nullptr) pMenuPopup->popup(event->button, event->time);
 }
 
-bool cGtkmmMainWindow::OnPlaybackPositionChanged(Gtk::ScrollType scrollType, double value)
+void cGtkmmMainWindow::OnActionPlaybackPositionValueChanged(uint64_t uiValue)
 {
-  std::cout<<"cGtkmmMainWindow::OnPlaybackPositionChanged\n";
+  view.OnActionPlaybackPositionChanged(uiValue);
+}
 
-  view.OnActionPlaybackPositionChanged(value);
+void cGtkmmMainWindow::OnActionVolumeValueChanged(unsigned int uiVolume0To100)
+{
+  view.OnActionVolumeChanged(uiVolume0To100);
+}
 
-  return true;
+void cGtkmmMainWindow::OnActionSliderValueChanged(const cGtkmmHorizontalSlider& slider, uint64_t uiValue)
+{
+  if (&slider == pPositionSlider) OnActionPlaybackPositionValueChanged(uiValue);
+  else OnActionVolumeValueChanged(uiValue);
 }
 
 void cGtkmmMainWindow::OnActionPlayTrack(const cTrack* pTrack)
@@ -329,7 +339,7 @@ std::string cGtkmmMainWindow::TimeToString(uint64_t milliseconds) const
 void cGtkmmMainWindow::SetPlaybackPositionMS(uint64_t milliseconds)
 {
   //std::cout<<"cGtkmmMainWindow::SetPlaybackPositionMS "<<milliseconds<<"\n";
-  positionSlider.set_value(double(milliseconds) / 1000.0f);
+  pPositionSlider->SetValue(double(milliseconds) / 1000.0f);
 
   textPosition.set_text(TimeToString(milliseconds).c_str());
 }
@@ -337,8 +347,7 @@ void cGtkmmMainWindow::SetPlaybackPositionMS(uint64_t milliseconds)
 void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
 {
   std::cout<<"cGtkmmMainWindow::SetPlaybackLengthMS "<<milliseconds<<"\n";
-  positionSlider.set_range(0, double(milliseconds) / 1000.0f);
-  positionSlider.set_increments(5, 5);
+  pPositionSlider->SetRange(0, double(milliseconds) / 1000.0f);
 
   textLength.set_text(TimeToString(milliseconds).c_str());
 }

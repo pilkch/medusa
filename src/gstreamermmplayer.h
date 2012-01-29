@@ -28,6 +28,8 @@ public:
   const cTrack* GetTrack() const { return pActiveTrack; }
   void SetTrack(const cTrack* pTrack);
 
+  void SetVolume0To100(unsigned int uiVolume0To100);
+
   void Play();
   void Pause();
   void Stop();
