@@ -14,10 +14,9 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   view(_view),
   pMenuPopup(nullptr),
   boxToolbar(Gtk::ORIENTATION_VERTICAL),
-  buttonPrevious("Previous"),
-  buttonPlay("Play"),
-  buttonNext("Next"),
+  textVolumeMinus("-"),
   pVolumeSlider(nullptr),
+  textVolumePlus("+"),
   textPosition("0:00"),
   pPositionSlider(nullptr),
   textLength("0:00"),
@@ -65,6 +64,16 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
           Gtk::AccelKey("<control><alt>S"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others));
 
+  // Playback menu
+  m_refActionGroup->add(Gtk::Action::create("PlaybackMenu", "Playback"));
+  m_refActionGroup->add(Gtk::Action::create("PlaybackPrevious", Gtk::Stock::MEDIA_PREVIOUS),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPreviousClicked));
+  m_refActionGroup->add(Gtk::Action::create("PlaybackPlayPause", Gtk::Stock::MEDIA_PLAY),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseClicked));
+  m_refActionGroup->add(Gtk::Action::create("PlaybackNext", Gtk::Stock::MEDIA_NEXT),
+          Gtk::AccelKey("<control><alt>S"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackNextClicked));
+
   // Help menu
   m_refActionGroup->add( Gtk::Action::create("HelpMenu", "Help") );
   m_refActionGroup->add( Gtk::Action::create("HelpAbout", Gtk::Stock::HELP),
@@ -94,13 +103,19 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
       "      <menuitem action='EditPaste'/>"
       "      <menuitem action='EditSomething'/>"
       "    </menu>"
+      "    <menu action='PlaybackMenu'>"
+      "      <menuitem action='PlaybackPrevious'/>"
+      "      <menuitem action='PlaybackPlayPause'/>"
+      "      <menuitem action='PlaybackNext'/>"
+      "    </menu>"
       "    <menu action='HelpMenu'>"
       "      <menuitem action='HelpAbout'/>"
       "    </menu>"
       "  </menubar>"
       "  <toolbar  name='ToolBar'>"
-      "    <toolitem action='FileNewStandard'/>"
-      "    <toolitem action='FileQuit'/>"
+      "    <toolitem action='PlaybackPrevious'/>"
+      "    <toolitem action='PlaybackPlayPause'/>"
+      "    <toolitem action='PlaybackNext'/>"
       "  </toolbar>"
       "</ui>";
 
@@ -191,17 +206,13 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
 
   SetPlaybackLengthMS(1000);
 
-  buttonPlay.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlayPauseClicked));
-
   pVolumeSlider->set_size_request(100, -1);
 
   boxPlaybackButtons.pack_start(textCurrentlyPlaying, Gtk::PACK_SHRINK);
   boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
-  boxPlaybackButtons.pack_start(buttonPrevious, Gtk::PACK_SHRINK);
-  boxPlaybackButtons.pack_start(buttonPlay, Gtk::PACK_SHRINK);
-  boxPlaybackButtons.pack_start(buttonNext, Gtk::PACK_SHRINK);
-  boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
+  boxPlaybackButtons.pack_start(textVolumeMinus, Gtk::PACK_SHRINK);
   boxPlaybackButtons.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
+  boxPlaybackButtons.pack_start(textVolumePlus, Gtk::PACK_SHRINK);
 
 
   dummyCategories.set_size_request(150, -1);
@@ -289,9 +300,21 @@ void cGtkmmMainWindow::OnActionPlayTrack(const cTrack* pTrack)
   view.OnActionPlayTrack(pTrack);
 }
 
-void cGtkmmMainWindow::OnPlayPauseClicked()
+void cGtkmmMainWindow::OnPlaybackPreviousClicked()
+{
+  std::cout<<"cGtkmmMainWindow::OnPlaybackPreviousClicked"<<std::endl;
+  //view.OnActionPlayPause();
+}
+
+void cGtkmmMainWindow::OnPlaybackPlayPauseClicked()
 {
   view.OnActionPlayPause();
+}
+
+void cGtkmmMainWindow::OnPlaybackNextClicked()
+{
+  std::cout<<"cGtkmmMainWindow::OnPlaybackNextClicked"<<std::endl;
+  //view.OnActionPlayPause();
 }
 
 bool cGtkmmMainWindow::OnTimerPlaybackPosition()
@@ -354,7 +377,7 @@ void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
 
 void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
 {
-  buttonPlay.set_label("Pause");
+  //buttonPlay.set_label("Pause");
 
   // Update position slider
   SetPlaybackLengthMS(pTrack->metaData.uiDurationMilliSeconds);
@@ -368,7 +391,7 @@ void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
 
 void cGtkmmMainWindow::SetStatePaused()
 {
-  buttonPlay.set_label("Play");
+  //buttonPlay.set_label("Play");
 
   pTrackList->SetStatePaused(view.GetTrack());
 

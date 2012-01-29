@@ -44,7 +44,9 @@ private:
 
   void on_menu_file_popup_generic();
 
-  void OnPlayPauseClicked();
+  void OnPlaybackPreviousClicked();
+  void OnPlaybackPlayPauseClicked();
+  void OnPlaybackNextClicked();
   bool OnTimerPlaybackPosition();
 
   cGtkmmView& view;
@@ -69,10 +71,9 @@ private:
 
   // Controls
   Gtk::Label textCurrentlyPlaying;
-  Gtk::Button buttonPrevious;
-  Gtk::Button buttonPlay;
-  Gtk::Button buttonNext;
+  Gtk::Label textVolumeMinus;
   cGtkmmHorizontalSlider* pVolumeSlider;
+  Gtk::Label textVolumePlus;
   Gtk::Label textPosition;
   cGtkmmHorizontalSlider* pPositionSlider;
   Gtk::Label textLength;
