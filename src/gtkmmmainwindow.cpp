@@ -195,11 +195,11 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
 
   // Set the currently playing song information
   textCurrentlyPlaying.set_use_markup(true);
-  textCurrentlyPlaying.set_markup("<b><big>Artist</big></b> - <b><big>Title</big></b>, track 1 on Album");
+  textCurrentlyPlaying.set_markup("");
 
   pVolumeSlider = new cGtkmmHorizontalSlider(*this);
-  pVolumeSlider->SetValue(100);
   pVolumeSlider->SetRange(0, 100);
+  pVolumeSlider->SetValue(100);
 
 
   pPositionSlider = new cGtkmmHorizontalSlider(*this);
@@ -451,6 +451,16 @@ void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
 
 void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
 {
+  spitfire::ostringstream_t o;
+  if (!pTrack->metaData.sArtist.empty()) o<<"<b><big>"<<pTrack->metaData.sArtist<<"</big></b>";
+  if (!pTrack->metaData.sArtist.empty() && !pTrack->metaData.sTitle.empty()) o<<" - ";
+  if (!pTrack->metaData.sTitle.empty()) o<<"<b><big>"<<pTrack->metaData.sTitle<<"</big></b>";
+  if ((pTrack->metaData.uiTracknum != 0) && !pTrack->metaData.sAlbum.empty()) o<<",";
+  if (pTrack->metaData.uiTracknum != 0) o<<" track "<<pTrack->metaData.uiTracknum;
+  if (!pTrack->metaData.sAlbum.empty()) o<<" on "<<pTrack->metaData.sAlbum;
+
+  textCurrentlyPlaying.set_markup(spitfire::string::ToUTF8(o.str()).c_str());
+
   //buttonPlay.set_label("Pause");
 
   // Update position slider
