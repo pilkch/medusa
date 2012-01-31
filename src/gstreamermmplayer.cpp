@@ -26,12 +26,17 @@ void cGStreamermmPlayer::Create(int argc, char** argv)
 
   Gst::init(argc, argv);
 
-  playbin = Gst::PlayBin::create();
+  playbin = Gst::PlayBin2::create("playbin");
+
+  ASSERT(playbin);
 
   bus = playbin->get_bus();
 
   // Register our bus message handler
   uiWatchID = bus->add_watch(sigc::mem_fun(*this, &cGStreamermmPlayer::_OnBusMessage));
+
+  // Handle about to finish (We want to tell the listener so that it can queue another track for example)
+  playbin->signal_about_to_finish().connect(sigc::mem_fun(*this, &cGStreamermmPlayer::OnAboutToFinish));
 }
 
 void cGStreamermmPlayer::Destroy()
@@ -54,42 +59,63 @@ bool cGStreamermmPlayer::_OnBusMessage(const Glib::RefPtr<Gst::Bus>& bus, const 
   return true;
 }
 
+bool cGStreamermmPlayer::OnTimerPlaybackPosition()
+{
+  pView->OnPlayerUpdatePlaybackPosition();
+
+  return true;
+}
+
+void cGStreamermmPlayer::OnAboutToFinish()
+{
+  pView->OnPlayerAboutToFinish();
+}
+
 void cGStreamermmPlayer::SetTrack(const cTrack* pTrack)
 {
-  std::wcout<<"cGStreamermmPlayer::SetTrack"<<std::endl;
+  std::wcout<<"cGStreamermmPlayer::SetTrack \""<<pTrack->sFilePath<<"\""<<std::endl;
 
-  if (pTrack != nullptr) {
-    const Glib::ustring sPath = spitfire::string::ToUTF8(pTrack->sFilePath).c_str();
-    const Glib::ustring sURL = "file://" + sPath;
-    playbin->set_property("uri", sURL);
-  } else playbin->set_property("uri", Glib::ustring(""));
+  ASSERT(playbin);
 
   Stop();
+
+  if (pTrack != nullptr) playbin->property_uri() = Glib::filename_to_uri(spitfire::string::ToUTF8(pTrack->sFilePath).c_str());
+  else playbin->set_property("uri", Glib::ustring(""));
 
   pActiveTrack = pTrack;
 }
 
 void cGStreamermmPlayer::SetVolume0To100(unsigned int uiVolume0To100)
 {
-  playbin->property_volume() = static_cast<double>(uiVolume0To100) / 100.0;
+  playbin->set_property("volume", static_cast<double>(uiVolume0To100) / 100.0);
 }
 
 void cGStreamermmPlayer::Play()
 {
   state = STATE::PLAYING;
   playbin->set_state(Gst::STATE_PLAYING);
+
+  // Call OnTimerPlaybackPosition function at a 200ms
+  // interval to regularly update the position of the stream
+  timeoutConnection = Glib::signal_timeout().connect(sigc::mem_fun(*this, &cGStreamermmPlayer::OnTimerPlaybackPosition), 100);
 }
 
 void cGStreamermmPlayer::Pause()
 {
   state = STATE::STOPPED;
   playbin->set_state(Gst::STATE_PAUSED);
+
+  // Disconnect the progress signal handler
+  timeoutConnection.disconnect();
 }
 
 void cGStreamermmPlayer::Stop()
 {
   state = STATE::STOPPED;
   playbin->set_state(Gst::STATE_NULL);
+
+  // Disconnect the progress signal handler
+  timeoutConnection.disconnect();
 }
 
 void cGStreamermmPlayer::SeekMS(timepositionms_t timeMS)

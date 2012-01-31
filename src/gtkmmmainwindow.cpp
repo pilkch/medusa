@@ -317,13 +317,6 @@ void cGtkmmMainWindow::OnPlaybackNextClicked()
   //view.OnActionPlayPause();
 }
 
-bool cGtkmmMainWindow::OnTimerPlaybackPosition()
-{
-  view.OnActionTimerUpdatePlaybackPosition();
-
-  return true;
-}
-
 std::string cGtkmmMainWindow::TimeToString(uint64_t milliseconds) const
 {
   std::ostringstream o;
@@ -383,10 +376,6 @@ void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
   SetPlaybackLengthMS(pTrack->metaData.uiDurationMilliSeconds);
 
   pTrackList->SetStatePlaying(pTrack);
-
-  // Call OnTimerPlaybackPosition function at a 200ms
-  // interval to regularly update the position of the stream
-  timeoutConnection = Glib::signal_timeout().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnTimerPlaybackPosition), 200);
 }
 
 void cGtkmmMainWindow::SetStatePaused()
@@ -394,7 +383,4 @@ void cGtkmmMainWindow::SetStatePaused()
   //buttonPlay.set_label("Play");
 
   pTrackList->SetStatePaused(view.GetTrack());
-
-  // Disconnect the progress signal handler:
-  timeoutConnection.disconnect();
 }

@@ -12,6 +12,7 @@ class cGtkmmView : public cView
 {
 public:
   friend class cGtkmmMainWindow;
+  friend class cGStreamermmPlayer;
 
   cGtkmmView(int argc, char** argv);
   ~cGtkmmView();
@@ -24,7 +25,8 @@ protected:
   void OnActionVolumeChanged(unsigned int uiVolume0To100);
   void OnActionPlay();
   void OnActionPlayPause();
-  void OnActionTimerUpdatePlaybackPosition();
+  void OnPlayerUpdatePlaybackPosition();
+  void OnPlayerAboutToFinish();
 
 private:
   void _Run();

@@ -43,6 +43,8 @@ public:
 
 private:
   bool _OnBusMessage(const Glib::RefPtr<Gst::Bus>& bus, const Glib::RefPtr<Gst::Message>& message);
+  bool OnTimerPlaybackPosition();
+  void OnAboutToFinish();
 
   cGtkmmView* pView;
 
@@ -53,12 +55,14 @@ private:
 
   STATE state;
 
-  Glib::RefPtr<Gst::PlayBin> playbin;
+  Glib::RefPtr<Gst::PlayBin2> playbin;
   Glib::RefPtr<Gst::Bus> bus;
   guint uiWatchID;
   mutable uint64_t positionMS;
 
   const cTrack* pActiveTrack;
+
+  sigc::connection timeoutConnection;
 };
 
 #endif // gstreamermmplayer_h

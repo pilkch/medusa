@@ -47,7 +47,6 @@ private:
   void OnPlaybackPreviousClicked();
   void OnPlaybackPlayPauseClicked();
   void OnPlaybackNextClicked();
-  bool OnTimerPlaybackPosition();
 
   cGtkmmView& view;
 
@@ -83,8 +82,6 @@ private:
   Gtk::Label dummyStatusBar;
 
   cGtkmmTrackList* pTrackList;
-
-  sigc::connection timeoutConnection;
 };
 
 #endif // gtkmmmainwindow_h
