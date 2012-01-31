@@ -6,6 +6,42 @@
 #include "gtkmmmainwindow.h"
 #include "gtkmmtracklist.h"
 
+// ** cGtkmmTrackListIterator
+
+cGtkmmTrackListIterator::cGtkmmTrackListIterator(cGtkmmTrackList& _trackList) :
+  trackList(_trackList),
+  i(0),
+  n(0),
+  iter(_trackList.get_model()->children())
+{
+  std::cout<<"cGtkmmTrackListIterator::cGtkmmTrackListIterator"<<std::endl;
+  n = iter.size();
+  std::cout<<"cGtkmmTrackListIterator::cGtkmmTrackListIterator n="<<n<<std::endl;
+}
+
+bool cGtkmmTrackListIterator::IsValid() const
+{
+  return (i < n);
+}
+
+void cGtkmmTrackListIterator::Next()
+{
+  i++;
+}
+
+const Gtk::TreeRow& cGtkmmTrackListIterator::GetRow()
+{
+  ASSERT(IsValid());
+
+  row = iter[i];
+
+  ASSERT(row);
+  return row;
+}
+
+
+// ** cGtkmmTrackListSelectedIterator
+
 cGtkmmTrackListSelectedIterator::cGtkmmTrackListSelectedIterator(cGtkmmTrackList& _trackList) :
   trackList(_trackList),
   i(0),
@@ -41,6 +77,8 @@ const Gtk::TreeRow& cGtkmmTrackListSelectedIterator::GetRow()
   return *iter;
 }
 
+
+// ** cGtkmmTrackList
 
 cGtkmmTrackList::cGtkmmTrackList(cGtkmmMainWindow& _mainWindow) :
   mainWindow(_mainWindow)

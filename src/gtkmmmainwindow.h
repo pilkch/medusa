@@ -29,6 +29,8 @@ public:
   void SetPlaybackLengthMS(uint64_t milliseconds);
 
   void OnActionPlayTrack(const cTrack* pTrack);
+  void OnActionPlayPreviousTrack();
+  void OnActionPlayNextTrack();
   void OnActionPlaylistRightClick(GdkEventButton* event);
   void OnActionPlaybackPositionValueChanged(uint64_t uiValue);
   void OnActionVolumeValueChanged(unsigned int uiVolume0To100);
@@ -36,6 +38,9 @@ public:
   void OnActionSliderValueChanged(const cGtkmmHorizontalSlider& slider, uint64_t uiValue);
 
 private:
+  const cTrack* GetPreviousTrack() const;
+  const cTrack* GetNextTrack() const;
+
   std::string TimeToString(uint64_t milliseconds) const;
 
   void on_menu_file_new_generic();

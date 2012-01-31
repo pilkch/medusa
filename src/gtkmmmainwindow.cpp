@@ -303,7 +303,7 @@ void cGtkmmMainWindow::OnActionPlayTrack(const cTrack* pTrack)
 void cGtkmmMainWindow::OnPlaybackPreviousClicked()
 {
   std::cout<<"cGtkmmMainWindow::OnPlaybackPreviousClicked"<<std::endl;
-  //view.OnActionPlayPause();
+  OnActionPlayPreviousTrack();
 }
 
 void cGtkmmMainWindow::OnPlaybackPlayPauseClicked()
@@ -314,7 +314,88 @@ void cGtkmmMainWindow::OnPlaybackPlayPauseClicked()
 void cGtkmmMainWindow::OnPlaybackNextClicked()
 {
   std::cout<<"cGtkmmMainWindow::OnPlaybackNextClicked"<<std::endl;
-  //view.OnActionPlayPause();
+  OnActionPlayNextTrack();
+}
+
+const cTrack* cGtkmmMainWindow::GetPreviousTrack() const
+{
+  const cTrack* pCurrentTrack = view.GetTrack();
+  if (pCurrentTrack == nullptr) {
+    // There was no current track so just pick the last one
+    const cTrack* pPreviousTrack = nullptr;
+    cGtkmmTrackListIterator iter(*pTrackList);
+    while (iter.IsValid()) {
+      const Gtk::TreeModel::Row& row = iter.GetRow();
+      pPreviousTrack = pTrackList->GetTrackFromRow(row);
+
+      iter.Next();
+    }
+
+    return pPreviousTrack;
+  } else {
+    const cTrack* pPreviousTrack = nullptr;
+    cGtkmmTrackListIterator iter(*pTrackList);
+    while (iter.IsValid()) {
+      const Gtk::TreeModel::Row& row = iter.GetRow();
+      const cTrack* pThisTrack = pTrackList->GetTrackFromRow(row);
+      if (pThisTrack == pCurrentTrack) {
+        // Found our current track so return the previous one
+        return pPreviousTrack;
+      }
+
+      pPreviousTrack = pThisTrack;
+
+      iter.Next();
+    }
+  }
+
+  return nullptr;
+}
+
+const cTrack* cGtkmmMainWindow::GetNextTrack() const
+{
+  const cTrack* pCurrentTrack = view.GetTrack();
+  if (pCurrentTrack == nullptr) {
+    // There was no current track so just pick the first one
+    cGtkmmTrackListIterator iter(*pTrackList);
+    if (iter.IsValid()) {
+      const Gtk::TreeModel::Row& row = iter.GetRow();
+      return pTrackList->GetTrackFromRow(row);
+    }
+  } else {
+    cGtkmmTrackListIterator iter(*pTrackList);
+    while (iter.IsValid()) {
+      const Gtk::TreeModel::Row& row = iter.GetRow();
+      const cTrack* pNextTrack = pTrackList->GetTrackFromRow(row);
+      if (pNextTrack == pCurrentTrack) {
+        // Found our current track so return the next one
+        iter.Next();
+
+        if (iter.IsValid()) {
+          const Gtk::TreeModel::Row& row = iter.GetRow();
+          return pTrackList->GetTrackFromRow(row);
+        }
+
+        break;
+      }
+
+      iter.Next();
+    }
+  }
+
+  return nullptr;
+}
+
+void cGtkmmMainWindow::OnActionPlayPreviousTrack()
+{
+  const cTrack* pPreviousTrack = GetPreviousTrack();
+  if (pPreviousTrack != nullptr) OnActionPlayTrack(pPreviousTrack);
+}
+
+void cGtkmmMainWindow::OnActionPlayNextTrack()
+{
+  const cTrack* pNextTrack = GetNextTrack();
+  if (pNextTrack != nullptr) OnActionPlayTrack(pNextTrack);
 }
 
 std::string cGtkmmMainWindow::TimeToString(uint64_t milliseconds) const

@@ -22,7 +22,7 @@ cGStreamermmPlayer::cGStreamermmPlayer(cGtkmmView& view) :
 
 void cGStreamermmPlayer::Create(int argc, char** argv)
 {
-  std::cout<<"cGStreamermmPlayer::Create\n";
+  std::cout<<"cGStreamermmPlayer::Create"<<std::endl;
 
   Gst::init(argc, argv);
 

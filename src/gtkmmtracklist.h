@@ -7,12 +7,39 @@
 // Medusa headers
 #include "track.h"
 
+// ** cGtkmmTrackListIterator
+
+class cGtkmmTrackListIterator
+{
+public:
+  explicit cGtkmmTrackListIterator(cGtkmmTrackList& trackList);
+
+  size_t GetCount() const { return iter.size(); }
+
+  bool IsValid() const;
+
+  void Next();
+
+  const Gtk::TreeRow& GetRow();
+
+private:
+  cGtkmmTrackList& trackList;
+
+  size_t i;
+  size_t n;
+
+  Gtk::TreeModel::Children iter;
+  Gtk::TreeRow row;
+};
+
+// ** cGtkmmTrackListSelectedIterator
+
 class cGtkmmTrackListSelectedIterator
 {
 public:
   explicit cGtkmmTrackListSelectedIterator(cGtkmmTrackList& trackList);
 
-  size_t GetCount() const { return selected.size(); }
+  size_t GetCount() const { return n; }
 
   bool IsValid() const;
 
@@ -31,7 +58,10 @@ private:
   Gtk::TreeModel::const_iterator iter;
 };
 
+
 class cGtkmmMainWindow;
+
+// ** cGtkmmTrackList
 
 class cGtkmmTrackList : public Gtk::TreeView {
 public:

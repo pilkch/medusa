@@ -61,12 +61,10 @@ void cGtkmmView::OnPlayerUpdatePlaybackPosition()
 
 void cGtkmmView::OnPlayerAboutToFinish()
 {
-  //cTrack* pTrack = ...;
-
-  //player.SetTrack(pTrack);
-
   // TODO: Should we just tell the player which track to play and not actually start playing it yet?
-  //OnActionPlay();
+
+  // TODO: THIS NEEDS TO BE CALLED ON THE MAIN THREAD SO WE HAVE TO USE A GTKMM DISPATCHER
+  ... call this via a dispatcher: mainWindow.OnActionPlayNextTrack();
 }
 
 void cGtkmmView::_Run()
