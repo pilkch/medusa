@@ -13,6 +13,11 @@ cGtkmmSlider::cGtkmmSlider(cGtkmmMainWindow& _mainWindow, bool bVertical) :
   mainWindow(_mainWindow),
   bLeftClickedPressEventChanged(false)
 {
+  #ifdef BUILD_GTKMM_SLIDER_HIGHLIGHT
+  set_restrict_to_fill_level(false);
+  set_show_fill_level(true);
+  #endif
+
   set_draw_value(false);
   set_digits(0);
   set_increments(5, 5);
@@ -59,6 +64,10 @@ bool cGtkmmSlider::OnValueChanged(Gtk::ScrollType scrollType, double value)
 {
   std::cout<<"cGtkmmSlider::OnValueChanged"<<std::endl;
 
+  #ifdef BUILD_GTKMM_SLIDER_HIGHLIGHT
+  set_fill_level(value);
+  #endif
+
   mainWindow.OnActionSliderValueChanged(*this, value);
 
   return true;
@@ -71,6 +80,10 @@ uint64_t cGtkmmSlider::GetValue() const
 
 void cGtkmmSlider::SetValue(uint64_t uiValue)
 {
+  #ifdef BUILD_GTKMM_SLIDER_HIGHLIGHT
+  set_fill_level(double(uiValue));
+  #endif
+
   set_value(double(uiValue));
 }
 

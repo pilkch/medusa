@@ -11,6 +11,12 @@
 // Clicking with the middle button moves the slider to the location of the click.
 #define BUILD_GTKMM_SLIDER_DONT_JUMP_HACK
 
+// HACK: In gtkmm 2.4 the area before the slider was highlighted,
+// in gtkmm 3.0 and later this highlighting is turned off.
+// We can abuse the fill value which does provide highlighting and set
+// the value of the fill value to the value of the slider whenever our slider moves.
+#define BUILD_GTKMM_SLIDER_HIGHLIGHT
+
 class cGtkmmSlider : public Gtk::Scale {
 public:
   friend class cGtkmmMainWindow;
