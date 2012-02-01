@@ -14,13 +14,13 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   view(_view),
   settings(_settings),
   pMenuPopup(nullptr),
-  boxToolbar(Gtk::ORIENTATION_VERTICAL),
-  textVolumeMinus("-"),
-  pVolumeSlider(nullptr),
-  textVolumePlus("+"),
+  boxToolbarAndVolume(Gtk::ORIENTATION_VERTICAL),
   textPosition("0:00"),
   pPositionSlider(nullptr),
   textLength("0:00"),
+  textVolumePlus("+"),
+  pVolumeSlider(nullptr),
+  textVolumeMinus("-"),
   dummyCategories("Categories"),
   dummyStatusBar("StatusBar"),
   pTrackList(nullptr)
@@ -136,13 +136,28 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   Gtk::Widget* pMenubar = m_refUIManager->get_widget("/MenuBar");
   if (pMenubar != nullptr) boxMainWindow.pack_start(*pMenubar, Gtk::PACK_SHRINK);
 
-  Gtk::Toolbar* pToolbar = dynamic_cast<Gtk::Toolbar*>(m_refUIManager->get_widget("/ToolBar"));
-  if (pToolbar != nullptr) {
-    pToolbar->set_orientation(Gtk::ORIENTATION_VERTICAL);
-    pToolbar->set_toolbar_style(Gtk::TOOLBAR_ICONS);
-    boxToolbar.pack_start(*pToolbar);
-  }
+  // In gtkmm 3 set_orientation is not supported so we create our own toolbar out of plain old buttons
+  //Gtk::Toolbar* pToolbar = dynamic_cast<Gtk::Toolbar*>(m_refUIManager->get_widget("/ToolBar"));
+  //if (pToolbar != nullptr) {
+  //  pToolbar->set_orientation(Gtk::ORIENTATION_VERTICAL);
+  //  pToolbar->set_toolbar_style(Gtk::TOOLBAR_ICONS);
+  //  boxToolbarAndVolume.pack_start(*pToolbar);
+  //}
 
+  buttonPrevious.set icon ...
+  boxToolbarAndVolume.pack_start(buttonPrevious);
+  boxToolbarAndVolume.pack_start(buttonPlay);
+  boxToolbarAndVolume.pack_start(buttonNext);
+
+  pVolumeSlider = new cGtkmmSlider(*this, true);
+  pVolumeSlider->SetRange(0, 100);
+  pVolumeSlider->SetValue(settings.GetVolume0To100());
+
+  pVolumeSlider->set_size_request(-1, 100);
+
+  boxToolbarAndVolume.pack_start(textVolumePlus, Gtk::PACK_SHRINK);
+  boxToolbarAndVolume.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
+  boxToolbarAndVolume.pack_start(textVolumeMinus, Gtk::PACK_SHRINK);
 
 
   // Popup menu
@@ -202,22 +217,12 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   textCurrentlyPlaying.set_use_markup(true);
   textCurrentlyPlaying.set_markup("");
 
-  pVolumeSlider = new cGtkmmHorizontalSlider(*this);
-  pVolumeSlider->SetRange(0, 100);
-  pVolumeSlider->SetValue(settings.GetVolume0To100());
 
-
-  pPositionSlider = new cGtkmmHorizontalSlider(*this);
-
-  SetPlaybackLengthMS(1000);
-
-  pVolumeSlider->set_size_request(100, -1);
+  pPositionSlider = new cGtkmmSlider(*this, false);
+  pPositionSlider->SetRange(0, 0);
 
   boxPlaybackButtons.pack_start(textCurrentlyPlaying, Gtk::PACK_SHRINK);
   boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
-  boxPlaybackButtons.pack_start(textVolumeMinus, Gtk::PACK_SHRINK);
-  boxPlaybackButtons.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
-  boxPlaybackButtons.pack_start(textVolumePlus, Gtk::PACK_SHRINK);
 
 
   dummyCategories.set_size_request(150, -1);
@@ -238,7 +243,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxControls.pack_start(boxCategoriesAndPlaylist, Gtk::PACK_EXPAND_WIDGET);
 
   boxControlsAndToolbar.pack_start(boxControls, Gtk::PACK_EXPAND_WIDGET);
-  boxControlsAndToolbar.pack_start(boxToolbar, Gtk::PACK_SHRINK);
+  boxControlsAndToolbar.pack_start(boxToolbarAndVolume, Gtk::PACK_SHRINK);
 
   boxMainWindow.pack_start(boxControlsAndToolbar, Gtk::PACK_EXPAND_WIDGET);
   boxMainWindow.pack_start(dummyStatusBar, Gtk::PACK_SHRINK);
@@ -299,7 +304,7 @@ void cGtkmmMainWindow::OnActionVolumeValueChanged(unsigned int uiVolume0To100)
   view.OnActionVolumeChanged(uiVolume0To100);
 }
 
-void cGtkmmMainWindow::OnActionSliderValueChanged(const cGtkmmHorizontalSlider& slider, uint64_t uiValue)
+void cGtkmmMainWindow::OnActionSliderValueChanged(const cGtkmmSlider& slider, uint64_t uiValue)
 {
   if (&slider == pPositionSlider) OnActionPlaybackPositionValueChanged(uiValue);
   else OnActionVolumeValueChanged(uiValue);
@@ -471,8 +476,6 @@ void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
 
   textCurrentlyPlaying.set_markup(spitfire::string::ToUTF8(o.str()).c_str());
 
-  //buttonPlay.set_label("Pause");
-
   // Update position slider
   SetPlaybackLengthMS(pTrack->metaData.uiDurationMilliSeconds);
 
@@ -481,7 +484,5 @@ void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
 
 void cGtkmmMainWindow::SetStatePaused()
 {
-  //buttonPlay.set_label("Play");
-
   pTrackList->SetStatePaused(view.GetTrack());
 }
