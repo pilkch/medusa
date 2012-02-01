@@ -5,6 +5,7 @@
 #include <gtkmm.h>
 
 // Medusa headers
+#include "settings.h"
 #include "track.h"
 
 // http://git.gnome.org/browse/rhythmbox/tree/widgets/rb-header.c
@@ -20,7 +21,7 @@ class cGtkmmHorizontalSlider;
 
 class cGtkmmMainWindow : public Gtk::Window {
 public:
-  explicit cGtkmmMainWindow(cGtkmmView& view);
+  cGtkmmMainWindow(cGtkmmView& view, cSettings& settings);
   virtual ~cGtkmmMainWindow() {}
 
   void SetStatePlaying(const cTrack* pTrack);
@@ -43,6 +44,8 @@ private:
 
   std::string TimeToString(uint64_t milliseconds) const;
 
+  void OnWindowClose();
+
   void on_menu_file_new_generic();
   void on_menu_file_quit();
   void on_menu_others();
@@ -54,6 +57,7 @@ private:
   void OnPlaybackNextClicked();
 
   cGtkmmView& view;
+  cSettings& settings;
 
   // Menu and toolbar
   Glib::RefPtr<Gtk::UIManager> m_refUIManager;

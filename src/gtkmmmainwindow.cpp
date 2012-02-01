@@ -10,8 +10,9 @@
 
 // ** cGtkmmMainWindow
 
-cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
+cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   view(_view),
+  settings(_settings),
   pMenuPopup(nullptr),
   boxToolbar(Gtk::ORIENTATION_VERTICAL),
   textVolumeMinus("-"),
@@ -28,6 +29,10 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   set_border_width(5);
   set_size_request(400, 300);
   set_default_size(800, 600);
+
+  // Handle window close event
+  signal_hide().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnWindowClose));
+
 
   // Menu and toolbar
 
@@ -199,7 +204,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
 
   pVolumeSlider = new cGtkmmHorizontalSlider(*this);
   pVolumeSlider->SetRange(0, 100);
-  pVolumeSlider->SetValue(100);
+  pVolumeSlider->SetValue(settings.GetVolume0To100());
 
 
   pPositionSlider = new cGtkmmHorizontalSlider(*this);
@@ -242,6 +247,11 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view) :
   add(boxMainWindow);
 
   show_all_children();
+}
+
+void cGtkmmMainWindow::OnWindowClose()
+{
+  settings.SetVolume0To100(pVolumeSlider->GetValue());
 }
 
 void cGtkmmMainWindow::on_menu_file_quit()

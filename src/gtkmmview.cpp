@@ -7,20 +7,29 @@
 
 cGtkmmView::cGtkmmView(int argc, char** argv) :
   kit(argc, argv),
-  mainWindow(*this),
-  player(*this)
+  pMainWindow(nullptr),
+  player(*this),
+  mutexSettings("settings")
 {
+  settings.Load();
+
+  pMainWindow = new cGtkmmMainWindow(*this, settings);
+
   player.Create(argc, argv);
 }
 
 cGtkmmView::~cGtkmmView()
 {
   player.Destroy();
+
+  delete pMainWindow;
+
+  settings.Save();
 }
 
 void cGtkmmView::OnActionPlayTrack(const cTrack* pTrack)
 {
-  player.SetTrack(pTrack);
+  player.SetTrack(pTrack->sFilePath, pTrack->metaData.uiDurationMilliSeconds);
 
   OnActionPlay();
 }
@@ -70,5 +79,5 @@ void cGtkmmView::OnPlayerAboutToFinish()
 void cGtkmmView::_Run()
 {
   // Display our window
-  Gtk::Main::run(mainWindow);
+  Gtk::Main::run(*pMainWindow);
 }

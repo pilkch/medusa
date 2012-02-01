@@ -4,6 +4,11 @@
 // gtkmm headers
 #include <gtkmm.h>
 
+// Spitfire headers
+#include <spitfire/util/thread.h>
+
+// Medusa headers
+#include "settings.h"
 #include "view.h"
 #include "gstreamermmplayer.h"
 #include "gtkmmmainwindow.h"
@@ -33,9 +38,13 @@ private:
 
   Gtk::Main kit;
 
-  cGtkmmMainWindow mainWindow;
+  cGtkmmMainWindow* pMainWindow;
 
   cGStreamermmPlayer player;
+
+  // TODO: Move this to a separate class
+  spitfire::util::cMutex mutexSettings;
+  cSettings settings;
 };
 
 #endif // gtkmmview_h
