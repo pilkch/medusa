@@ -72,15 +72,15 @@ private:
 
   // Controls
   Gtk::Label textCurrentlyPlaying;
-  cGtkmmHorizontalSlider* pVolumeSlider;
   Gtk::Label textPosition;
-  cGtkmmHorizontalSlider* pPositionSlider;
+  cGtkmmSlider* pPositionSlider;
   Gtk::Label textLength;
 
   Gtk::Button buttonPrevious;
   Gtk::Button buttonPlay;
   Gtk::Button buttonNext;
   Gtk::Label textVolumePlus;
+  cGtkmmSlider* pVolumeSlider;
   Gtk::Label textVolumeMinus;
 
   Gtk::Button dummyCategories;

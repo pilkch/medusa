@@ -4,7 +4,7 @@
 
 // Medusa headers
 #include "gtkmmview.h"
-#include "gtkmmhorizontalslider.h"
+#include "gtkmmslider.h"
 #include "gtkmmmainwindow.h"
 #include "gtkmmtracklist.h"
 
