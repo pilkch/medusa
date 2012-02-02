@@ -7,6 +7,7 @@
 // Medusa headers
 #include "settings.h"
 #include "track.h"
+#include "gtkmmicontheme.h"
 
 class cGtkmmView;
 class cGtkmmSlider;
@@ -31,11 +32,15 @@ public:
 
   void OnActionSliderValueChanged(const cGtkmmSlider& slider, uint64_t uiValue);
 
+  void OnThemeChanged();
+
 private:
   const cTrack* GetPreviousTrack() const;
   const cTrack* GetNextTrack() const;
 
   std::string TimeToString(uint64_t milliseconds) const;
+
+  void SetPlaybackButtonIcons();
 
   void OnWindowClose();
 
@@ -51,6 +56,8 @@ private:
 
   cGtkmmView& view;
   cSettings& settings;
+
+  cGtkmmIconTheme iconTheme;
 
   // Menu and toolbar
   Glib::RefPtr<Gtk::UIManager> m_refUIManager;

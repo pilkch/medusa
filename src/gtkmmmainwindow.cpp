@@ -136,6 +136,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   Gtk::Widget* pMenubar = m_refUIManager->get_widget("/MenuBar");
   if (pMenubar != nullptr) boxMainWindow.pack_start(*pMenubar, Gtk::PACK_SHRINK);
 
+
   // In gtkmm 3 set_orientation is not supported so we create our own toolbar out of plain old buttons
   //Gtk::Toolbar* pToolbar = dynamic_cast<Gtk::Toolbar*>(m_refUIManager->get_widget("/ToolBar"));
   //if (pToolbar != nullptr) {
@@ -144,10 +145,18 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   //  boxToolbarAndVolume.pack_start(*pToolbar);
   //}
 
-  buttonPrevious.set icon ...
-  boxToolbarAndVolume.pack_start(buttonPrevious);
-  boxToolbarAndVolume.pack_start(buttonPlay);
-  boxToolbarAndVolume.pack_start(buttonNext);
+
+  iconTheme.RegisterThemeChangedListener(*this);
+
+  SetPlaybackButtonIcons();
+
+  buttonPrevious.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPreviousClicked));
+  buttonPlay.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseClicked));
+  buttonNext.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackNextClicked));
+
+  boxToolbarAndVolume.pack_start(buttonPrevious, Gtk::PACK_SHRINK);
+  boxToolbarAndVolume.pack_start(buttonPlay, Gtk::PACK_SHRINK);
+  boxToolbarAndVolume.pack_start(buttonNext, Gtk::PACK_SHRINK);
 
   pVolumeSlider = new cGtkmmSlider(*this, true);
   pVolumeSlider->SetRange(0, 100);
@@ -158,6 +167,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxToolbarAndVolume.pack_start(textVolumePlus, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(textVolumeMinus, Gtk::PACK_SHRINK);
+  boxToolbarAndVolume.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
 
 
   // Popup menu
@@ -252,6 +262,28 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   add(boxMainWindow);
 
   show_all_children();
+}
+
+void cGtkmmMainWindow::OnThemeChanged()
+{
+  SetPlaybackButtonIcons();
+}
+
+const char* sICON_MEDIA_PREVIOUS = "gtk-media-previous-ltr";
+const char* sICON_MEDIA_PLAY = "gtk-media-play-ltr";
+const char* sICON_MEDIA_NEXT = "gtk-media-next-ltr";
+
+void cGtkmmMainWindow::SetPlaybackButtonIcons()
+{
+  Gtk::Image* pImagePrevious = new Gtk::Image;
+  iconTheme.LoadStockIconRotatedClockwise(sICON_MEDIA_PREVIOUS, *pImagePrevious);
+  buttonPrevious.set_image(*pImagePrevious);
+  Gtk::Image* pImagePlay = new Gtk::Image;
+  iconTheme.LoadStockIcon(sICON_MEDIA_PLAY, *pImagePlay);
+  buttonPlay.set_image(*pImagePlay);
+  Gtk::Image* pImageNext = new Gtk::Image;
+  iconTheme.LoadStockIconRotatedClockwise(sICON_MEDIA_NEXT, *pImageNext);
+  buttonNext.set_image(*pImageNext);
 }
 
 void cGtkmmMainWindow::OnWindowClose()
