@@ -8,7 +8,7 @@
 #include <gstreamermm.h>
 
 // Spitfire headers
-#include <spitfire/util/cString.h>
+#include <spitfire/util/string.h>
 
 // Medusa headers
 #include "track.h"

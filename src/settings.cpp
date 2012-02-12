@@ -23,6 +23,7 @@
 
 void cSettings::Load()
 {
+  // Read the xml document
   spitfire::xml::reader reader;
 
   const spitfire::string_t sFilename = spitfire::filesystem::GetThisApplicationSettingsDirectory() + TEXT("config.xml");
@@ -34,9 +35,14 @@ void cSettings::Load()
 
 void cSettings::Save()
 {
+  // Create the directory
+  const spitfire::string_t sFolder = spitfire::filesystem::GetThisApplicationSettingsDirectory();
+  spitfire::filesystem::CreateDirectory(sFolder);
+
+  // Write the xml document
   spitfire::xml::writer writer;
 
-  const spitfire::string_t sFilename = spitfire::filesystem::GetThisApplicationSettingsDirectory() + TEXT("config.xml");
+  const spitfire::string_t sFilename = sFolder + TEXT("config.xml");
   if (!writer.WriteToFile(document, sFilename)) {
     std::cout<<"cSettings::Save Error saving to file \""<<spitfire::string::ToUTF8(sFilename)<<"\""<<std::endl;
     return;

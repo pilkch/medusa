@@ -23,6 +23,8 @@ public:
   void SetPlaybackPositionMS(uint64_t milliseconds);
   void SetPlaybackLengthMS(uint64_t milliseconds);
 
+  void OnActionBrowseFiles();
+  void OnActionBrowseFolder();
   void OnActionPlayTrack(const cTrack* pTrack);
   void OnActionPlayPreviousTrack();
   void OnActionPlayNextTrack();
@@ -83,6 +85,8 @@ private:
   cGtkmmSlider* pPositionSlider;
   Gtk::Label textLength;
 
+  Gtk::Button buttonAddFiles;
+  Gtk::Button buttonAddFolder;
   Gtk::Button buttonPrevious;
   Gtk::Button buttonPlay;
   Gtk::Button buttonNext;

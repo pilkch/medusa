@@ -7,6 +7,7 @@
 #include "gtkmmslider.h"
 #include "gtkmmmainwindow.h"
 #include "gtkmmtracklist.h"
+#include "gtkmmfilebrowse.h"
 
 // ** cGtkmmMainWindow
 
@@ -28,7 +29,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   set_title("Medusa");
   set_border_width(5);
   set_size_request(400, 300);
-  set_default_size(800, 600);
+  set_default_size(800, 400);
 
   // Handle window close event
   signal_hide().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnWindowClose));
@@ -54,6 +55,10 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   // File menu
   m_refActionGroup->add(Gtk::Action::create("FileMenu", "File"));
+  m_refActionGroup->add(Gtk::Action::create("FileAddFiles", "Add files"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFiles));
+  m_refActionGroup->add(Gtk::Action::create("FileAddFolder", "Add directory"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFolder));
   // Sub-menu
   m_refActionGroup->add(Gtk::Action::create("FileNew", Gtk::Stock::NEW));
   m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
@@ -95,6 +100,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "<ui>"
       "  <menubar name='MenuBar'>"
       "    <menu action='FileMenu'>"
+      "      <menuitem action='FileAddFiles'/>"
+      "      <menuitem action='FileAddFolder'/>"
       "      <menu action='FileNew'>"
       "        <menuitem action='FileNewStandard'/>"
       "        <menuitem action='FileNewFoo'/>"
@@ -140,15 +147,18 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   // In gtkmm 3 set_orientation is not supported so we create our own toolbar out of plain old buttons
   //Gtk::Toolbar* pToolbar = dynamic_cast<Gtk::Toolbar*>(m_refUIManager->get_widget("/ToolBar"));
   //if (pToolbar != nullptr) {
-  //  pToolbar->set_orientation(Gtk::ORIENTATION_VERTICAL);
+  //  pToolbar->property_orientation() = Gtk::ORIENTATION_VERTICAL;
+  //  //pToolbar->set_orientation(Gtk::ORIENTATION_VERTICAL);
   //  pToolbar->set_toolbar_style(Gtk::TOOLBAR_ICONS);
   //  boxToolbarAndVolume.pack_start(*pToolbar);
   //}
 
 
-  iconTheme.RegisterThemeChangedListener(*this);
+  buttonAddFiles.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFiles));
+  buttonAddFolder.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFolder));
 
-  SetPlaybackButtonIcons();
+  boxToolbarAndVolume.pack_start(buttonAddFiles, Gtk::PACK_SHRINK);
+  boxToolbarAndVolume.pack_start(buttonAddFolder, Gtk::PACK_SHRINK);
 
   buttonPrevious.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPreviousClicked));
   buttonPlay.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseClicked));
@@ -168,6 +178,11 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxToolbarAndVolume.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(textVolumeMinus, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
+
+
+  iconTheme.RegisterThemeChangedListener(*this);
+
+  SetPlaybackButtonIcons();
 
 
   // Popup menu
@@ -269,12 +284,21 @@ void cGtkmmMainWindow::OnThemeChanged()
   SetPlaybackButtonIcons();
 }
 
+const char* sICON_ADD = "gtk-add";
+const char* sICON_DIRECTORY = "gtk-directory";
 const char* sICON_MEDIA_PREVIOUS = "gtk-media-previous-ltr";
 const char* sICON_MEDIA_PLAY = "gtk-media-play-ltr";
 const char* sICON_MEDIA_NEXT = "gtk-media-next-ltr";
 
 void cGtkmmMainWindow::SetPlaybackButtonIcons()
 {
+  Gtk::Image* pImageFile = new Gtk::Image;
+  iconTheme.LoadStockIcon(sICON_ADD, *pImageFile);
+  buttonAddFiles.set_image(*pImageFile);
+  Gtk::Image* pImageDirectory = new Gtk::Image;
+  iconTheme.LoadStockIcon(sICON_DIRECTORY, *pImageDirectory);
+  buttonAddFolder.set_image(*pImageDirectory);
+
   Gtk::Image* pImagePrevious = new Gtk::Image;
   iconTheme.LoadStockIconRotatedClockwise(sICON_MEDIA_PREVIOUS, *pImagePrevious);
   buttonPrevious.set_image(*pImagePrevious);
@@ -284,6 +308,14 @@ void cGtkmmMainWindow::SetPlaybackButtonIcons()
   Gtk::Image* pImageNext = new Gtk::Image;
   iconTheme.LoadStockIconRotatedClockwise(sICON_MEDIA_NEXT, *pImageNext);
   buttonNext.set_image(*pImageNext);
+}
+
+void cGtkmmMainWindow::OnActionBrowseFiles()
+{
+}
+
+void cGtkmmMainWindow::OnActionBrowseFolder()
+{
 }
 
 void cGtkmmMainWindow::OnWindowClose()
