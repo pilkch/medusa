@@ -83,6 +83,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   m_refActionGroup->add(Gtk::Action::create("PlaybackNext", Gtk::Stock::MEDIA_NEXT),
           Gtk::AccelKey("<control><alt>S"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackNextClicked));
+  m_refActionGroup->add(Gtk::ToggleAction::create("PlaybackRepeatToggle", Gtk::Stock::GOTO_TOP),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRepeatToggle));
 
   // Help menu
   m_refActionGroup->add( Gtk::Action::create("HelpMenu", "Help") );
@@ -119,6 +121,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "      <menuitem action='PlaybackPrevious'/>"
       "      <menuitem action='PlaybackPlayPause'/>"
       "      <menuitem action='PlaybackNext'/>"
+      "      <menuitem action='PlaybackRepeatToggle'/>"
       "    </menu>"
       "    <menu action='HelpMenu'>"
       "      <menuitem action='HelpAbout'/>"
@@ -128,6 +131,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "    <toolitem action='PlaybackPrevious'/>"
       "    <toolitem action='PlaybackPlayPause'/>"
       "    <toolitem action='PlaybackNext'/>"
+      "    <toolitem action='PlaybackRepeatToggle'/>"
       "  </toolbar>"
       "</ui>";
 
@@ -173,6 +177,10 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   pVolumeSlider->SetValue(settings.GetVolume0To100());
 
   pVolumeSlider->set_size_request(-1, 100);
+
+  buttonRepeatToggle.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRepeatToggle));
+
+  boxToolbarAndVolume.pack_start(buttonRepeatToggle, Gtk::PACK_SHRINK);
 
   boxToolbarAndVolume.pack_start(textVolumePlus, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
@@ -251,6 +259,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
 
   dummyCategories.set_size_request(150, -1);
+  dummyCategories.set_visible(false);
 
 
   pTrackList = new cGtkmmTrackList(*this);
@@ -289,6 +298,7 @@ const char* sICON_DIRECTORY = "gtk-directory";
 const char* sICON_MEDIA_PREVIOUS = "gtk-media-previous-ltr";
 const char* sICON_MEDIA_PLAY = "gtk-media-play-ltr";
 const char* sICON_MEDIA_NEXT = "gtk-media-next-ltr";
+const char* sICON_REPEAT_TOGGLE = "gtk-goto-top";
 
 void cGtkmmMainWindow::SetPlaybackButtonIcons()
 {
@@ -308,6 +318,10 @@ void cGtkmmMainWindow::SetPlaybackButtonIcons()
   Gtk::Image* pImageNext = new Gtk::Image;
   iconTheme.LoadStockIconRotatedClockwise(sICON_MEDIA_NEXT, *pImageNext);
   buttonNext.set_image(*pImageNext);
+
+  Gtk::Image* pImageRepeatToggle = new Gtk::Image;
+  iconTheme.LoadStockIconRotatedClockwise(sICON_REPEAT_TOGGLE, *pImageRepeatToggle);
+  buttonRepeatToggle.set_image(*pImageRepeatToggle);
 }
 
 void cGtkmmMainWindow::OnActionBrowseFiles()
@@ -377,6 +391,11 @@ void cGtkmmMainWindow::OnActionSliderValueChanged(const cGtkmmSlider& slider, ui
 void cGtkmmMainWindow::OnActionPlayTrack(const cTrack* pTrack)
 {
   view.OnActionPlayTrack(pTrack);
+}
+
+void cGtkmmMainWindow::OnActionRepeatToggle()
+{
+  //view.OnActionRepeatToggle();
 }
 
 void cGtkmmMainWindow::OnPlaybackPreviousClicked()

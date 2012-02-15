@@ -31,6 +31,7 @@ public:
   void OnActionPlaylistRightClick(GdkEventButton* event);
   void OnActionPlaybackPositionValueChanged(uint64_t uiValue);
   void OnActionVolumeValueChanged(unsigned int uiVolume0To100);
+  void OnActionRepeatToggle();
 
   void OnActionSliderValueChanged(const cGtkmmSlider& slider, uint64_t uiValue);
 
@@ -93,6 +94,7 @@ private:
   Gtk::Label textVolumePlus;
   cGtkmmSlider* pVolumeSlider;
   Gtk::Label textVolumeMinus;
+  Gtk::ToggleButton buttonRepeatToggle;
 
   Gtk::Button dummyCategories;
 
