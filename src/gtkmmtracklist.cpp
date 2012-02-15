@@ -113,6 +113,11 @@ cGtkmmTrackList::cGtkmmTrackList(cGtkmmMainWindow& _mainWindow) :
   append_column("Artist", columns.artist);
   append_column("Title", columns.title);
   append_column("Album", columns.album);
+  append_column("Track", columns.track);
+  append_column("Year", columns.year);
+  append_column("Time", columns.time);
+  append_column("Date Added", columns.dateAdded);
+  append_column("Path", columns.filePath);
 
   // Set initial sorting column
   playlistTreeModelRef->set_sort_column(columns.artist, Gtk::SORT_ASCENDING);
@@ -129,6 +134,21 @@ cGtkmmTrackList::cGtkmmTrackList(cGtkmmMainWindow& _mainWindow) :
 
   pColumn = get_column(3);
   pColumn->set_sort_column(columns.album);
+
+  pColumn = get_column(4);
+  pColumn->set_sort_column(columns.track);
+
+  pColumn = get_column(5);
+  pColumn->set_sort_column(columns.year);
+
+  pColumn = get_column(6);
+  pColumn->set_sort_column(columns.time);
+
+  pColumn = get_column(7);
+  pColumn->set_sort_column(columns.dateAdded);
+
+  pColumn = get_column(8);
+  pColumn->set_sort_column(columns.filePath);
 }
 
 const cTrack* cGtkmmTrackList::GetTrackFromRow(const Gtk::TreeModel::Row& row) const
@@ -212,6 +232,11 @@ void cGtkmmTrackList::OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::T
   }
 }
 
+spitfire::string_t FormatTime(uint64_t uiDurationMilliSeconds)
+{
+  return spitfire::string::ToString(uiDurationMilliSeconds);
+}
+
 void cGtkmmTrackList::AddTrack(const int id, const cTrack& track)
 {
   Gtk::TreeModel::Row row = *(playlistTreeModelRef->append());
@@ -220,6 +245,11 @@ void cGtkmmTrackList::AddTrack(const int id, const cTrack& track)
   row[columns.artist] = spitfire::string::ToUTF8(track.metaData.sArtist);
   row[columns.title] = spitfire::string::ToUTF8(track.metaData.sTitle);
   row[columns.album] = spitfire::string::ToUTF8(track.metaData.sAlbum);
+  row[columns.track] = spitfire::string::ToUTF8(spitfire::string::ToString(track.metaData.uiTracknum));
+  row[columns.year] = spitfire::string::ToUTF8(spitfire::string::ToString(track.metaData.uiYear));
+  row[columns.time] = spitfire::string::ToUTF8(FormatTime(track.metaData.uiDurationMilliSeconds));
+  row[columns.dateAdded] = "30/06/12"; //spitfire::string::ToUTF8(track.metaData.);
+  row[columns.filePath] = spitfire::string::ToUTF8(track.sFilePath);
 
   // Custom data
   cUserDataPtr pUserData(new cUserData);
