@@ -78,7 +78,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   m_refActionGroup->add(Gtk::Action::create("PlaybackMenu", "Playback"));
   m_refActionGroup->add(Gtk::Action::create("PlaybackPrevious", Gtk::Stock::MEDIA_PREVIOUS),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPreviousClicked));
-  m_refActionGroup->add(Gtk::Action::create("PlaybackPlayPause", Gtk::Stock::MEDIA_PLAY),
+  m_refActionGroup->add(Gtk::ToggleAction::create("PlaybackPlayPause", Gtk::Stock::MEDIA_PLAY),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseClicked));
   m_refActionGroup->add(Gtk::Action::create("PlaybackNext", Gtk::Stock::MEDIA_NEXT),
           Gtk::AccelKey("<control><alt>S"),
@@ -165,11 +165,11 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxToolbarAndVolume.pack_start(buttonAddFolder, Gtk::PACK_SHRINK);
 
   buttonPrevious.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPreviousClicked));
-  buttonPlay.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseClicked));
+  buttonPlayPause.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseClicked));
   buttonNext.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackNextClicked));
 
   boxToolbarAndVolume.pack_start(buttonPrevious, Gtk::PACK_SHRINK);
-  boxToolbarAndVolume.pack_start(buttonPlay, Gtk::PACK_SHRINK);
+  boxToolbarAndVolume.pack_start(buttonPlayPause, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(buttonNext, Gtk::PACK_SHRINK);
 
   pVolumeSlider = new cGtkmmSlider(*this, true);
@@ -314,7 +314,7 @@ void cGtkmmMainWindow::SetPlaybackButtonIcons()
   buttonPrevious.set_image(*pImagePrevious);
   Gtk::Image* pImagePlay = new Gtk::Image;
   iconTheme.LoadStockIcon(sICON_MEDIA_PLAY, *pImagePlay);
-  buttonPlay.set_image(*pImagePlay);
+  buttonPlayPause.set_image(*pImagePlay);
   Gtk::Image* pImageNext = new Gtk::Image;
   iconTheme.LoadStockIconRotatedClockwise(sICON_MEDIA_NEXT, *pImageNext);
   buttonNext.set_image(*pImageNext);

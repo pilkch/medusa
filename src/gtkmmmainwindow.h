@@ -89,7 +89,7 @@ private:
   Gtk::Button buttonAddFiles;
   Gtk::Button buttonAddFolder;
   Gtk::Button buttonPrevious;
-  Gtk::Button buttonPlay;
+  Gtk::ToggleButton buttonPlayPause;
   Gtk::Button buttonNext;
   Gtk::Label textVolumePlus;
   cGtkmmSlider* pVolumeSlider;
