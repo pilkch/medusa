@@ -63,8 +63,10 @@ private:
   void on_menu_file_popup_generic();
 
   void OnPlaybackPreviousClicked();
-  void OnPlaybackPlayPauseClicked();
   void OnPlaybackNextClicked();
+
+  void OnPlaybackPlayPauseMenuToggled();
+  void OnPlaybackPlayPauseButtonToggled();
 
   cGtkmmView& view;
   cSettings& settings;
@@ -86,7 +88,7 @@ private:
 
   // Layouts
   Gtk::VBox boxMainWindow;
-  Gtk::VBox boxToolbarAndVolume;
+  Gtk::Box boxToolbarAndVolume;
   Gtk::HBox boxPlaybackButtons;
   Gtk::HBox boxPositionSlider;
   Gtk::HBox boxCategoriesAndPlaylist;
@@ -114,6 +116,9 @@ private:
   Gtk::Label dummyStatusBar;
 
   cGtkmmTrackList* pTrackList;
+
+  Glib::RefPtr<Gtk::ToggleAction> pPlayPauseAction;
+  bool bIsTogglingPlayPause;
 };
 
 #endif // gtkmmmainwindow_h

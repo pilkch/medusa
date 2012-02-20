@@ -25,7 +25,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   textVolumeMinus("-"),
   dummyCategories("Categories"),
   dummyStatusBar("StatusBar"),
-  pTrackList(nullptr)
+  pTrackList(nullptr),
+  bIsTogglingPlayPause(false),
 {
   set_title("Medusa");
   set_icon_from_file("application.xpm");
@@ -86,8 +87,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   m_refActionGroup->add(Gtk::Action::create("PlaybackMenu", "Playback"));
   m_refActionGroup->add(Gtk::Action::create("PlaybackPrevious", Gtk::Stock::MEDIA_PREVIOUS),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPreviousClicked));
-  m_refActionGroup->add(Gtk::ToggleAction::create("PlaybackPlayPause", Gtk::Stock::MEDIA_PLAY),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseClicked));
+  pPlayPauseAction = Gtk::ToggleAction::create("PlaybackPlayPause", Gtk::Stock::MEDIA_PLAY, "Play/Pause");
+  m_refActionGroup->add(pPlayPauseAction, sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseMenuToggled));
   m_refActionGroup->add(Gtk::Action::create("PlaybackNext", Gtk::Stock::MEDIA_NEXT),
           Gtk::AccelKey("<control><alt>S"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackNextClicked));
@@ -135,7 +136,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "      <menuitem action='HelpAbout'/>"
       "    </menu>"
       "  </menubar>"
-      "  <toolbar  name='ToolBar'>"
+      "  <toolbar name='ToolBar'>"
       "    <toolitem action='PlaybackPrevious'/>"
       "    <toolitem action='PlaybackPlayPause'/>"
       "    <toolitem action='PlaybackNext'/>"
@@ -173,7 +174,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxToolbarAndVolume.pack_start(buttonAddFolder, Gtk::PACK_SHRINK);
 
   buttonPrevious.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPreviousClicked));
-  buttonPlayPause.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseClicked));
+  buttonPlayPause.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseButtonToggled));
   buttonNext.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackNextClicked));
 
   boxToolbarAndVolume.pack_start(buttonPrevious, Gtk::PACK_SHRINK);
@@ -193,7 +194,6 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxToolbarAndVolume.pack_start(textVolumePlus, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(textVolumeMinus, Gtk::PACK_SHRINK);
-  boxToolbarAndVolume.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
 
 
   iconTheme.RegisterThemeChangedListener(*this);
@@ -267,13 +267,12 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
 
   dummyCategories.set_size_request(150, -1);
-  dummyCategories.set_visible(false);
 
 
   pTrackList = new cGtkmmTrackList(*this);
 
 
-  boxCategoriesAndPlaylist.pack_start(dummyCategories, Gtk::PACK_SHRINK);
+  //boxCategoriesAndPlaylist.pack_start(dummyCategories, Gtk::PACK_SHRINK); // Hidden for the moment until it is actually functional
   boxCategoriesAndPlaylist.pack_start(pTrackList->GetWidget(), Gtk::PACK_EXPAND_WIDGET);
 
   boxPositionSlider.pack_start(textPosition, Gtk::PACK_SHRINK);
@@ -445,15 +444,30 @@ void cGtkmmMainWindow::OnActionPlayTrack(const cTrack* pTrack)
   view.OnActionPlayTrack(pTrack);
 }
 
-void cGtkmmMainWindow::OnActionRepeatToggle()
+void cGtkmmMainWindow::OnPlaybackPlayPauseMenuToggled()
 {
-  //view.OnActionRepeatToggle();
+  if (!bIsTogglingPlayPause) {
+    // Toggle the play/pause button
+    bIsTogglingPlayPause = true;
+    buttonPlayPause.set_active(!buttonPlayPause.get_active());
+    bIsTogglingPlayPause = false;
+
+    // Perform the action
+    view.OnActionPlayPause();
+  }
 }
 
-void cGtkmmMainWindow::OnPlaybackPreviousClicked()
+void cGtkmmMainWindow::OnPlaybackPlayPauseButtonToggled()
 {
-  std::cout<<"cGtkmmMainWindow::OnPlaybackPreviousClicked"<<std::endl;
-  OnActionPlayPreviousTrack();
+  if (!bIsTogglingPlayPause) {
+    // Toggle the play/pause button
+    bIsTogglingPlayPause = true;
+    pPlayPauseAction->set_active(!pPlayPauseAction->get_active());
+    bIsTogglingPlayPause = false;
+
+    // Perform the action
+    view.OnActionPlayPause();
+  }
 }
 
 void cGtkmmMainWindow::OnPlaybackPlayPauseClicked()
@@ -580,9 +594,19 @@ void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
   SetPlaybackLengthMS(pTrack->metaData.uiDurationMilliSeconds);
 
   pTrackList->SetStatePlaying(pTrack);
+
+  bIsTogglingPlayPause = true;
+  buttonPlayPause.set_active(true);
+  pPlayPauseAction->set_active(true);
+  bIsTogglingPlayPause = false;
 }
 
 void cGtkmmMainWindow::SetStatePaused()
 {
   pTrackList->SetStatePaused(view.GetTrack());
+
+  bIsTogglingPlayPause = true;
+  buttonPlayPause.set_active(false);
+  pPlayPauseAction->set_active(false);
+  bIsTogglingPlayPause = false;
 }
