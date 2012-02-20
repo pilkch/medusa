@@ -45,7 +45,16 @@ private:
 
   void SetPlaybackButtonIcons();
 
-  void OnWindowClose();
+  void ShowWindow();
+  void HideWindow();
+
+  void SetStatusIconText(const spitfire::string_t& sText);
+
+  // Overridden
+  bool on_delete_event(GdkEventAny* event);
+
+  void OnStatusIconActivate();
+  void OnStatusIconPopupMenu(guint button, guint32 activate_time);
 
   void on_menu_file_new_generic();
   void on_menu_file_quit();
@@ -61,6 +70,10 @@ private:
   cSettings& settings;
 
   cGtkmmIconTheme iconTheme;
+
+  // Status icon
+  bool bIsIconified;
+  Glib::RefPtr<Gtk::StatusIcon> pStatusIcon;
 
   // Menu and toolbar
   Glib::RefPtr<Gtk::UIManager> m_refUIManager;

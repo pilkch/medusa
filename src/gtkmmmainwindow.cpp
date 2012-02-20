@@ -1,6 +1,5 @@
 // Standard headers
 #include <iostream>
-#include <iomanip>
 
 // Medusa headers
 #include "gtkmmview.h"
@@ -8,12 +7,14 @@
 #include "gtkmmmainwindow.h"
 #include "gtkmmtracklist.h"
 #include "gtkmmfilebrowse.h"
+#include "util.h"
 
 // ** cGtkmmMainWindow
 
 cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   view(_view),
   settings(_settings),
+  bIsIconified(false),
   pMenuPopup(nullptr),
   boxToolbarAndVolume(Gtk::ORIENTATION_VERTICAL),
   textPosition("0:00"),
@@ -27,13 +28,20 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   pTrackList(nullptr)
 {
   set_title("Medusa");
+  set_icon_from_file("application.xpm");
   set_border_width(5);
+  set_skip_taskbar_hint(true); // Minimise to status icon
   set_size_request(400, 300);
   set_default_size(800, 400);
+  resize(400, 300);
 
-  // Handle window close event
-  signal_hide().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnWindowClose));
 
+  // Status icon
+  pStatusIcon = Gtk::StatusIcon::create_from_file("application.xpm");
+  pStatusIcon->signal_activate().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnStatusIconActivate));
+  pStatusIcon->signal_popup_menu().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnStatusIconPopupMenu));
+
+  SetStatusIconText(TEXT("Medusa"));
 
   // Menu and toolbar
 
@@ -286,6 +294,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   add(boxMainWindow);
 
   show_all_children();
+
+  if (settings.IsShowMainWindow()) show();
 }
 
 void cGtkmmMainWindow::OnThemeChanged()
@@ -332,14 +342,56 @@ void cGtkmmMainWindow::OnActionBrowseFolder()
 {
 }
 
-void cGtkmmMainWindow::OnWindowClose()
+void cGtkmmMainWindow::SetStatusIconText(const spitfire::string_t& sText)
 {
-  settings.SetVolume0To100(pVolumeSlider->GetValue());
+  pStatusIcon->set_tooltip_text(spitfire::string::ToUTF8(sText).c_str());
+}
+
+void cGtkmmMainWindow::ShowWindow()
+{
+  bIsIconified = false;
+  deiconify();
+  present();
+}
+
+void cGtkmmMainWindow::HideWindow()
+{
+  bIsIconified = true;
+  iconify();
+}
+
+bool cGtkmmMainWindow::on_delete_event(GdkEventAny* event)
+{
+  std::cout<<"cGtkmmMainWindow::on_delete_event"<<std::endl;
+  (void)event;
+  HideWindow();
+  return true;
+}
+
+void cGtkmmMainWindow::OnStatusIconActivate()
+{
+  std::cout<<"cGtkmmMainWindow::OnStatusIconActivate bIsIconified="<<(bIsIconified ? "true" : "false")<<std::endl;
+  if (bIsIconified) ShowWindow();
+  else HideWindow();
+}
+
+void cGtkmmMainWindow::OnStatusIconPopupMenu(guint button, guint32 activate_time)
+{
+  std::cout<<"cGtkmmMainWindow::OnStatusIconPopupMenu"<<std::endl;
+  Gtk::Menu* pMenuPopup = dynamic_cast<Gtk::Menu*>(popupUIManagerRef->get_widget("/PopupMenu"));
+  assert(pMenuPopup != nullptr);
+  pStatusIcon->popup_menu_at_position(*pMenuPopup, button, activate_time);
 }
 
 void cGtkmmMainWindow::on_menu_file_quit()
 {
-  hide(); //Closes the main window to stop the Gtk::Main::run().
+  std::cout<<"cGtkmmMainWindow::on_menu_file_quit"<<std::endl;
+
+  // Save volume settings
+  settings.SetVolume0To100(pVolumeSlider->GetValue());
+
+  //hide(); //Closes the main window to stop the Gtk::Main::run().
+  Gtk::Main::quit();
 }
 
 void cGtkmmMainWindow::on_menu_file_new_generic()
