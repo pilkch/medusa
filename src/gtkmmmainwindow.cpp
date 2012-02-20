@@ -496,47 +496,12 @@ void cGtkmmMainWindow::OnActionPlayNextTrack()
   if (pNextTrack != nullptr) OnActionPlayTrack(pNextTrack);
 }
 
-std::string cGtkmmMainWindow::TimeToString(uint64_t milliseconds) const
-{
-  std::ostringstream o;
-
-  o<<std::right<<std::setfill('0');
-
-  uint64_t time = milliseconds / 1000;
-
-  const uint64_t seconds = time % 60;
-  time /= 60;
-
-  const uint64_t minutes = time % 60;
-  time /= 60;
-
-  const uint64_t hours = time % 24;
-  time /= 24;
-
-  const uint64_t days = hours;
-
-  if (days != 0) {
-    o<<days<<":";
-    o<<std::setw(2); // Set width of 2 for the next value
-  }
-
-  if (hours != 0)  {
-    o<<hours<<":";
-    o<<std::setw(2); // Set width of 2 for the next value
-  }
-
-  o<<minutes<<":";
-  o<<std::setw(2)<<seconds;
-
-  return o.str();
-}
-
 void cGtkmmMainWindow::SetPlaybackPositionMS(uint64_t milliseconds)
 {
   //std::cout<<"cGtkmmMainWindow::SetPlaybackPositionMS "<<milliseconds<<"\n";
   pPositionSlider->SetValue(double(milliseconds) / 1000.0f);
 
-  textPosition.set_text(TimeToString(milliseconds).c_str());
+  textPosition.set_text(spitfire::string::ToUTF8(medusa::util::FormatTime(milliseconds)).c_str());
 }
 
 void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
@@ -544,7 +509,7 @@ void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
   std::cout<<"cGtkmmMainWindow::SetPlaybackLengthMS "<<milliseconds<<"\n";
   pPositionSlider->SetRange(0, double(milliseconds) / 1000.0f);
 
-  textLength.set_text(TimeToString(milliseconds).c_str());
+  textLength.set_text(spitfire::string::ToUTF8(medusa::util::FormatTime(milliseconds)).c_str());
 }
 
 void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)

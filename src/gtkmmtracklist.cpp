@@ -1,10 +1,10 @@
 // Standard headers
 #include <iostream>
-#include <iomanip>
 
 // Medusa headers
 #include "gtkmmmainwindow.h"
 #include "gtkmmtracklist.h"
+#include "util.h"
 
 // ** cGtkmmTrackListIterator
 
@@ -232,11 +232,6 @@ void cGtkmmTrackList::OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::T
   }
 }
 
-spitfire::string_t FormatTime(uint64_t uiDurationMilliSeconds)
-{
-  return spitfire::string::ToString(uiDurationMilliSeconds);
-}
-
 void cGtkmmTrackList::AddTrack(const int id, const cTrack& track)
 {
   Gtk::TreeModel::Row row = *(playlistTreeModelRef->append());
@@ -245,9 +240,9 @@ void cGtkmmTrackList::AddTrack(const int id, const cTrack& track)
   row[columns.artist] = spitfire::string::ToUTF8(track.metaData.sArtist);
   row[columns.title] = spitfire::string::ToUTF8(track.metaData.sTitle);
   row[columns.album] = spitfire::string::ToUTF8(track.metaData.sAlbum);
-  row[columns.track] = spitfire::string::ToUTF8(spitfire::string::ToString(track.metaData.uiTracknum));
-  row[columns.year] = spitfire::string::ToUTF8(spitfire::string::ToString(track.metaData.uiYear));
-  row[columns.time] = spitfire::string::ToUTF8(FormatTime(track.metaData.uiDurationMilliSeconds));
+  row[columns.track] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiTracknum));
+  row[columns.year] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiYear));
+  row[columns.time] = spitfire::string::ToUTF8(medusa::util::FormatTime(track.metaData.uiDurationMilliSeconds));
   row[columns.dateAdded] = "30/06/12"; //spitfire::string::ToUTF8(track.metaData.);
   row[columns.filePath] = spitfire::string::ToUTF8(track.sFilePath);
 
