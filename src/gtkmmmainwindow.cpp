@@ -50,39 +50,28 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   // Create actions for menus and toolbars
   m_refActionGroup = Gtk::ActionGroup::create();
 
-  // File|New sub menu
-  m_refActionGroup->add(Gtk::Action::create("FileNewStandard",
-              Gtk::Stock::NEW, "_New", "Create a new file"),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_file_new_generic));
-
-  m_refActionGroup->add(Gtk::Action::create("FileNewFoo",
-              Gtk::Stock::NEW, "New Foo", "Create a new foo"),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_file_new_generic));
-
-  m_refActionGroup->add(Gtk::Action::create("FileNewGoo",
-              Gtk::Stock::NEW, "_New Goo", "Create a new goo"),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_file_new_generic));
-
   // File menu
   m_refActionGroup->add(Gtk::Action::create("FileMenu", "File"));
-  m_refActionGroup->add(Gtk::Action::create("FileAddFiles", "Add files"),
+  m_refActionGroup->add(Gtk::Action::create("FileAddFiles", "Add Files"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFiles));
-  m_refActionGroup->add(Gtk::Action::create("FileAddFolder", "Add directory"),
+  m_refActionGroup->add(Gtk::Action::create("FileAddFolder", "Add Folder"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFolder));
-  // Sub-menu
-  m_refActionGroup->add(Gtk::Action::create("FileNew", Gtk::Stock::NEW));
+  m_refActionGroup->add(Gtk::Action::create("FileRemove", "Remove"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRemoveTrack));
+  m_refActionGroup->add(Gtk::Action::create("FileProperties", "Properties"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackProperties));
   m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_file_quit));
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnMenuFileQuit));
 
   // Edit menu
   m_refActionGroup->add(Gtk::Action::create("EditMenu", "Edit"));
-  m_refActionGroup->add(Gtk::Action::create("EditCopy", Gtk::Stock::COPY),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others));
-  m_refActionGroup->add(Gtk::Action::create("EditPaste", Gtk::Stock::PASTE),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others));
-  m_refActionGroup->add(Gtk::Action::create("EditSomething", "Something"),
-          Gtk::AccelKey("<control><alt>S"),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others));
+  //m_refActionGroup->add(Gtk::Action::create("EditCopy", Gtk::Stock::COPY),
+  //        sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others));
+  //m_refActionGroup->add(Gtk::Action::create("EditPaste", Gtk::Stock::PASTE),
+  //        sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others));
+  //m_refActionGroup->add(Gtk::Action::create("EditSomething", "Something"),
+  //        Gtk::AccelKey("<control><alt>S"),
+  //        sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others));
 
   // Playback menu
   m_refActionGroup->add(Gtk::Action::create("PlaybackMenu", "Playback"));
@@ -99,7 +88,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   // Help menu
   m_refActionGroup->add( Gtk::Action::create("HelpMenu", "Help") );
   m_refActionGroup->add( Gtk::Action::create("HelpAbout", Gtk::Stock::HELP),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others) );
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnMenuHelpAbout) );
 
   m_refUIManager = Gtk::UIManager::create();
   m_refUIManager->insert_action_group(m_refActionGroup);
@@ -114,18 +103,15 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "    <menu action='FileMenu'>"
       "      <menuitem action='FileAddFiles'/>"
       "      <menuitem action='FileAddFolder'/>"
-      "      <menu action='FileNew'>"
-      "        <menuitem action='FileNewStandard'/>"
-      "        <menuitem action='FileNewFoo'/>"
-      "        <menuitem action='FileNewGoo'/>"
-      "      </menu>"
+      "      <menuitem action='FileRemove'/>"
+      "      <menuitem action='FileProperties'/>"
       "      <separator/>"
       "      <menuitem action='FileQuit'/>"
       "    </menu>"
       "    <menu action='EditMenu'>"
-      "      <menuitem action='EditCopy'/>"
-      "      <menuitem action='EditPaste'/>"
-      "      <menuitem action='EditSomething'/>"
+      //"      <menuitem action='EditCopy'/>"
+      //"      <menuitem action='EditPaste'/>"
+      //"      <menuitem action='EditSomething'/>"
       "    </menu>"
       "    <menu action='PlaybackMenu'>"
       "      <menuitem action='PlaybackPrevious'/>"
@@ -205,21 +191,23 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   // Popup menu
   popupActionGroupRef = Gtk::ActionGroup::create();
 
-  //File|New sub menu:
-  //These menu actions would normally already exist for a main menu, because a
-  //context menu should not normally contain menu items that are only available
-  //via a context menu.
+  // File|New sub menu:
+  // These menu actions would normally already exist for a main menu, because a context menu should
+  // not normally contain menu items that are only available via a context menu.
   popupActionGroupRef->add(Gtk::Action::create("ContextMenu", "Context Menu"));
 
-  popupActionGroupRef->add(Gtk::Action::create("ContextEdit", "Edit"),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_file_popup_generic));
+  popupActionGroupRef->add(Gtk::Action::create("ContextAddFiles", "Add Files"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFiles));
 
-  popupActionGroupRef->add(Gtk::Action::create("ContextProcess", "Process"),
+  popupActionGroupRef->add(Gtk::Action::create("ContextAddFolder", "Add Folder"),
           Gtk::AccelKey("<control>P"),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_file_popup_generic));
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFolder));
 
   popupActionGroupRef->add(Gtk::Action::create("ContextRemove", "Remove"),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_file_popup_generic));
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRemoveTrack));
+
+  popupActionGroupRef->add(Gtk::Action::create("ContextProperties", "Properties"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackProperties));
 
   popupUIManagerRef = Gtk::UIManager::create();
   popupUIManagerRef->insert_action_group(popupActionGroupRef);
@@ -231,9 +219,10 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
     Glib::ustring ui_info =
       "<ui>"
       "  <popup name='PopupMenu'>"
-      "    <menuitem action='ContextEdit'/>"
-      "    <menuitem action='ContextProcess'/>"
+      "    <menuitem action='ContextAddFiles'/>"
+      "    <menuitem action='ContextAddFolder'/>"
       "    <menuitem action='ContextRemove'/>"
+      "    <menuitem action='ContextProperties'/>"
       "  </popup>"
       "</ui>";
 
@@ -336,6 +325,27 @@ void cGtkmmMainWindow::SetPlaybackButtonIcons()
 
 void cGtkmmMainWindow::OnActionBrowseFiles()
 {
+  cGtkmmFileDialog dialog;
+  dialog.SetType(cGtkmmFileDialog::TYPE::OPEN);
+  dialog.SetSelectMultipleFiles(true);
+  dialog.SetCaption(TEXT("Add audio files"));
+  dialog.SetDefaultFolder(spitfire::filesystem::GetHomeMusicDirectory());
+  if (dialog.Run(*this)) {
+    std::cout<<"cGtkmmMainWindow::OnActionBrowseFiles Selected files"<<std::endl;
+    cTrackPropertiesReader propertiesReader;
+
+    const std::vector<spitfire::string_t>& vSelectedFiles = dialog.GetSelectedFiles();
+    const size_t n = vSelectedFiles.size();
+    for (size_t i = 0; i < n; i++) {
+      cTrack* pTrack = new cTrack;
+      pTrack->sFilePath = vSelectedFiles[i];
+      std::wcout<<"cGtkmmMainWindow::OnActionBrowseFiles Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
+      propertiesReader.ReadTrackProperties(pTrack->metaData, pTrack->sFilePath);
+
+      tracks.push_back(pTrack);
+      pTrackList->AddTrack(0, *pTrack);
+    }
+  }
 }
 
 void cGtkmmMainWindow::OnActionBrowseFolder()
@@ -383,9 +393,14 @@ void cGtkmmMainWindow::OnStatusIconPopupMenu(guint button, guint32 activate_time
   pStatusIcon->popup_menu_at_position(*pMenuPopup, button, activate_time);
 }
 
-void cGtkmmMainWindow::on_menu_file_quit()
+void cGtkmmMainWindow::OnMenuHelpAbout()
 {
-  std::cout<<"cGtkmmMainWindow::on_menu_file_quit"<<std::endl;
+  std::cout<<"cGtkmmMainWindow::OnMenuHelpAbout"<<std::endl;
+}
+
+void cGtkmmMainWindow::OnMenuFileQuit()
+{
+  std::cout<<"cGtkmmMainWindow::OnMenuFileQuit"<<std::endl;
 
   // Save volume settings
   settings.SetVolume0To100(pVolumeSlider->GetValue());
@@ -394,26 +409,31 @@ void cGtkmmMainWindow::on_menu_file_quit()
   Gtk::Main::quit();
 }
 
-void cGtkmmMainWindow::on_menu_file_new_generic()
+void cGtkmmMainWindow::OnActionRemoveTrack()
 {
-   std::cout<<"A File|New menu item was selected."<<std::endl;
-}
-
-void cGtkmmMainWindow::on_menu_others()
-{
-  std::cout<<"A menu item was selected."<<std::endl;
-}
-
-void cGtkmmMainWindow::on_menu_file_popup_generic()
-{
-   std::cout<<"cGtkmmMainWindow::on_menu_file_popup_generic A popup menu item was selected"<<std::endl;
+   std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack A popup menu item was selected"<<std::endl;
    cGtkmmTrackListSelectedIterator iter(*pTrackList);
    while (iter.IsValid()) {
-     std::cout<<"cGtkmmMainWindow::on_menu_file_popup_generic Item was selected"<<std::endl;
+     std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack Item was selected"<<std::endl;
      const Gtk::TreeModel::Row& row = iter.GetRow();
      const cTrack* pTrack = pTrackList->GetTrackFromRow(row);
      if (pTrack != nullptr) std::wcout<<"Properties selected for track "<<pTrack->metaData.sArtist<<" - "<<pTrack->metaData.sTitle<<std::endl;
-     else std::cout<<"cGtkmmMainWindow::on_menu_file_popup_generic Could not get track from row"<<std::endl;
+     else std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack Could not get track from row"<<std::endl;
+
+     iter.Next();
+   }
+}
+
+void cGtkmmMainWindow::OnActionTrackProperties()
+{
+   std::cout<<"cGtkmmMainWindow::OnActionTrackProperties A popup menu item was selected"<<std::endl;
+   cGtkmmTrackListSelectedIterator iter(*pTrackList);
+   while (iter.IsValid()) {
+     std::cout<<"cGtkmmMainWindow::OnActionTrackProperties Item was selected"<<std::endl;
+     const Gtk::TreeModel::Row& row = iter.GetRow();
+     const cTrack* pTrack = pTrackList->GetTrackFromRow(row);
+     if (pTrack != nullptr) std::wcout<<"Properties selected for track "<<pTrack->metaData.sArtist<<" - "<<pTrack->metaData.sTitle<<std::endl;
+     else std::cout<<"cGtkmmMainWindow::OnActionTrackProperties Could not get track from row"<<std::endl;
 
      iter.Next();
    }

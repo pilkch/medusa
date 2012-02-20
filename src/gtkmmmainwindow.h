@@ -25,6 +25,8 @@ public:
 
   void OnActionBrowseFiles();
   void OnActionBrowseFolder();
+  void OnActionRemoveTrack();
+  void OnActionTrackProperties();
   void OnActionPlayTrack(const cTrack* pTrack);
   void OnActionPlayPreviousTrack();
   void OnActionPlayNextTrack();
@@ -55,11 +57,8 @@ private:
   void OnStatusIconActivate();
   void OnStatusIconPopupMenu(guint button, guint32 activate_time);
 
-  void on_menu_file_new_generic();
-  void on_menu_file_quit();
-  void on_menu_others();
-
-  void on_menu_file_popup_generic();
+  void OnMenuHelpAbout();
+  void OnMenuFileQuit();
 
   void OnPlaybackPreviousClicked();
   void OnPlaybackNextClicked();
