@@ -332,10 +332,24 @@ bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitf
 {
   metaData.Clear();
 
+  if (!spitfire::filesystem::FileExists(sFilePath)) {
+    std::cerr<<"cLibID3Tag::ReadTrackTags File does not exist, returning false"<<std::endl;
+    return false;
+  }
+  if (spitfire::filesystem::GetFileSize(sFilePath) == 0) {
+    std::cerr<<"cLibID3Tag::ReadTrackTags File is empty, returning false"<<std::endl;
+    return false;
+  }
+
   id3_file* p_input = id3_file_open(spitfire::string::ToUTF8(sFilePath).c_str(), ID3_FILE_MODE_READONLY);
   if (p_input == nullptr) p_input = id3_file_open(spitfire::string::ToASCII(sFilePath).c_str(), ID3_FILE_MODE_READONLY);
 
-  if (p_input != nullptr) {
+  if (p_input == nullptr) {
+    std::cout<<"cLibID3Tag::ReadTrackTags Could not open file, returning false"<<std::endl;
+    return false;
+  }
+
+  {
     id3_tag* tag = id3_file_tag(p_input);
     if (tag == nullptr) {
       id3_file_close(p_input);
@@ -468,14 +482,20 @@ bool cLibID3Tag::WriteTrackTags(const spitfire::audio::cMetaData& metaData, cons
 {
   std::wcout<<"cLibID3Tag::WriteTrackTags \""<<sFilePath<<"\""<<std::endl;
 
-  // The file must exist already
-  ASSERT(spitfire::filesystem::FileExists(sFilePath));
+  if (!spitfire::filesystem::FileExists(sFilePath)) {
+    std::cerr<<"cLibID3Tag::WriteTrackTags File does not exist, returning false"<<std::endl;
+    return false;
+  }
+  if (spitfire::filesystem::GetFileSize(sFilePath) == 0) {
+    std::cerr<<"cLibID3Tag::WriteTrackTags File is empty, returning false"<<std::endl;
+    return false;
+  }
 
   id3_file* p_input = id3_file_open(spitfire::string::ToUTF8(sFilePath).c_str(), ID3_FILE_MODE_READWRITE);
   if (p_input == nullptr) p_input = id3_file_open(spitfire::string::ToASCII(sFilePath).c_str(), ID3_FILE_MODE_READWRITE);
 
   if (p_input == nullptr) {
-    std::cout<<"cLibID3Tag::WriteTrackTags 1"<<std::endl;
+    std::cout<<"cLibID3Tag::WriteTrackTags Could not open file, returning false"<<std::endl;
     return false;
   }
 
