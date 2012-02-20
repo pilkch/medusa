@@ -27,6 +27,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   dummyStatusBar("StatusBar"),
   pTrackList(nullptr),
   bIsTogglingPlayPause(false),
+  bIsTogglingRepeat(false)
 {
   set_title("Medusa");
   set_icon_from_file("application.xpm");
@@ -92,8 +93,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   m_refActionGroup->add(Gtk::Action::create("PlaybackNext", Gtk::Stock::MEDIA_NEXT),
           Gtk::AccelKey("<control><alt>S"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackNextClicked));
-  m_refActionGroup->add(Gtk::ToggleAction::create("PlaybackRepeatToggle", Gtk::Stock::GOTO_TOP),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRepeatToggle));
+  pRepeatAction = Gtk::ToggleAction::create("PlaybackRepeatToggle", Gtk::Stock::GOTO_TOP, "Repeat");
+  m_refActionGroup->add(pRepeatAction, sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackRepeatMenuToggled));
 
   // Help menu
   m_refActionGroup->add( Gtk::Action::create("HelpMenu", "Help") );
@@ -187,9 +188,9 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   pVolumeSlider->set_size_request(-1, 100);
 
-  buttonRepeatToggle.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRepeatToggle));
+  buttonRepeat.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackRepeatButtonToggled));
 
-  boxToolbarAndVolume.pack_start(buttonRepeatToggle, Gtk::PACK_SHRINK);
+  boxToolbarAndVolume.pack_start(buttonRepeat, Gtk::PACK_SHRINK);
 
   boxToolbarAndVolume.pack_start(textVolumePlus, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
@@ -330,7 +331,7 @@ void cGtkmmMainWindow::SetPlaybackButtonIcons()
 
   Gtk::Image* pImageRepeatToggle = new Gtk::Image;
   iconTheme.LoadStockIconRotatedClockwise(sICON_REPEAT_TOGGLE, *pImageRepeatToggle);
-  buttonRepeatToggle.set_image(*pImageRepeatToggle);
+  buttonRepeat.set_image(*pImageRepeatToggle);
 }
 
 void cGtkmmMainWindow::OnActionBrowseFiles()
@@ -470,9 +471,36 @@ void cGtkmmMainWindow::OnPlaybackPlayPauseButtonToggled()
   }
 }
 
-void cGtkmmMainWindow::OnPlaybackPlayPauseClicked()
+void cGtkmmMainWindow::OnPlaybackRepeatMenuToggled()
 {
-  view.OnActionPlayPause();
+  if (!bIsTogglingRepeat) {
+    // Toggle the repeat button
+    bIsTogglingRepeat = true;
+    buttonRepeat.set_active(!buttonRepeat.get_active());
+    bIsTogglingRepeat = false;
+
+    // Perform the action
+    //view.OnActionRepeatToggle();
+  }
+}
+
+void cGtkmmMainWindow::OnPlaybackRepeatButtonToggled()
+{
+  if (!bIsTogglingRepeat) {
+    // Toggle the repeat button
+    bIsTogglingRepeat = true;
+    pRepeatAction->set_active(!pRepeatAction->get_active());
+    bIsTogglingRepeat = false;
+
+    // Perform the action
+    //view.OnActionRepeatToggle();
+  }
+}
+
+void cGtkmmMainWindow::OnPlaybackPreviousClicked()
+{
+  std::cout<<"cGtkmmMainWindow::OnPlaybackPreviousClicked"<<std::endl;
+  OnActionPlayPreviousTrack();
 }
 
 void cGtkmmMainWindow::OnPlaybackNextClicked()

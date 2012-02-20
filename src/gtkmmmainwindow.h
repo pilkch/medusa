@@ -31,7 +31,6 @@ public:
   void OnActionPlaylistRightClick(GdkEventButton* event);
   void OnActionPlaybackPositionValueChanged(uint64_t uiValue);
   void OnActionVolumeValueChanged(unsigned int uiVolume0To100);
-  void OnActionRepeatToggle();
 
   void OnActionSliderValueChanged(const cGtkmmSlider& slider, uint64_t uiValue);
 
@@ -65,7 +64,9 @@ private:
   void OnPlaybackPreviousClicked();
   void OnPlaybackNextClicked();
 
+  void OnPlaybackRepeatMenuToggled();
   void OnPlaybackPlayPauseMenuToggled();
+  void OnPlaybackRepeatButtonToggled();
   void OnPlaybackPlayPauseButtonToggled();
 
   cGtkmmView& view;
@@ -109,7 +110,7 @@ private:
   Gtk::Label textVolumePlus;
   cGtkmmSlider* pVolumeSlider;
   Gtk::Label textVolumeMinus;
-  Gtk::ToggleButton buttonRepeatToggle;
+  Gtk::ToggleButton buttonRepeat;
 
   Gtk::Button dummyCategories;
 
@@ -118,7 +119,9 @@ private:
   cGtkmmTrackList* pTrackList;
 
   Glib::RefPtr<Gtk::ToggleAction> pPlayPauseAction;
+  Glib::RefPtr<Gtk::ToggleAction> pRepeatAction;
   bool bIsTogglingPlayPause;
+  bool bIsTogglingRepeat;
 };
 
 #endif // gtkmmmainwindow_h
