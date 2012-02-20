@@ -1,6 +1,7 @@
 #ifndef MEDUSA_SETTINGS_H
 #define MEDUSA_SETTINGS_H
 
+// Spitfire headers
 #include <spitfire/storage/document.h>
 
 // ** cSettings
@@ -11,11 +12,14 @@ public:
   void Load();
   void Save();
 
+  bool IsShowMainWindow() const;
+  void SetShowMainWindow(bool bShowMainWindow);
+
   uint32_t GetVolume0To100() const;
   void SetVolume0To100(uint32_t uiVolume);
 
-  bool IsModeRepeat() const;
-  void SetModeRepeat(bool bRepeat);
+  bool IsRepeat() const;
+  void SetRepeat(bool bRepeat);
 
 private:
   template <class T>

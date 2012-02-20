@@ -131,6 +131,16 @@ void cSettings::SetXMLValue(const spitfire::string_t& sSection, const spitfire::
   itemElement->SetAttribute(spitfire::string::ToUTF8(sAttribute), value);
 }
 
+bool cSettings::IsShowMainWindow() const
+{
+  return GetXMLValue(TEXT("settings"), TEXT("window"), TEXT("showMainWindow"), true);
+}
+
+void cSettings::SetShowMainWindow(bool bShowMainWindow)
+{
+  SetXMLValue(TEXT("settings"), TEXT("window"), TEXT("showMainWindow"), bShowMainWindow);
+}
+
 uint32_t cSettings::GetVolume0To100() const
 {
   return GetXMLValue(TEXT("settings"), TEXT("playback"), TEXT("volume"), 100);
@@ -139,4 +149,14 @@ uint32_t cSettings::GetVolume0To100() const
 void cSettings::SetVolume0To100(uint32_t uiVolume)
 {
   SetXMLValue(TEXT("settings"), TEXT("playback"), TEXT("volume"), uiVolume);
+}
+
+bool cSettings::IsRepeat() const
+{
+  return GetXMLValue(TEXT("settings"), TEXT("window"), TEXT("repeat"), true);
+}
+
+void cSettings::SetRepeat(bool bRepeat)
+{
+  SetXMLValue(TEXT("settings"), TEXT("window"), TEXT("repeat"), bRepeat);
 }
