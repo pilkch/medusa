@@ -2,6 +2,7 @@
 #include <iostream>
 
 // Medusa headers
+#include "gtkmmabout.h"
 #include "gtkmmview.h"
 #include "gtkmmslider.h"
 #include "gtkmmmainwindow.h"
@@ -88,7 +89,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   // Help menu
   m_refActionGroup->add( Gtk::Action::create("HelpMenu", "Help") );
-  m_refActionGroup->add( Gtk::Action::create("HelpAbout", Gtk::Stock::HELP),
+  m_refActionGroup->add( Gtk::Action::create("HelpAbout", Gtk::Stock::ABOUT),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnMenuHelpAbout) );
 
   m_refUIManager = Gtk::UIManager::create();
@@ -455,6 +456,8 @@ void cGtkmmMainWindow::OnStatusIconPopupMenu(guint button, guint32 activate_time
 void cGtkmmMainWindow::OnMenuHelpAbout()
 {
   std::cout<<"cGtkmmMainWindow::OnMenuHelpAbout"<<std::endl;
+  cGtkmmAboutDialog about;
+  about.Run(*this);
 }
 
 void cGtkmmMainWindow::OnMenuFileQuit()

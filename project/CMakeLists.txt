@@ -36,6 +36,11 @@ ADD_DEFINITIONS("-D__GTK__")
 ADD_DEFINITIONS("-DSPITFIRE_APPLICATION_NAME=\"\\\"Medusa\\\"\"")
 ADD_DEFINITIONS("-DSPITFIRE_APPLICATION_NAME_LWR=\"\\\"medusa\\\"\"")
 
+ADD_DEFINITIONS("-DBUILD_APPLICATION_NAME=\"\\\"Medusa\\\"\"")
+ADD_DEFINITIONS("-DBUILD_APPLICATION_VERSION_STRING=\"\\\"0.5\\\"\"")
+ADD_DEFINITIONS("-DBUILD_APPLICATION_COPYRIGHT_OWNER=\"\\\"Chris Pilkington\\\"\"")
+ADD_DEFINITIONS("-DBUILD_APPLICATION_WEBSITE=\"\\\"http://chris.iluo.net/projects/medusa/\\\"\"")
+
 ADD_DEFINITIONS("-DBUILD_LASTFM_KEY=\"\\\"353d762a05751b53267c1434abb59ed1\\\"\"")
 ADD_DEFINITIONS("-DBUILD_LASTFM_SECRET=\"\\\"ccd0d3900f527382ca1997556dbd9b09\\\"\"")
 
@@ -80,7 +85,7 @@ SET(LIBRARY_SPITFIRE_SOURCE_DIRECTORY spitfire/)
 SET(LIBRARY_SPITFIRE_SOURCE_FILES
 audio/lastfm.cpp audio/metadata.cpp audio/playlist.cpp
 storage/document.cpp storage/file.cpp storage/filesystem.cpp storage/xml.cpp
-util/string.cpp util/thread.cpp)
+util/datetime.cpp util/string.cpp util/thread.cpp)
 
 PREFIX_PATHS(${LIBRARY_SPITFIRE_SOURCE_DIRECTORY} ${LIBRARY_SPITFIRE_SOURCE_FILES})
 SET(OUTPUT_LIBRARY_SPITFIRE_SOURCE_FILES ${OUTPUT_FILES})
