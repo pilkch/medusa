@@ -81,10 +81,15 @@ private:
   Glib::RefPtr<Gtk::UIManager> m_refUIManager;
   Glib::RefPtr<Gtk::ActionGroup> m_refActionGroup;
 
-  // Popup menu
+  // Playlist right click menu
   Glib::RefPtr<Gtk::UIManager> popupUIManagerRef;
   Glib::RefPtr<Gtk::ActionGroup> popupActionGroupRef;
   Gtk::Menu* pMenuPopup;
+
+  // Status icon right click menu
+  Glib::RefPtr<Gtk::UIManager> statusIconPopupUIManagerRef;
+  Glib::RefPtr<Gtk::ActionGroup> statusIconPopupActionGroupRef;
+  Gtk::Menu* pStatusIconPopupMenu;
 
   // Layouts
   Gtk::VBox boxMainWindow;

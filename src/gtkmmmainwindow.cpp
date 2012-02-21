@@ -16,6 +16,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   settings(_settings),
   bIsIconified(false),
   pMenuPopup(nullptr),
+  pStatusIconPopupMenu(nullptr),
   boxToolbarAndVolume(Gtk::ORIENTATION_VERTICAL),
   textPosition("0:00"),
   pPositionSlider(nullptr),
@@ -160,6 +161,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxToolbarAndVolume.pack_start(buttonAddFiles, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(buttonAddFolder, Gtk::PACK_SHRINK);
 
+  boxToolbarAndVolume.pack_start(*Gtk::manage(new Gtk::Separator()), Gtk::PACK_SHRINK);
+
   buttonPrevious.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPreviousClicked));
   buttonPlayPause.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseButtonToggled));
   buttonNext.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackNextClicked));
@@ -167,6 +170,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxToolbarAndVolume.pack_start(buttonPrevious, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(buttonPlayPause, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(buttonNext, Gtk::PACK_SHRINK);
+
+  boxToolbarAndVolume.pack_start(*Gtk::manage(new Gtk::Separator()), Gtk::PACK_SHRINK);
 
   pVolumeSlider = new cGtkmmSlider(*this, true);
   pVolumeSlider->SetRange(0, 100);
@@ -176,11 +181,13 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   buttonRepeat.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackRepeatButtonToggled));
 
-  boxToolbarAndVolume.pack_start(buttonRepeat, Gtk::PACK_SHRINK);
-
   boxToolbarAndVolume.pack_start(textVolumePlus, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(textVolumeMinus, Gtk::PACK_SHRINK);
+
+  boxToolbarAndVolume.pack_start(*Gtk::manage(new Gtk::Separator()), Gtk::PACK_SHRINK);
+
+  boxToolbarAndVolume.pack_start(buttonRepeat, Gtk::PACK_SHRINK);
 
 
   iconTheme.RegisterThemeChangedListener(*this);
@@ -188,7 +195,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   SetPlaybackButtonIcons();
 
 
-  // Popup menu
+  // Right click menu
   popupActionGroupRef = Gtk::ActionGroup::create();
 
   // File|New sub menu:
@@ -236,9 +243,63 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
     }
   }
 
-  //Get the menu:
+  // Get the menu
   pMenuPopup = dynamic_cast<Gtk::Menu*>(popupUIManagerRef->get_widget("/PopupMenu"));
   if (pMenuPopup == nullptr) g_warning("menu not found");
+
+
+
+  // Status icon right click menu
+  statusIconPopupActionGroupRef = Gtk::ActionGroup::create();
+
+  // File|New sub menu:
+  // These menu actions would normally already exist for a main menu, because a context menu should
+  // not normally contain menu items that are only available via a context menu.
+  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconMenu", "StatusIcon Menu"));
+
+  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconAddFiles", "Add Files"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFiles));
+
+  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconAddFolder", "Add Folder"),
+          Gtk::AccelKey("<control>P"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFolder));
+
+  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconRemove", "Remove"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRemoveTrack));
+
+  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconProperties", "Properties"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackProperties));
+
+  statusIconPopupUIManagerRef = Gtk::UIManager::create();
+  statusIconPopupUIManagerRef->insert_action_group(statusIconPopupActionGroupRef);
+
+  add_accel_group(statusIconPopupUIManagerRef->get_accel_group());
+
+  // Layout the actions in our popup menu
+  {
+    Glib::ustring ui_info =
+      "<ui>"
+      "  <popup name='StatusIconPopupMenu'>"
+      "    <menuitem action='StatusIconAddFiles'/>"
+      "    <menuitem action='StatusIconAddFolder'/>"
+      "    <menuitem action='StatusIconRemove'/>"
+      "    <menuitem action='StatusIconProperties'/>"
+      "  </popup>"
+      "</ui>";
+
+    try
+    {
+      statusIconPopupUIManagerRef->add_ui_from_string(ui_info);
+    }
+    catch(const Glib::Error& ex)
+    {
+      std::cerr<<"building menus failed: "<<ex.what();
+    }
+  }
+
+  // Get the menu
+  pStatusIconPopupMenu = dynamic_cast<Gtk::Menu*>(statusIconPopupUIManagerRef->get_widget("/StatusIconPopupMenu"));
+  if (pStatusIconPopupMenu == nullptr) g_warning("menu not found");
 
 
 
@@ -253,7 +314,6 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   pPositionSlider->SetRange(0, 0);
 
   boxPlaybackButtons.pack_start(textCurrentlyPlaying, Gtk::PACK_SHRINK);
-  boxPlaybackButtons.pack_start(*Gtk::manage(new Gtk::Label()), Gtk::PACK_EXPAND_WIDGET); // Spacer
 
 
   dummyCategories.set_size_request(150, -1);
@@ -388,9 +448,8 @@ void cGtkmmMainWindow::OnStatusIconActivate()
 void cGtkmmMainWindow::OnStatusIconPopupMenu(guint button, guint32 activate_time)
 {
   std::cout<<"cGtkmmMainWindow::OnStatusIconPopupMenu"<<std::endl;
-  Gtk::Menu* pMenuPopup = dynamic_cast<Gtk::Menu*>(popupUIManagerRef->get_widget("/PopupMenu"));
-  assert(pMenuPopup != nullptr);
-  pStatusIcon->popup_menu_at_position(*pMenuPopup, button, activate_time);
+  assert(pStatusIconPopupMenu != nullptr);
+  pStatusIcon->popup_menu_at_position(*pStatusIconPopupMenu, button, activate_time);
 }
 
 void cGtkmmMainWindow::OnMenuHelpAbout()
@@ -441,7 +500,8 @@ void cGtkmmMainWindow::OnActionTrackProperties()
 
 void cGtkmmMainWindow::OnActionPlaylistRightClick(GdkEventButton* event)
 {
-  if (pMenuPopup != nullptr) pMenuPopup->popup(event->button, event->time);
+  assert(pMenuPopup != nullptr);
+  pMenuPopup->popup(event->button, event->time);
 }
 
 void cGtkmmMainWindow::OnActionPlaybackPositionValueChanged(uint64_t uiValue)
