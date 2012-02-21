@@ -61,16 +61,13 @@ bool cGtkmmFileDialog::Run(Gtk::Window& parent)
 
   // Create our dialog
   Gtk::FileChooserDialog
-  dialog(spitfire::string::ToUTF8(sCaption).c_str(), (type ==
-  TYPE::SAVE) ? Gtk::FILE_CHOOSER_ACTION_SAVE :
-  Gtk::FILE_CHOOSER_ACTION_OPEN);
+  dialog(spitfire::string::ToUTF8(sCaption).c_str(), (type == TYPE::SAVE) ? Gtk::FILE_CHOOSER_ACTION_SAVE : Gtk::FILE_CHOOSER_ACTION_OPEN);
   dialog.set_transient_for(parent);
   dialog.set_select_multiple(bSelectMultipleFiles);
 
   // Add response buttons the the dialog
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-  dialog.add_button((type == TYPE::SAVE) ? Gtk::Stock::SAVE :
-  Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+  dialog.add_button((type == TYPE::SAVE) ? Gtk::Stock::SAVE : Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
 
   // Add filters, so that only certain file types can be selected
   const size_t nFilters = filterList.filters.size();
@@ -137,8 +134,7 @@ bool cGtkmmFolderDialog::Run(Gtk::Window& parent)
 
   // Create our dialog
   Gtk::FileChooserDialog
-  dialog(spitfire::string::ToUTF8(sCaption).c_str(),
-  Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+  dialog(spitfire::string::ToUTF8(sCaption).c_str(), Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
   dialog.set_transient_for(parent);
 
   // Add response buttons the the dialog
