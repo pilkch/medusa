@@ -8,6 +8,7 @@
 #include "gtkmmmainwindow.h"
 #include "gtkmmtracklist.h"
 #include "gtkmmfilebrowse.h"
+#include "gtkmmpreferencesdialog.h"
 #include "util.h"
 
 // ** cGtkmmMainWindow
@@ -67,13 +68,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   // Edit menu
   m_refActionGroup->add(Gtk::Action::create("EditMenu", "Edit"));
-  //m_refActionGroup->add(Gtk::Action::create("EditCopy", Gtk::Stock::COPY),
-  //        sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others));
-  //m_refActionGroup->add(Gtk::Action::create("EditPaste", Gtk::Stock::PASTE),
-  //        sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others));
-  //m_refActionGroup->add(Gtk::Action::create("EditSomething", "Something"),
-  //        Gtk::AccelKey("<control><alt>S"),
-  //        sigc::mem_fun(*this, &cGtkmmMainWindow::on_menu_others));
+  m_refActionGroup->add(Gtk::Action::create("EditPreferences", Gtk::Stock::PREFERENCES),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnMenuEditPreferences));
 
   // Playback menu
   m_refActionGroup->add(Gtk::Action::create("PlaybackMenu", "Playback"));
@@ -111,9 +107,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "      <menuitem action='FileQuit'/>"
       "    </menu>"
       "    <menu action='EditMenu'>"
-      //"      <menuitem action='EditCopy'/>"
-      //"      <menuitem action='EditPaste'/>"
-      //"      <menuitem action='EditSomething'/>"
+      "      <menuitem action='EditPreferences'/>"
       "    </menu>"
       "    <menu action='PlaybackMenu'>"
       "      <menuitem action='PlaybackPrevious'/>"
@@ -265,11 +259,17 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
           Gtk::AccelKey("<control>P"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFolder));
 
-  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconRemove", "Remove"),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRemoveTrack));
+  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconPrevious", "Previous"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionPlayPreviousTrack));
 
-  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconProperties", "Properties"),
-          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackProperties));
+  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconPlayPause", "Play/Pause"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseMenuToggled));
+
+  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconNext", "Next"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionPlayNextTrack));
+
+  statusIconPopupActionGroupRef->add(Gtk::Action::create("StatusIconQuit", "Quit"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnMenuFileQuit));
 
   statusIconPopupUIManagerRef = Gtk::UIManager::create();
   statusIconPopupUIManagerRef->insert_action_group(statusIconPopupActionGroupRef);
@@ -281,10 +281,14 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
     Glib::ustring ui_info =
       "<ui>"
       "  <popup name='StatusIconPopupMenu'>"
+      "    <menuitem action='StatusIconPrevious'/>"
+      "    <menuitem action='StatusIconPlayPause'/>"
+      "    <menuitem action='StatusIconNext'/>"
+      "    <separator/>"
       "    <menuitem action='StatusIconAddFiles'/>"
       "    <menuitem action='StatusIconAddFolder'/>"
-      "    <menuitem action='StatusIconRemove'/>"
-      "    <menuitem action='StatusIconProperties'/>"
+      "    <separator/>"
+      "    <menuitem action='StatusIconQuit'/>"
       "  </popup>"
       "</ui>";
 
@@ -469,6 +473,14 @@ void cGtkmmMainWindow::OnMenuFileQuit()
 
   //hide(); //Closes the main window to stop the Gtk::Main::run().
   Gtk::Main::quit();
+}
+
+void cGtkmmMainWindow::OnMenuEditPreferences()
+{
+  std::cout<<"cGtkmmMainWindow::OnMenuEditPreferences"<<std::endl;
+  cGtkmmPreferencesDialog dialog(*this);
+  // TODO: Reload settings when dialog.Run() returns true
+  dialog.Run();
 }
 
 void cGtkmmMainWindow::OnActionRemoveTrack()

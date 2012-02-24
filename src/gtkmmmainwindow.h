@@ -59,6 +59,7 @@ private:
 
   void OnMenuHelpAbout();
   void OnMenuFileQuit();
+  void OnMenuEditPreferences();
 
   void OnPlaybackPreviousClicked();
   void OnPlaybackNextClicked();
