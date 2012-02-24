@@ -36,6 +36,9 @@ private:
   Gtk::Entry lastfmUserName;
   Gtk::Label lastfmPasswordDescription;
   Gtk::Entry lastfmPassword;
+  Gtk::HBox boxLastfmSignup;
+  Gtk::Label lastfmNewToLastfmDescription;
+  Gtk::LinkButton lastfmSignUpForAnAccount;
 
   Gtk::Separator separator;
 };

@@ -10,7 +10,9 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(Gtk::Window& parent) :
   lastfmEnabled("Use Last.fm"),
   lastfmTable(2, 2),
   lastfmUserNameDescription("User:"),
-  lastfmPasswordDescription("Password:")
+  lastfmPasswordDescription("Password:"),
+  lastfmNewToLastfmDescription("New to Last.fm?"),
+  lastfmSignUpForAnAccount("http://www.last.fm/join", "Sign up for an account")
 {
   set_resizable();
 
@@ -42,6 +44,9 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(Gtk::Window& parent) :
   lastfmTable.attach(lastfmPasswordDescription, 0, 1, 1, 2, Gtk::SHRINK);
   lastfmTable.attach(lastfmPassword, 1, 2, 1, 2);
   lastfmPassword.set_visibility(false);
+  boxLastfm.pack_start(boxLastfmSignup, Gtk::PACK_SHRINK);
+  boxLastfmSignup.pack_start(lastfmNewToLastfmDescription, Gtk::PACK_SHRINK);
+  boxLastfmSignup.pack_start(lastfmSignUpForAnAccount, Gtk::PACK_SHRINK);
 
   // Add separator
   pBox->pack_start(separator, Gtk::PACK_SHRINK);

@@ -57,9 +57,9 @@ private:
   void OnStatusIconActivate();
   void OnStatusIconPopupMenu(guint button, guint32 activate_time);
 
-  void OnMenuHelpAbout();
   void OnMenuFileQuit();
   void OnMenuEditPreferences();
+  void OnMenuHelpAbout();
 
   void OnPlaybackPreviousClicked();
   void OnPlaybackNextClicked();
