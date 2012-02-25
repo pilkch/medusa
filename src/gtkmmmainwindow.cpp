@@ -478,9 +478,10 @@ void cGtkmmMainWindow::OnMenuFileQuit()
 void cGtkmmMainWindow::OnMenuEditPreferences()
 {
   std::cout<<"cGtkmmMainWindow::OnMenuEditPreferences"<<std::endl;
-  cGtkmmPreferencesDialog dialog(*this);
-  // TODO: Reload settings when dialog.Run() returns true
-  dialog.Run();
+  cGtkmmPreferencesDialog dialog(settings, *this);
+  if (dialog.Run()) {
+    // TODO: Reload settings
+  }
 }
 
 void cGtkmmMainWindow::OnActionRemoveTrack()

@@ -7,16 +7,22 @@
 // Spitfire headers
 #include <spitfire/util/string.h>
 
+// Medusa headers
+#include "settings.h"
+
 class cGtkmmPreferencesDialog : public Gtk::Dialog
 {
 public:
-  explicit cGtkmmPreferencesDialog(Gtk::Window& parent);
+  cGtkmmPreferencesDialog(cSettings& settings, Gtk::Window& parent);
   virtual ~cGtkmmPreferencesDialog() {}
 
   bool Run();
 
 private:
-  void OnLastfmEnabledToggled();
+  void OnResponse(int response_id);
+  void OnEnableControls();
+
+  cSettings& settings;
 
   Gtk::Alignment m_Alignment;
 
@@ -41,6 +47,8 @@ private:
   Gtk::LinkButton lastfmSignUpForAnAccount;
 
   Gtk::Separator separator;
+
+  Gtk::Button* pOkButton;
 };
 
 #endif // !MEDUSA_GTKMMPREFERENCESDIALOG_H

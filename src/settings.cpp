@@ -160,3 +160,43 @@ void cSettings::SetRepeat(bool bRepeat)
 {
   SetXMLValue(TEXT("settings"), TEXT("window"), TEXT("repeat"), bRepeat);
 }
+
+bool cSettings::IsNotifyOnSongChange() const
+{
+  return GetXMLValue(TEXT("settings"), TEXT("window"), TEXT("notifyOnSongChange"), true);
+}
+
+void cSettings::SetNotifyOnSongChange(bool bNotifyOnSongChange)
+{
+  SetXMLValue(TEXT("settings"), TEXT("window"), TEXT("notifyOnSongChange"), bNotifyOnSongChange);
+}
+
+bool cSettings::IsLastFMEnabled() const
+{
+  return GetXMLValue(TEXT("settings"), TEXT("lastfm"), TEXT("enabled"), false);
+}
+
+void cSettings::SetLastFMEnabled(bool bEnabled)
+{
+  SetXMLValue(TEXT("settings"), TEXT("lastfm"), TEXT("enabled"), bEnabled);
+}
+
+spitfire::string_t cSettings::GetLastFMUserName() const
+{
+  return GetXMLValue<spitfire::string_t>(TEXT("settings"), TEXT("lastfm"), TEXT("username"), TEXT(""));
+}
+
+void cSettings::SetLastFMUserName(const spitfire::string_t& sUserName)
+{
+  SetXMLValue(TEXT("settings"), TEXT("lastfm"), TEXT("username"), sUserName);
+}
+
+spitfire::string_t cSettings::GetLastFMPassword() const
+{
+  return GetXMLValue<spitfire::string_t>(TEXT("settings"), TEXT("lastfm"), TEXT("password"), TEXT(""));
+}
+
+void cSettings::SetLastFMPassword(const spitfire::string_t& sPassword)
+{
+  SetXMLValue(TEXT("settings"), TEXT("lastfm"), TEXT("password"), sPassword);
+}
