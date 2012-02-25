@@ -86,6 +86,8 @@ void cGtkmmPreferencesDialog::OnResponse(int response_id)
     settings.SetLastFMEnabled(lastfmEnabled.get_active());
     settings.SetLastFMUserName(spitfire::string::ToString_t(lastfmUserName.get_text()));
     settings.SetLastFMPassword(spitfire::string::ToString_t(lastfmPassword.get_text()));
+
+    settings.Save();
   }
 }
 

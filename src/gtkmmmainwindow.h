@@ -51,6 +51,8 @@ private:
 
   void SetStatusIconText(const spitfire::string_t& sText);
 
+  void ApplySettings();
+
   // Overridden
   bool on_delete_event(GdkEventAny* event);
 

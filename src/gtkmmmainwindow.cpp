@@ -175,6 +175,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   pVolumeSlider->set_size_request(-1, 100);
 
   buttonRepeat.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackRepeatButtonToggled));
+  buttonRepeat.set_active(settings.IsRepeat());
 
   boxToolbarAndVolume.pack_start(textVolumePlus, Gtk::PACK_SHRINK);
   boxToolbarAndVolume.pack_start(*pVolumeSlider, Gtk::PACK_SHRINK);
@@ -480,7 +481,8 @@ void cGtkmmMainWindow::OnMenuEditPreferences()
   std::cout<<"cGtkmmMainWindow::OnMenuEditPreferences"<<std::endl;
   cGtkmmPreferencesDialog dialog(settings, *this);
   if (dialog.Run()) {
-    // TODO: Reload settings
+    // Update our state from the settings
+    ApplySettings();
   }
 }
 
@@ -733,4 +735,12 @@ void cGtkmmMainWindow::SetStatePaused()
   buttonPlayPause.set_active(false);
   pPlayPauseAction->set_active(false);
   bIsTogglingPlayPause = false;
+}
+
+void cGtkmmMainWindow::ApplySettings()
+{
+  buttonRepeat.set_active(settings.IsRepeat());
+
+  // Last.fm settings
+  // TODO: Set Last.fm settings
 }
