@@ -4,6 +4,8 @@
 // Spitfire headers
 #include <spitfire/storage/document.h>
 
+namespace medusa
+{
 // ** cSettings
 
 class cSettings
@@ -41,5 +43,6 @@ private:
 
   spitfire::document::cDocument document;
 };
+}
 
 #endif // MEDUSA_SETTINGS_H

@@ -5,14 +5,17 @@
 #include <spitfire/spitfire.h>
 #include <spitfire/audio/metadata.h>
 
-class cTrack
+namespace medusa
 {
-public:
-  spitfire::string_t sFilePath;
+  class cTrack
+  {
+  public:
+    spitfire::string_t sFilePath;
 
-  spitfire::audio::cMetaData metaData;
+    spitfire::audio::cMetaData metaData;
 
-  bool bIsPropertiesLoaded;
-};
+    bool bIsPropertiesLoaded;
+  };
+}
 
 #endif // MEDUSA_TRACK_H

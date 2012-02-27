@@ -8,6 +8,8 @@
 #include "gtkmmview.h"
 #include "gstreamermmplayer.h"
 
+namespace medusa
+{
 // NOTE:
 // The "Hello World" application in the GStreamer documentation shows how to play an Ogg/Vorbis file.
 // To make this work with WAV files, you can simply replace "oggdemux" with "wavparse" and replace "vorbisdec" with "identity"
@@ -138,4 +140,5 @@ uint64_t cGStreamermmPlayer::GetPlaybackPositionMS() const
   }
 
   return positionMS;
+}
 }

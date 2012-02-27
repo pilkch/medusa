@@ -13,6 +13,8 @@
 #include "gstreamermmplayer.h"
 #include "gtkmmmainwindow.h"
 
+namespace medusa
+{
 class cGtkmmView : public cView
 {
 public:
@@ -46,5 +48,6 @@ private:
   spitfire::util::cMutex mutexSettings;
   cSettings settings;
 };
+}
 
 #endif // gtkmmview_h

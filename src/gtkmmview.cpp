@@ -5,6 +5,8 @@
 #include "gtkmmview.h"
 #include "gtkmmmainwindow.h"
 
+namespace medusa
+{
 cGtkmmView::cGtkmmView(int argc, char** argv) :
   kit(argc, argv),
   pMainWindow(nullptr),
@@ -80,4 +82,5 @@ void cGtkmmView::_Run()
 {
   // Display our window
   Gtk::Main::run(*pMainWindow);
+}
 }

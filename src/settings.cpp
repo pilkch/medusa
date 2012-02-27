@@ -21,6 +21,8 @@
 // Medusa headers
 #include "settings.h"
 
+namespace medusa
+{
 void cSettings::Load()
 {
   // Read the xml document
@@ -199,4 +201,5 @@ spitfire::string_t cSettings::GetLastFMPassword() const
 void cSettings::SetLastFMPassword(const spitfire::string_t& sPassword)
 {
   SetXMLValue(TEXT("settings"), TEXT("lastfm"), TEXT("password"), sPassword);
+}
 }

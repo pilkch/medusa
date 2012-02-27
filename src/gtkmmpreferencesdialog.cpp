@@ -1,6 +1,8 @@
 // Medusa headers
 #include "gtkmmpreferencesdialog.h"
 
+namespace medusa
+{
 cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Window& parent) :
   Gtk::Dialog("PreferencesDialog", parent, true),
   settings(_settings),
@@ -105,4 +107,5 @@ void cGtkmmPreferencesDialog::OnEnableControls()
 bool cGtkmmPreferencesDialog::Run()
 {
   return (run() == Gtk::ResponseType::RESPONSE_OK);
+}
 }

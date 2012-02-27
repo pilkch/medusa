@@ -8,31 +8,34 @@
 // Medusa headers
 #include "track.h"
 
-class cController;
-
-class cModel
+namespace medusa
 {
-public:
-  cModel();
+  class cController;
 
-  void SetController(cController* pController);
+  class cModel
+  {
+  public:
+    cModel();
 
-private:
-  cController* pController;
+    void SetController(cController* pController);
 
-  std::vector<cTrack*> tracks;
-};
+  private:
+    cController* pController;
 
-// ** cModel
+    std::vector<cTrack*> tracks;
+  };
 
-inline cModel::cModel() :
-  pController(nullptr)
-{
-}
+  // ** cModel
 
-inline void cModel::SetController(cController* _pController)
-{
-  pController = _pController;
+  inline cModel::cModel() :
+    pController(nullptr)
+  {
+  }
+
+  inline void cModel::SetController(cController* _pController)
+  {
+    pController = _pController;
+  }
 }
 
 #endif // model_h

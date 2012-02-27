@@ -6,6 +6,8 @@
 #include "gtkmmview.h"
 #include "gtkmmslider.h"
 
+namespace medusa
+{
 // ** cGtkmmSlider
 
 cGtkmmSlider::cGtkmmSlider(cGtkmmMainWindow& _mainWindow, bool bVertical) :
@@ -90,4 +92,5 @@ void cGtkmmSlider::SetValue(uint64_t uiValue)
 void cGtkmmSlider::SetRange(uint64_t uiMin, uint64_t uiMax)
 {
   set_range(double(uiMin), double(uiMax));
+}
 }

@@ -7,6 +7,8 @@
 // Medusa headers
 #include "track.h"
 
+namespace medusa
+{
 // ** cGtkmmTrackListIterator
 
 class cGtkmmTrackListIterator
@@ -122,5 +124,6 @@ private:
   Glib::RefPtr<Gtk::ListStore> playlistTreeModelRef;
   Glib::RefPtr<Gtk::TreeSelection> playlistTreeSelectionRef;
 };
+}
 
 #endif // gtkmmtracklist_h

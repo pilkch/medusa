@@ -10,6 +10,8 @@
 // Medusa headers
 #include "settings.h"
 
+namespace medusa
+{
 class cGtkmmPreferencesDialog : public Gtk::Dialog
 {
 public:
@@ -50,5 +52,6 @@ private:
 
   Gtk::Button* pOkButton;
 };
+}
 
 #endif // !MEDUSA_GTKMMPREFERENCESDIALOG_H

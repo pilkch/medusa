@@ -13,13 +13,13 @@
 
 int main(int argc, char* argv[])
 {
-  std::cout<<"main\n";
+  std::cout<<"main"<<std::endl;
 
   spitfire::util::SetMainThread();
 
-  cModel model;
-  cGtkmmView view(argc, argv);
-  cController controller(model, view);
+  medusa::cModel model;
+  medusa::cGtkmmView view(argc, argv);
+  medusa::cController controller(model, view);
 
   view.Run();
 

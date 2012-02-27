@@ -11,6 +11,8 @@
 #include "gtkmmpreferencesdialog.h"
 #include "util.h"
 
+namespace medusa
+{
 // ** cGtkmmMainWindow
 
 cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
@@ -693,7 +695,7 @@ void cGtkmmMainWindow::SetPlaybackPositionMS(uint64_t milliseconds)
   //std::cout<<"cGtkmmMainWindow::SetPlaybackPositionMS "<<milliseconds<<"\n";
   pPositionSlider->SetValue(double(milliseconds) / 1000.0f);
 
-  textPosition.set_text(spitfire::string::ToUTF8(medusa::util::FormatTime(milliseconds)).c_str());
+  textPosition.set_text(spitfire::string::ToUTF8(util::FormatTime(milliseconds)).c_str());
 }
 
 void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
@@ -701,7 +703,7 @@ void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
   std::cout<<"cGtkmmMainWindow::SetPlaybackLengthMS "<<milliseconds<<"\n";
   pPositionSlider->SetRange(0, double(milliseconds) / 1000.0f);
 
-  textLength.set_text(spitfire::string::ToUTF8(medusa::util::FormatTime(milliseconds)).c_str());
+  textLength.set_text(spitfire::string::ToUTF8(util::FormatTime(milliseconds)).c_str());
 }
 
 void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
@@ -743,4 +745,5 @@ void cGtkmmMainWindow::ApplySettings()
 
   // Last.fm settings
   // TODO: Set Last.fm settings
+}
 }

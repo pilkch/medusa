@@ -6,6 +6,8 @@
 #include "gtkmmtracklist.h"
 #include "util.h"
 
+namespace medusa
+{
 // ** cGtkmmTrackListIterator
 
 cGtkmmTrackListIterator::cGtkmmTrackListIterator(cGtkmmTrackList& _trackList) :
@@ -243,7 +245,7 @@ void cGtkmmTrackList::AddTrack(const int id, const cTrack& track)
   row[columns.track] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiTracknum));
   row[columns.year] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiYear));
   row[columns.time] = spitfire::string::ToUTF8(medusa::util::FormatTime(track.metaData.uiDurationMilliSeconds));
-  row[columns.dateAdded] = "30/06/12"; //spitfire::string::ToUTF8(track.metaData.);
+  row[columns.dateAdded] = "2012/02/28"; //spitfire::string::ToUTF8(medusa::util::FormatTime(track.ui));
   row[columns.filePath] = spitfire::string::ToUTF8(track.sFilePath);
 
   // Custom data
@@ -286,4 +288,5 @@ void cGtkmmTrackList::SetStatePaused(const cTrack* pTrack)
       iter++;
     }
   }
+}
 }

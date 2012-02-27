@@ -4,6 +4,8 @@
 // gtkmm headers
 #include <gtkmm.h>
 
+namespace medusa
+{
 // http://git.gnome.org/browse/rhythmbox/tree/widgets/rb-header.c
 // HACK: We want the behaviour you get with the middle button, so we
 // mangle the event.
@@ -40,5 +42,6 @@ private:
   bool bLeftClickedPressEventChanged;
   #endif
 };
+}
 
 #endif // gtkmmslider_h

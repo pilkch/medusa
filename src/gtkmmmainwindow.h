@@ -9,9 +9,11 @@
 #include "track.h"
 #include "gtkmmicontheme.h"
 
-class cGtkmmView;
-class cGtkmmSlider;
-class cGtkmmTrackList;
+namespace medusa
+{
+  class cGtkmmView;
+  class cGtkmmSlider;
+  class cGtkmmTrackList;
 
 class cGtkmmMainWindow : public Gtk::Window {
 public:
@@ -130,5 +132,6 @@ private:
   bool bIsTogglingPlayPause;
   bool bIsTogglingRepeat;
 };
+}
 
 #endif // gtkmmmainwindow_h

@@ -4,6 +4,8 @@
 // Spitfire headers
 #include <spitfire/audio/metadata.h>
 
+namespace medusa
+{
 // ** cTrackPropertiesReader
 
 class cTrackPropertiesReader
@@ -27,5 +29,6 @@ public:
 private:
   bool WriteTrackTags(const spitfire::audio::cMetaData& properties, const spitfire::string_t& sFilePath) const;
 };
+}
 
 #endif // trackproperties_h

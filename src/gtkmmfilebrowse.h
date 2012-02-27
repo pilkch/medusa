@@ -11,6 +11,8 @@
 // Spitfire headers
 #include <spitfire/util/string.h>
 
+namespace medusa
+{
 // Browse for a file with file type filtering
 //
 // cGtkmmFileDialog dialog;
@@ -133,5 +135,6 @@ private:
 
   spitfire::string_t sSelectedFolder;
 };
+}
 
 #endif // gtkmmfilebrowse_h

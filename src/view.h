@@ -1,37 +1,40 @@
 #ifndef view_h
 #define view_h
 
-// TODO: INCLUDE SPITFIRE.H INSTEAD
-#define nullptr NULL
+// Spitfire headers
+#include <spitfire/spitfire.h>
 
-class cController;
-
-class cView
+namespace medusa
 {
-public:
-  cView();
-  virtual ~cView() {}
+  class cController;
 
-  void SetController(cController* pController);
+  class cView
+  {
+  public:
+    cView();
+    virtual ~cView() {}
 
-  void Run() { _Run(); }
+    void SetController(cController* pController);
 
-private:
-  virtual void _Run() = 0;
+    void Run() { _Run(); }
 
-  cController* pController;
-};
+  private:
+    virtual void _Run() = 0;
 
-// ** cView
+    cController* pController;
+  };
 
-inline cView::cView() :
-  pController(nullptr)
-{
-}
+  // ** cView
 
-inline void cView::SetController(cController* _pController)
-{
-  pController = _pController;
+  inline cView::cView() :
+    pController(nullptr)
+  {
+  }
+
+  inline void cView::SetController(cController* _pController)
+  {
+    pController = _pController;
+  }
 }
 
 #endif // view_h

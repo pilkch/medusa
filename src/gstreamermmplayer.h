@@ -13,9 +13,13 @@
 // Medusa headers
 #include "track.h"
 
-typedef uint64_t timepositionms_t;
+namespace medusa
+{
+  typedef uint64_t timepositionms_t;
 
-class cGtkmmView;
+  class cGtkmmView;
+
+// ** cGStreamermmPlayer
 
 class cGStreamermmPlayer
 {
@@ -64,5 +68,6 @@ private:
 
   sigc::connection timeoutConnection;
 };
+}
 
 #endif // gstreamermmplayer_h

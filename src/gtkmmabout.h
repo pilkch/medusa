@@ -8,6 +8,8 @@
 #include <spitfire/util/string.h>
 #include <spitfire/util/datetime.h>
 
+namespace medusa
+{
 // ** cGtkmmAboutDialog
 
 class cGtkmmAboutDialog
@@ -31,6 +33,7 @@ inline void cGtkmmAboutDialog::Run(Gtk::Window& parent)
   dialog.set_website(BUILD_APPLICATION_WEBSITE);
   //dialog.set_translator_credits("translators");
   dialog.run();
+}
 }
 
 #endif // !MEDUSA_GTKMMABOUT_H

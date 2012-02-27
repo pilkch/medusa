@@ -18,7 +18,27 @@
 // Spitfire headers
 #include <spitfire/storage/filesystem.h>
 
+struct id3_file {
+  FILE *iofile;
+  enum id3_file_mode mode;
+  char *path;
 
+  int flags;
+
+  struct id3_tag *primary;
+
+  unsigned int ntags;
+  struct filetag *tags;
+};
+
+struct filetag {
+  struct id3_tag *tag;
+  unsigned long location;
+  id3_length_t length;
+};
+
+namespace medusa
+{
 // ** cLibID3Tag
 //
 // Use libid3tag to read the tag data
@@ -47,25 +67,6 @@
 
 enum {
   ID3_FILE_FLAG_ID3V1 = 0x0001
-};
-
-struct id3_file {
-  FILE *iofile;
-  enum id3_file_mode mode;
-  char *path;
-
-  int flags;
-
-  struct id3_tag *primary;
-
-  unsigned int ntags;
-  struct filetag *tags;
-};
-
-struct filetag {
-  struct id3_tag *tag;
-  unsigned long location;
-  id3_length_t length;
 };
 
 
@@ -766,4 +767,5 @@ bool cTrackPropertiesWriter::WriteTrackTags(const spitfire::audio::cMetaData& me
 {
   cLibID3Tag libID3Tag;
   return libID3Tag.WriteTrackTags(metaData, sFilePath);
+}
 }

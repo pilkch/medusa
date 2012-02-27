@@ -1,5 +1,7 @@
 #include "gtkmmfilebrowse.h"
 
+namespace medusa
+{
 // ** cFilterList
 
 void cFilterList::AddFilter(const cFilter& filter)
@@ -152,4 +154,5 @@ bool cGtkmmFolderDialog::Run(Gtk::Window& parent)
   }
 
   return bResult;
+}
 }

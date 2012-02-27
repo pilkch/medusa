@@ -8,31 +8,34 @@
 // Medusa headers
 #include "gtkmmicontheme.h"
 
-// ** cGtkmmIconTheme
-
-cGtkmmIconTheme::cGtkmmIconTheme()
+namespace medusa
 {
-  icon_theme = Gtk::IconTheme::get_default();
-}
+  // ** cGtkmmIconTheme
 
-void cGtkmmIconTheme::LoadStockIcon(const std::string& sStockIconName, Gtk::Image& image)
-{
-  std::cout<<"cGtkmmIconTheme::LoadStockIcon"<<std::endl;
-  image.set(icon_theme->load_icon(sStockIconName.c_str(), 32, Gtk::ICON_LOOKUP_USE_BUILTIN));
-}
+  cGtkmmIconTheme::cGtkmmIconTheme()
+  {
+    icon_theme = Gtk::IconTheme::get_default();
+  }
 
-void cGtkmmIconTheme::LoadStockIconRotatedClockwise(const std::string& sStockIconName, Gtk::Image& image)
-{
-  std::cout<<"cGtkmmIconTheme::LoadStockIconRotatedClockwise"<<std::endl;
+  void cGtkmmIconTheme::LoadStockIcon(const std::string& sStockIconName, Gtk::Image& image)
+  {
+    std::cout<<"cGtkmmIconTheme::LoadStockIcon"<<std::endl;
+    image.set(icon_theme->load_icon(sStockIconName.c_str(), 32, Gtk::ICON_LOOKUP_USE_BUILTIN));
+  }
 
-  // This doesn't seem to work
-  //Gtk::StockItem item;
-  //Gtk::Stock::lookup(idStockIcon, item);
+  void cGtkmmIconTheme::LoadStockIconRotatedClockwise(const std::string& sStockIconName, Gtk::Image& image)
+  {
+    std::cout<<"cGtkmmIconTheme::LoadStockIconRotatedClockwise"<<std::endl;
 
-  Glib::RefPtr<Gdk::Pixbuf> pixbuf = icon_theme->load_icon(sStockIconName.c_str(), 32, Gtk::ICON_LOOKUP_USE_BUILTIN);
+    // This doesn't seem to work
+    //Gtk::StockItem item;
+    //Gtk::Stock::lookup(idStockIcon, item);
 
-  ASSERT(pixbuf);
+    Glib::RefPtr<Gdk::Pixbuf> pixbuf = icon_theme->load_icon(sStockIconName.c_str(), 32, Gtk::ICON_LOOKUP_USE_BUILTIN);
 
-  // Rotate the pixbuf and assign it to our image
-  image.set(pixbuf->rotate_simple(Gdk::PixbufRotation::PIXBUF_ROTATE_CLOCKWISE));
+    ASSERT(pixbuf);
+
+    // Rotate the pixbuf and assign it to our image
+    image.set(pixbuf->rotate_simple(Gdk::PixbufRotation::PIXBUF_ROTATE_CLOCKWISE));
+  }
 }
