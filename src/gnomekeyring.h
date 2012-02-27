@@ -2,8 +2,10 @@
 #define GNOMEKEYRING_H
 
 // Spitfire headers
-#include <spitfire/util/string.h>
 #include <spitfire/util/signalobject.h>
+
+// Medusa headers
+#include "medusa.h"
 
 namespace medusa
 {
@@ -12,8 +14,8 @@ namespace medusa
   class cGnomeKeyRing
   {
   public:
-    void LoadPassword(spitfire::string_t& sPassword);
-    void SavePassword(const spitfire::string_t& sCaption, const spitfire::string_t& sPassword);
+    void LoadPassword(string_t& sPassword);
+    void SavePassword(const string_t& sCaption, const string_t& sPassword);
   };
 }
 

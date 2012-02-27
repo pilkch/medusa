@@ -8,8 +8,8 @@
 // gtkmm headers
 #include <gtkmm.h>
 
-// Spitfire headers
-#include <spitfire/util/string.h>
+// Medusa headers
+#include "medusa.h"
 
 namespace medusa
 {
@@ -47,7 +47,7 @@ namespace medusa
 // dialog.SetCaption(TEXT("Please choose some files"));
 // dialog.SetDefaultFolder(TEXT("/folder"));
 // if (dialog.Run(*this)) {
-//   const std::vector<spitfire::string_t>& vSelectedFiles = dialog.GetSelectedFiles();
+//   const std::vector<string_t>& vSelectedFiles = dialog.GetSelectedFiles();
 //   const size_t n = vSelectedFiles.size();
 //   for (size_t i = 0; i < n; i++) {
 //     ... add file (vSelectedFiles[i])
@@ -68,7 +68,7 @@ namespace medusa
 class cFilter
 {
 public:
-  spitfire::string_t sName;
+  string_t sName;
   std::vector<std::string> mimeTypes;
   std::vector<std::string> patterns;
 };
@@ -92,24 +92,24 @@ public:
 
   void SetType(TYPE type);
   void SetSelectMultipleFiles(bool bSelectMultipleFiles);
-  void SetCaption(const spitfire::string_t& sCaption);
-  void SetDefaultFolder(const spitfire::string_t& sDefaultFolder);
+  void SetCaption(const string_t& sCaption);
+  void SetDefaultFolder(const string_t& sDefaultFolder);
   void SetFilterList(const cFilterList& filterList);
 
-  const spitfire::string_t& GetSelectedFile() const;
-  const std::vector<spitfire::string_t>& GetSelectedFiles() const;
+  const string_t& GetSelectedFile() const;
+  const std::vector<string_t>& GetSelectedFiles() const;
 
   bool Run(Gtk::Window& parent);
 
 private:
   TYPE type;
   bool bSelectMultipleFiles;
-  spitfire::string_t sCaption;
-  spitfire::string_t sDefaultFolder;
+  string_t sCaption;
+  string_t sDefaultFolder;
   cFilterList filterList;
 
-  spitfire::string_t sSelectedFile;
-  std::vector<spitfire::string_t> vSelectedFiles;
+  string_t sSelectedFile;
+  std::vector<string_t> vSelectedFiles;
 };
 
 class cGtkmmFolderDialog
@@ -121,19 +121,19 @@ public:
   };
 
   void SetType(TYPE type);
-  void SetCaption(const spitfire::string_t& sCaption);
-  void SetDefaultFolder(const spitfire::string_t& sDefaultFolder);
+  void SetCaption(const string_t& sCaption);
+  void SetDefaultFolder(const string_t& sDefaultFolder);
 
-  const spitfire::string_t& GetSelectedFolder() const;
+  const string_t& GetSelectedFolder() const;
 
   bool Run(Gtk::Window& parent);
 
 private:
   TYPE type;
-  spitfire::string_t sCaption;
-  spitfire::string_t sDefaultFolder;
+  string_t sCaption;
+  string_t sDefaultFolder;
 
-  spitfire::string_t sSelectedFolder;
+  string_t sSelectedFolder;
 };
 }
 

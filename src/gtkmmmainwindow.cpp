@@ -402,7 +402,7 @@ void cGtkmmMainWindow::OnActionBrowseFiles()
     std::cout<<"cGtkmmMainWindow::OnActionBrowseFiles Selected files"<<std::endl;
     cTrackPropertiesReader propertiesReader;
 
-    const std::vector<spitfire::string_t>& vSelectedFiles = dialog.GetSelectedFiles();
+    const std::vector<string_t>& vSelectedFiles = dialog.GetSelectedFiles();
     const size_t n = vSelectedFiles.size();
     for (size_t i = 0; i < n; i++) {
       cTrack* pTrack = new cTrack;
@@ -420,7 +420,7 @@ void cGtkmmMainWindow::OnActionBrowseFolder()
 {
 }
 
-void cGtkmmMainWindow::SetStatusIconText(const spitfire::string_t& sText)
+void cGtkmmMainWindow::SetStatusIconText(const string_t& sText)
 {
   pStatusIcon->set_tooltip_text(spitfire::string::ToUTF8(sText).c_str());
 }

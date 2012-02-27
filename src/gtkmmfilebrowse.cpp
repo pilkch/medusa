@@ -31,12 +31,12 @@ void cGtkmmFileDialog::SetSelectMultipleFiles(bool _bSelectMultipleFiles)
   bSelectMultipleFiles = _bSelectMultipleFiles;
 }
 
-void cGtkmmFileDialog::SetCaption(const spitfire::string_t& _sCaption)
+void cGtkmmFileDialog::SetCaption(const string_t& _sCaption)
 {
   sCaption = _sCaption;
 }
 
-void cGtkmmFileDialog::SetDefaultFolder(const spitfire::string_t& _sDefaultFolder)
+void cGtkmmFileDialog::SetDefaultFolder(const string_t& _sDefaultFolder)
 {
   sDefaultFolder = _sDefaultFolder;
 }
@@ -46,12 +46,12 @@ void cGtkmmFileDialog::SetFilterList(const cFilterList& _filterList)
   filterList = _filterList;
 }
 
-const spitfire::string_t& cGtkmmFileDialog::GetSelectedFile() const
+const string_t& cGtkmmFileDialog::GetSelectedFile() const
 {
   return sSelectedFile;
 }
 
-const std::vector<spitfire::string_t>& cGtkmmFileDialog::GetSelectedFiles() const
+const std::vector<string_t>& cGtkmmFileDialog::GetSelectedFiles() const
 {
   return vSelectedFiles;
 }
@@ -115,17 +115,17 @@ void cGtkmmFolderDialog::SetType(TYPE _type)
   type = _type;
 }
 
-void cGtkmmFolderDialog::SetCaption(const spitfire::string_t& _sCaption)
+void cGtkmmFolderDialog::SetCaption(const string_t& _sCaption)
 {
   sCaption = _sCaption;
 }
 
-void cGtkmmFolderDialog::SetDefaultFolder(const spitfire::string_t& _sDefaultFolder)
+void cGtkmmFolderDialog::SetDefaultFolder(const string_t& _sDefaultFolder)
 {
   sDefaultFolder = _sDefaultFolder;
 }
 
-const spitfire::string_t& cGtkmmFolderDialog::GetSelectedFolder() const
+const string_t& cGtkmmFolderDialog::GetSelectedFolder() const
 {
   return sSelectedFolder;
 }

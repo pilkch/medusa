@@ -5,8 +5,10 @@
 #include <gtkmm.h>
 
 // Spitfire headers
-#include <spitfire/util/string.h>
 #include <spitfire/util/datetime.h>
+
+// Medusa headers
+#include "medusa.h"
 
 namespace medusa
 {

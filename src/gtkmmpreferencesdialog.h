@@ -4,10 +4,8 @@
 // gtkmm headers
 #include <gtkmm.h>
 
-// Spitfire headers
-#include <spitfire/util/string.h>
-
 // Medusa headers
+#include "medusa.h"
 #include "settings.h"
 
 namespace medusa

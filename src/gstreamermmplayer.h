@@ -7,10 +7,8 @@
 // gstreamermm headers
 #include <gstreamermm.h>
 
-// Spitfire headers
-#include <spitfire/util/string.h>
-
 // Medusa headers
+#include "medusa.h"
 #include "track.h"
 
 namespace medusa

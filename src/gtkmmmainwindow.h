@@ -4,6 +4,9 @@
 // gtkmm headers
 #include <gtkmm.h>
 
+// Spitfire headers
+#include <spitfire/audio/lastfm.h>
+
 // Medusa headers
 #include "settings.h"
 #include "track.h"
@@ -51,7 +54,7 @@ private:
   void ShowWindow();
   void HideWindow();
 
-  void SetStatusIconText(const spitfire::string_t& sText);
+  void SetStatusIconText(const string_t& sText);
 
   void ApplySettings();
 

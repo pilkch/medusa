@@ -28,7 +28,7 @@ void cSettings::Load()
   // Read the xml document
   spitfire::xml::reader reader;
 
-  const spitfire::string_t sFilename = spitfire::filesystem::GetThisApplicationSettingsDirectory() + TEXT("config.xml");
+  const string_t sFilename = spitfire::filesystem::GetThisApplicationSettingsDirectory() + TEXT("config.xml");
   if (!reader.ReadFromFile(document, sFilename)) {
     std::cout<<"cSettings::Load \""<<spitfire::string::ToUTF8(sFilename)<<"\" not found"<<std::endl;
     return;
@@ -38,13 +38,13 @@ void cSettings::Load()
 void cSettings::Save()
 {
   // Create the directory
-  const spitfire::string_t sFolder = spitfire::filesystem::GetThisApplicationSettingsDirectory();
+  const string_t sFolder = spitfire::filesystem::GetThisApplicationSettingsDirectory();
   spitfire::filesystem::CreateDirectory(sFolder);
 
   // Write the xml document
   spitfire::xml::writer writer;
 
-  const spitfire::string_t sFilename = sFolder + TEXT("config.xml");
+  const string_t sFilename = sFolder + TEXT("config.xml");
   if (!writer.WriteToFile(document, sFilename)) {
     std::cout<<"cSettings::Save Error saving to file \""<<spitfire::string::ToUTF8(sFilename)<<"\""<<std::endl;
     return;
@@ -52,7 +52,7 @@ void cSettings::Save()
 }
 
 template <class T>
-T cSettings::GetXMLValue(const spitfire::string_t& sSection, const spitfire::string_t& sItem, const spitfire::string_t& sAttribute, const T& valueDefault) const
+T cSettings::GetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& valueDefault) const
 {
   T value = valueDefault;
 
@@ -79,7 +79,7 @@ T cSettings::GetXMLValue(const spitfire::string_t& sSection, const spitfire::str
 }
 
 template <class T>
-void cSettings::SetXMLValue(const spitfire::string_t& sSection, const spitfire::string_t& sItem, const spitfire::string_t& sAttribute, const T& value)
+void cSettings::SetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& value)
 {
   // Get or create the config element
   spitfire::document::cNode::iterator iterConfig(document);
@@ -183,22 +183,22 @@ void cSettings::SetLastFMEnabled(bool bEnabled)
   SetXMLValue(TEXT("settings"), TEXT("lastfm"), TEXT("enabled"), bEnabled);
 }
 
-spitfire::string_t cSettings::GetLastFMUserName() const
+string_t cSettings::GetLastFMUserName() const
 {
-  return GetXMLValue<spitfire::string_t>(TEXT("settings"), TEXT("lastfm"), TEXT("username"), TEXT(""));
+  return GetXMLValue<string_t>(TEXT("settings"), TEXT("lastfm"), TEXT("username"), TEXT(""));
 }
 
-void cSettings::SetLastFMUserName(const spitfire::string_t& sUserName)
+void cSettings::SetLastFMUserName(const string_t& sUserName)
 {
   SetXMLValue(TEXT("settings"), TEXT("lastfm"), TEXT("username"), sUserName);
 }
 
-spitfire::string_t cSettings::GetLastFMPassword() const
+string_t cSettings::GetLastFMPassword() const
 {
-  return GetXMLValue<spitfire::string_t>(TEXT("settings"), TEXT("lastfm"), TEXT("password"), TEXT(""));
+  return GetXMLValue<string_t>(TEXT("settings"), TEXT("lastfm"), TEXT("password"), TEXT(""));
 }
 
-void cSettings::SetLastFMPassword(const spitfire::string_t& sPassword)
+void cSettings::SetLastFMPassword(const string_t& sPassword)
 {
   SetXMLValue(TEXT("settings"), TEXT("lastfm"), TEXT("password"), sPassword);
 }

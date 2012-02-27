@@ -2,15 +2,17 @@
 #define MEDUSA_TRACK_H
 
 // Spitfire headers
-#include <spitfire/spitfire.h>
 #include <spitfire/audio/metadata.h>
+
+// Medusa headers
+#include "medusa.h"
 
 namespace medusa
 {
   class cTrack
   {
   public:
-    spitfire::string_t sFilePath;
+    string_t sFilePath;
 
     spitfire::audio::cMetaData metaData;
 

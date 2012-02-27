@@ -306,20 +306,20 @@ int myth_id3_file_update(struct id3_file *file)
 class cLibID3Tag
 {
 public:
-  bool ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const;
-  bool WriteTrackTags(const spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const;
+  bool ReadTrackTags(spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const;
+  bool WriteTrackTags(const spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const;
 
 private:
-  bool IsNumbersOnly(const spitfire::string_t& sText) const;
+  bool IsNumbersOnly(const string_t& sText) const;
 
-  spitfire::string_t GetTag(id3_tag* pTag, const char* szLabel, const spitfire::string_t& desc = TEXT("")) const;
-  spitfire::string_t GetRawID3String(union id3_field* pField) const;
+  string_t GetTag(id3_tag* pTag, const char* szLabel, const string_t& desc = TEXT("")) const;
+  string_t GetRawID3String(union id3_field* pField) const;
 
-  bool SetTag(id3_tag *pTag, const char* szLabel, const spitfire::string_t& value, const spitfire::string_t& desc = TEXT("")) const;
+  bool SetTag(id3_tag *pTag, const char* szLabel, const string_t& value, const string_t& desc = TEXT("")) const;
   void RemoveTag(id3_tag* pTag, const char* szLabel) const;
 };
 
-bool cLibID3Tag::IsNumbersOnly(const spitfire::string_t& sText) const
+bool cLibID3Tag::IsNumbersOnly(const string_t& sText) const
 {
   const size_t n = sText.length();
   for (size_t i = 0; i < n; i++) {
@@ -329,7 +329,7 @@ bool cLibID3Tag::IsNumbersOnly(const spitfire::string_t& sText) const
   return true;
 }
 
-bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
+bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const
 {
   metaData.Clear();
 
@@ -411,9 +411,9 @@ bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitf
   return true;
 }
 
-spitfire::string_t cLibID3Tag::GetRawID3String(union id3_field* pField) const
+string_t cLibID3Tag::GetRawID3String(union id3_field* pField) const
 {
-  spitfire::string_t tmp = TEXT("");
+  string_t tmp = TEXT("");
 
   const id3_ucs4_t* p_ucs4 = (const id3_ucs4_t*) id3_field_getstring(pField);
 
@@ -446,7 +446,7 @@ spitfire::string_t cLibID3Tag::GetRawID3String(union id3_field* pField) const
   return tmp;
 }
 
-spitfire::string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* szLabel, const spitfire::string_t& desc) const
+string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* szLabel, const string_t& desc) const
 {
   if (szLabel == nullptr) return TEXT("");
 
@@ -455,7 +455,7 @@ spitfire::string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* szLabel, const 
   for (int i = 0; nullptr != (p_frame = id3_tag_findframe(pTag, szLabel, i)); ++i) {
     int field_num = 1;
 
-    spitfire::string_t tmp = TEXT("");
+    string_t tmp = TEXT("");
 
     // Compare the first field with the description if supplied
     if (!desc.empty()) {
@@ -479,7 +479,7 @@ spitfire::string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* szLabel, const 
 }
 
 
-bool cLibID3Tag::WriteTrackTags(const spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
+bool cLibID3Tag::WriteTrackTags(const spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const
 {
   std::wcout<<"cLibID3Tag::WriteTrackTags \""<<sFilePath<<"\""<<std::endl;
 
@@ -590,7 +590,7 @@ void cLibID3Tag::RemoveTag(id3_tag* pTag, const char* szLabel) const
   }
 }
 
-bool cLibID3Tag::SetTag(id3_tag* pTag, const char* szLabel, const spitfire::string_t& value, const spitfire::string_t& desc) const
+bool cLibID3Tag::SetTag(id3_tag* pTag, const char* szLabel, const string_t& value, const string_t& desc) const
 {
   if ((szLabel == nullptr) || value.empty()) return false;
 
@@ -649,7 +649,7 @@ bool cLibID3Tag::SetTag(id3_tag* pTag, const char* szLabel, const spitfire::stri
 
 // ** cTrackPropertiesReader
 
-bool cTrackPropertiesReader::ReadTrackProperties(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
+bool cTrackPropertiesReader::ReadTrackProperties(spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const
 {
   metaData.Clear();
 
@@ -661,7 +661,7 @@ bool cTrackPropertiesReader::ReadTrackProperties(spitfire::audio::cMetaData& met
   return bResult;
 }
 
-bool cTrackPropertiesReader::ReadTrackTags(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
+bool cTrackPropertiesReader::ReadTrackTags(spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const
 {
   cLibID3Tag libID3Tag;
   return libID3Tag.ReadTrackTags(metaData, sFilePath);
@@ -670,7 +670,7 @@ bool cTrackPropertiesReader::ReadTrackTags(spitfire::audio::cMetaData& metaData,
 // Use libmad to read the track length
 // http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaioid3v2.cpp
 
-bool cTrackPropertiesReader::ReadTrackLength(spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
+bool cTrackPropertiesReader::ReadTrackLength(spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const
 {
   // TODO: CLEAN UP THIS FUNCTION
 
@@ -754,7 +754,7 @@ bool cTrackPropertiesReader::ReadTrackLength(spitfire::audio::cMetaData& metaDat
 
 // ** cTrackPropertiesWriter
 
-bool cTrackPropertiesWriter::WriteTrackProperties(const spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
+bool cTrackPropertiesWriter::WriteTrackProperties(const spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const
 {
   bool bResult = true;
 
@@ -763,7 +763,7 @@ bool cTrackPropertiesWriter::WriteTrackProperties(const spitfire::audio::cMetaDa
   return bResult;
 }
 
-bool cTrackPropertiesWriter::WriteTrackTags(const spitfire::audio::cMetaData& metaData, const spitfire::string_t& sFilePath) const
+bool cTrackPropertiesWriter::WriteTrackTags(const spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const
 {
   cLibID3Tag libID3Tag;
   return libID3Tag.WriteTrackTags(metaData, sFilePath);

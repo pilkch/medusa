@@ -14,7 +14,7 @@ namespace medusa
     ~cGnomeKeyRingFindResult();
 
     spitfire::util::cSignalObject soDone;
-    spitfire::string_t sPassword;
+    string_t sPassword;
   };
 
   class cGnomeKeyRingSaveResult
@@ -60,7 +60,7 @@ namespace medusa
     pThis->soDone.Signal();
   }
 
-  void cGnomeKeyRing::LoadPassword(spitfire::string_t& sPassword)
+  void cGnomeKeyRing::LoadPassword(string_t& sPassword)
   {
     cGnomeKeyRingFindResult result;
     void* pThis = &result;
@@ -90,7 +90,7 @@ namespace medusa
     pThis->soDone.Signal();
   }
 
-  void cGnomeKeyRing::SavePassword(const spitfire::string_t& sCaption, const spitfire::string_t& sPassword)
+  void cGnomeKeyRing::SavePassword(const string_t& sCaption, const string_t& sPassword)
   {
     std::string sPasswordUTF8(spitfire::string::ToUTF8(sPassword));
     std::string sCaptionUTF8(spitfire::string::ToUTF8(sCaption));

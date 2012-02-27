@@ -9,14 +9,14 @@ namespace medusa
 {
   namespace util
   {
-    spitfire::string_t FormatNumber(uint64_t uiValue)
+    string_t FormatNumber(uint64_t uiValue)
     {
       if (uiValue == 0) return TEXT("");
 
       return spitfire::string::ToString(uiValue);
     }
 
-    spitfire::string_t FormatTime(uint64_t milliseconds)
+    string_t FormatTime(uint64_t milliseconds)
     {
       spitfire::ostringstream_t o;
 

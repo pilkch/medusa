@@ -4,6 +4,9 @@
 // Spitfire headers
 #include <spitfire/storage/document.h>
 
+// Medusa headers
+#include "medusa.h"
+
 namespace medusa
 {
 // ** cSettings
@@ -29,17 +32,17 @@ public:
   bool IsLastFMEnabled() const;
   void SetLastFMEnabled(bool bEnabled);
 
-  spitfire::string_t GetLastFMUserName() const;
-  void SetLastFMUserName(const spitfire::string_t& sUserName);
+  string_t GetLastFMUserName() const;
+  void SetLastFMUserName(const string_t& sUserName);
 
-  spitfire::string_t GetLastFMPassword() const;
-  void SetLastFMPassword(const spitfire::string_t& sPassword);
+  string_t GetLastFMPassword() const;
+  void SetLastFMPassword(const string_t& sPassword);
 
 private:
   template <class T>
-  T GetXMLValue(const spitfire::string_t& sSection, const spitfire::string_t& sItem, const spitfire::string_t& sAttribute, const T& valueDefault) const;
+  T GetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& valueDefault) const;
   template <class T>
-  void SetXMLValue(const spitfire::string_t& sSection, const spitfire::string_t& sItem, const spitfire::string_t& sAttribute, const T& value);
+  void SetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& value);
 
   spitfire::document::cDocument document;
 };
