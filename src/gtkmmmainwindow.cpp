@@ -353,6 +353,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   show_all_children();
 
   if (settings.IsShowMainWindow()) show();
+
+  ApplySettings();
 }
 
 void cGtkmmMainWindow::OnThemeChanged()
@@ -471,8 +473,14 @@ void cGtkmmMainWindow::OnMenuFileQuit()
 {
   std::cout<<"cGtkmmMainWindow::OnMenuFileQuit"<<std::endl;
 
+  // Tell the lastfm thread to stop soon
+  if (lastfm.IsRunning()) lastfm.StopSoon();
+
   // Save volume settings
   settings.SetVolume0To100(pVolumeSlider->GetValue());
+
+  // Tell the lastfm thread to stop now
+  if (lastfm.IsRunning()) lastfm.Stop();
 
   //hide(); //Closes the main window to stop the Gtk::Main::run().
   Gtk::Main::quit();
@@ -543,6 +551,8 @@ void cGtkmmMainWindow::OnActionSliderValueChanged(const cGtkmmSlider& slider, ui
 void cGtkmmMainWindow::OnActionPlayTrack(const cTrack* pTrack)
 {
   view.OnActionPlayTrack(pTrack);
+
+  lastfm.StartPlayingTrack(pTrack->metaData);
 }
 
 void cGtkmmMainWindow::OnPlaybackPlayPauseMenuToggled()
@@ -727,6 +737,8 @@ void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
   buttonPlayPause.set_active(true);
   pPlayPauseAction->set_active(true);
   bIsTogglingPlayPause = false;
+
+  if (lastfm.IsRunning()) lastfm.StartPlayingTrack(pTrack->metaData);
 }
 
 void cGtkmmMainWindow::SetStatePaused()
@@ -737,13 +749,26 @@ void cGtkmmMainWindow::SetStatePaused()
   buttonPlayPause.set_active(false);
   pPlayPauseAction->set_active(false);
   bIsTogglingPlayPause = false;
+
+  if (lastfm.IsRunning()) lastfm.StopPlayingTrack();
 }
 
 void cGtkmmMainWindow::ApplySettings()
 {
   buttonRepeat.set_active(settings.IsRepeat());
 
-  // Last.fm settings
-  // TODO: Set Last.fm settings
+  // Stop Last.fm controller
+  if (lastfm.IsRunning()) {
+    std::cout<<"cGtkmmMainWindow::ApplySettings Stopping lastfm"<<std::endl;
+    lastfm.Stop();
+  }
+
+  // Start Last.fm controller
+  if (settings.IsLastFMEnabled()) {
+    std::cout<<"cGtkmmMainWindow::ApplySettings Starting lastfm"<<std::endl;
+    lastfm.Start(settings.GetLastFMUserName(), settings.GetLastFMPassword());
+  }
+
+  std::cout<<"cGtkmmMainWindow::ApplySettings returning"<<std::endl;
 }
 }

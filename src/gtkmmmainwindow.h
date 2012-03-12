@@ -79,6 +79,8 @@ private:
   cGtkmmView& view;
   cSettings& settings;
 
+  spitfire::audio::lastfm::cLastFM lastfm;
+
   cGtkmmIconTheme iconTheme;
 
   // Status icon
