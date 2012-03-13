@@ -718,15 +718,15 @@ void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
 
 void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
 {
-  spitfire::ostringstream_t o;
-  if (!pTrack->metaData.sArtist.empty()) o<<"<b><big>"<<pTrack->metaData.sArtist<<"</big></b>";
+  std::ostringstream o;
+  if (!pTrack->metaData.sArtist.empty()) o<<"<b><big>"<<spitfire::string::HTMLEncode(spitfire::string::ToUTF8(pTrack->metaData.sArtist))<<"</big></b>";
   if (!pTrack->metaData.sArtist.empty() && !pTrack->metaData.sTitle.empty()) o<<" - ";
-  if (!pTrack->metaData.sTitle.empty()) o<<"<b><big>"<<pTrack->metaData.sTitle<<"</big></b>";
+  if (!pTrack->metaData.sTitle.empty()) o<<"<b><big>"<<spitfire::string::HTMLEncode(spitfire::string::ToUTF8(pTrack->metaData.sTitle))<<"</big></b>";
   if ((pTrack->metaData.uiTracknum != 0) && !pTrack->metaData.sAlbum.empty()) o<<",";
   if (pTrack->metaData.uiTracknum != 0) o<<" track "<<pTrack->metaData.uiTracknum;
-  if (!pTrack->metaData.sAlbum.empty()) o<<" on "<<pTrack->metaData.sAlbum;
+  if (!pTrack->metaData.sAlbum.empty()) o<<" on "<<spitfire::string::HTMLEncode(spitfire::string::ToUTF8(pTrack->metaData.sAlbum));
 
-  textCurrentlyPlaying.set_markup(spitfire::string::ToUTF8(o.str()).c_str());
+  textCurrentlyPlaying.set_markup(o.str().c_str());
 
   // Update position slider
   SetPlaybackLengthMS(pTrack->metaData.uiDurationMilliSeconds);
