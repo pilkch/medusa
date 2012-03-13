@@ -1,6 +1,9 @@
 // Standard headers
 #include <iostream>
 
+// Spitfire headers
+#include <spitfire/storage/filesystem.h>
+
 // Medusa headers
 #include "gtkmmabout.h"
 #include "gtkmmview.h"
@@ -9,6 +12,7 @@
 #include "gtkmmtracklist.h"
 #include "gtkmmfilebrowse.h"
 #include "gtkmmpreferencesdialog.h"
+#include "trackmetadata.h"
 #include "util.h"
 
 namespace medusa
@@ -350,6 +354,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   // Add the box layout to the main window
   add(boxMainWindow);
 
+  LoadPlaylist();
+
   show_all_children();
 
   if (settings.IsShowMainWindow()) show();
@@ -391,6 +397,53 @@ void cGtkmmMainWindow::SetPlaybackButtonIcons()
   Gtk::Image* pImageRepeatToggle = new Gtk::Image;
   iconTheme.LoadStockIconRotatedClockwise(sICON_REPEAT_TOGGLE, *pImageRepeatToggle);
   buttonRepeat.set_image(*pImageRepeatToggle);
+}
+
+// TODO: REMOVE THIS
+#include "trackmetadata.h"
+std::vector<cTrack*> tracks;
+
+void cGtkmmMainWindow::LoadPlaylist()
+{
+  std::cout<<"cGtkmmMainWindow::LoadPlaylist"<<std::endl;
+
+  // Save the playlist
+  spitfire::audio::cPlaylist playlist;
+  util::LoadPlaylistFromCSV(util::GetPlayListFilePath(), playlist);
+
+  const size_t n = playlist.tracks.size();
+  for (size_t i = 0; i < n; i++) {
+    const spitfire::audio::cTrack* pPlaylistTrack = playlist.tracks[i];
+
+    cTrack* pTrack = new cTrack;
+    pTrack->sFilePath = pPlaylistTrack->sFullPath;
+
+    pTrack->metaData.sArtist = pPlaylistTrack->sArtist;
+    pTrack->metaData.sTitle = pPlaylistTrack->sTitle;
+    pTrack->metaData.uiDurationMilliSeconds = pPlaylistTrack->uiTrackLengthMS;
+
+    tracks.push_back(pTrack);
+    // TODO: Why do we always specify a track id of 0?
+    pTrackList->AddTrack(0, *pTrack);
+  }
+}
+
+void cGtkmmMainWindow::SavePlaylist() const
+{
+  // Save the playlist
+  spitfire::audio::cPlaylist playlist;
+
+  cGtkmmTrackListIterator iter(*pTrackList);
+  while (iter.IsValid()) {
+    const Gtk::TreeModel::Row& row = iter.GetRow();
+    const cTrack* pTrack = pTrackList->GetTrackFromRow(row);
+
+    util::AddTrackToPlaylist(playlist, pTrack);
+
+    iter.Next();
+  }
+
+  util::SavePlaylistToCSV(util::GetPlayListFilePath(), playlist);
 }
 
 void cGtkmmMainWindow::OnActionBrowseFiles()
@@ -475,6 +528,9 @@ void cGtkmmMainWindow::OnMenuFileQuit()
 
   // Tell the lastfm thread to stop soon
   if (lastfm.IsRunning()) lastfm.StopSoon();
+
+  // Save the playlist
+  SavePlaylist();
 
   // Save volume settings
   settings.SetVolume0To100(pVolumeSlider->GetValue());

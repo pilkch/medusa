@@ -84,7 +84,7 @@ AUX_SOURCE_DIRECTORY(./../src/ PROJECT_SOURCE_FILES)
 SET(LIBRARY_SPITFIRE_SOURCE_DIRECTORY spitfire/)
 SET(LIBRARY_SPITFIRE_SOURCE_FILES
 audio/lastfm.cpp audio/metadata.cpp audio/playlist.cpp
-storage/document.cpp storage/file.cpp storage/filesystem.cpp storage/xml.cpp
+storage/csv.cpp storage/document.cpp storage/file.cpp storage/filesystem.cpp storage/xml.cpp
 util/datetime.cpp util/string.cpp util/thread.cpp)
 
 PREFIX_PATHS(${LIBRARY_SPITFIRE_SOURCE_DIRECTORY} ${LIBRARY_SPITFIRE_SOURCE_FILES})
