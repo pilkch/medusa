@@ -236,21 +236,28 @@ void cGtkmmTrackList::OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::T
 
 void cGtkmmTrackList::AddTrack(const int id, const cTrack& track)
 {
+  AddTrack(&track, track.sFilePath, track.metaData);
+}
+
+void cGtkmmTrackList::AddTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
+{
+  std::wcout<<"cGtkmmTrackList::AddTrack \""<<sFilePath<<"\""<<std::endl;
+
   Gtk::TreeModel::Row row = *(playlistTreeModelRef->append());
   row[columns.id] = id;
   row[columns.pixbuf] = Gdk::Pixbuf::create_from_file("empty.xpm");
-  row[columns.artist] = spitfire::string::ToUTF8(track.metaData.sArtist);
-  row[columns.title] = spitfire::string::ToUTF8(track.metaData.sTitle);
-  row[columns.album] = spitfire::string::ToUTF8(track.metaData.sAlbum);
-  row[columns.track] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiTracknum));
-  row[columns.year] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiYear));
-  row[columns.time] = spitfire::string::ToUTF8(medusa::util::FormatTime(track.metaData.uiDurationMilliSeconds));
-  row[columns.dateAdded] = "2012/02/28"; //spitfire::string::ToUTF8(medusa::util::FormatTime(track.ui));
-  row[columns.filePath] = spitfire::string::ToUTF8(track.sFilePath);
+  row[columns.artist] = spitfire::string::ToUTF8(metaData.sArtist);
+  row[columns.title] = spitfire::string::ToUTF8(metaData.sTitle);
+  row[columns.album] = spitfire::string::ToUTF8(metaData.sAlbum);
+  row[columns.track] = spitfire::string::ToUTF8(medusa::util::FormatNumber(metaData.uiTracknum));
+  row[columns.year] = spitfire::string::ToUTF8(medusa::util::FormatNumber(metaData.uiYear));
+  row[columns.time] = spitfire::string::ToUTF8(medusa::util::FormatTime(metaData.uiDurationMilliSeconds));
+  row[columns.dateAdded] = "2012/02/28"; //spitfire::string::ToUTF8(medusa::util::FormatTime(ui));
+  row[columns.filePath] = spitfire::string::ToUTF8(sFilePath);
 
   // Custom data
   cUserDataPtr pUserData(new cUserData);
-  pUserData->pTrack = &track;
+  pUserData->pTrack = id;
   row[columns.userdata]  = pUserData;
 }
 

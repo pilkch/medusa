@@ -89,6 +89,7 @@ private:
   void OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 
   void AddTrack(const int id, const cTrack& track);
+  void AddTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
 
   cGtkmmMainWindow& mainWindow;
 
@@ -106,7 +107,7 @@ private:
     cModelColumns()
     { add(id); add(pixbuf); add(artist); add(title); add(album); add(track); add(year); add(time); add(dateAdded); add(filePath); add(userdata); }
 
-    Gtk::TreeModelColumn<int> id;
+    Gtk::TreeModelColumn<trackid_t> id;
     Gtk::TreeModelColumn<cPixbufPtr> pixbuf;
     Gtk::TreeModelColumn<Glib::ustring> artist;
     Gtk::TreeModelColumn<Glib::ustring> title;

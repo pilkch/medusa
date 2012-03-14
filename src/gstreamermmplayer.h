@@ -27,8 +27,8 @@ public:
   void Create(int argc, char** argv);
   void Destroy();
 
-  const cTrack* GetTrack() const { return pActiveTrack; }
-  void SetTrack(const cTrack* pTrack);
+  string_t GetTrack() const { return sActiveTrackFilePath; }
+  void SetTrack(const string_t& sFilePath, uint64_t uiDurationMilliseconds);
 
   void SetVolume0To100(unsigned int uiVolume0To100);
 
@@ -62,7 +62,8 @@ private:
   guint uiWatchID;
   mutable uint64_t positionMS;
 
-  const cTrack* pActiveTrack;
+  string_t sActiveTrackFilePath;
+  uint64_t uiActiveTrackDurationMilliseconds;
 
   sigc::connection timeoutConnection;
 };

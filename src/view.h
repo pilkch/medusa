@@ -3,6 +3,7 @@
 
 // Spitfire headers
 #include <spitfire/spitfire.h>
+#include <spitfire/audio/metadata.h>
 
 namespace medusa
 {
@@ -16,12 +17,15 @@ namespace medusa
 
     void SetController(cController* pController);
 
+    virtual void OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData) = 0;
+
     void Run() { _Run(); }
+
+  protected:
+    cController* pController;
 
   private:
     virtual void _Run() = 0;
-
-    cController* pController;
   };
 
   // ** cView

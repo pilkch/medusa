@@ -18,7 +18,8 @@ cGStreamermmPlayer::cGStreamermmPlayer(cGtkmmView& view) :
   pView(&view),
   state(STATE::STOPPED),
   uiWatchID(0),
-  positionMS(0)
+  positionMS(0),
+  uiActiveTrackDurationMilliseconds(0)
 {
 }
 
@@ -73,18 +74,19 @@ void cGStreamermmPlayer::OnAboutToFinish()
   pView->OnPlayerAboutToFinish();
 }
 
-void cGStreamermmPlayer::SetTrack(const cTrack* pTrack)
+void cGStreamermmPlayer::SetTrack(const string_t& sFilePath, uint64_t uiDurationMilliseconds)
 {
-  std::wcout<<"cGStreamermmPlayer::SetTrack \""<<pTrack->sFilePath<<"\""<<std::endl;
+  std::wcout<<"cGStreamermmPlayer::SetTrack \""<<sFilePath<<"\""<<std::endl;
 
   ASSERT(playbin);
 
   Stop();
 
-  if (pTrack != nullptr) playbin->property_uri() = Glib::filename_to_uri(spitfire::string::ToUTF8(pTrack->sFilePath).c_str());
+  if (!sFilePath.empty()) playbin->property_uri() = Glib::filename_to_uri(spitfire::string::ToUTF8(sFilePath).c_str());
   else playbin->set_property("uri", Glib::ustring(""));
 
-  pActiveTrack = pTrack;
+  sActiveTrackFilePath = sFilePath;
+  uiActiveTrackDurationMilliseconds = uiDurationMilliseconds;
 }
 
 void cGStreamermmPlayer::SetVolume0To100(unsigned int uiVolume0To100)
@@ -128,7 +130,7 @@ void cGStreamermmPlayer::SeekMS(timepositionms_t timeMS)
 
 uint64_t cGStreamermmPlayer::GetLengthMS() const
 {
-  return (pActiveTrack != nullptr) ? pActiveTrack->metaData.uiDurationMilliSeconds : 0;
+  return uiActiveTrackDurationMilliseconds;
 }
 
 uint64_t cGStreamermmPlayer::GetPlaybackPositionMS() const

@@ -455,24 +455,22 @@ void cGtkmmMainWindow::OnActionBrowseFiles()
   dialog.SetDefaultFolder(spitfire::filesystem::GetHomeMusicDirectory());
   if (dialog.Run(*this)) {
     std::cout<<"cGtkmmMainWindow::OnActionBrowseFiles Selected files"<<std::endl;
-    cTrackPropertiesReader propertiesReader;
-
     const std::vector<string_t>& vSelectedFiles = dialog.GetSelectedFiles();
-    const size_t n = vSelectedFiles.size();
-    for (size_t i = 0; i < n; i++) {
-      cTrack* pTrack = new cTrack;
-      pTrack->sFilePath = vSelectedFiles[i];
-      std::wcout<<"cGtkmmMainWindow::OnActionBrowseFiles Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
-      propertiesReader.ReadTrackProperties(pTrack->metaData, pTrack->sFilePath);
-
-      tracks.push_back(pTrack);
-      pTrackList->AddTrack(0, *pTrack);
-    }
+    view.OnActionAddTracks(vSelectedFiles);
   }
 }
 
 void cGtkmmMainWindow::OnActionBrowseFolder()
 {
+  cGtkmmFolderDialog dialog;
+  dialog.SetType(cGtkmmFolderDialog::TYPE::SELECT);
+  dialog.SetCaption(TEXT("Add audio folder"));
+  dialog.SetDefaultFolder(spitfire::filesystem::GetHomeMusicDirectory());
+  if (dialog.Run(*this)) {
+    std::cout<<"cGtkmmMainWindow::OnActionBrowseFolder Selected folder"<<std::endl;
+    const string_t sSelectedFolder = dialog.GetSelectedFolder();
+    view.OnActionAddTracksFromFolder(sSelectedFolder);
+  }
 }
 
 void cGtkmmMainWindow::SetStatusIconText(const string_t& sText)
@@ -560,7 +558,7 @@ void cGtkmmMainWindow::OnActionRemoveTrack()
      std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack Item was selected"<<std::endl;
      const Gtk::TreeModel::Row& row = iter.GetRow();
      const cTrack* pTrack = pTrackList->GetTrackFromRow(row);
-     if (pTrack != nullptr) std::wcout<<"Properties selected for track "<<pTrack->metaData.sArtist<<" - "<<pTrack->metaData.sTitle<<std::endl;
+     if (pTrack != nullptr) std::wcout<<"cGtkmmMainWindow::OnActionRemoveTrack Properties selected for track "<<pTrack->metaData.sArtist<<" - "<<pTrack->metaData.sTitle<<std::endl;
      else std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack Could not get track from row"<<std::endl;
 
      iter.Next();
@@ -575,7 +573,7 @@ void cGtkmmMainWindow::OnActionTrackProperties()
      std::cout<<"cGtkmmMainWindow::OnActionTrackProperties Item was selected"<<std::endl;
      const Gtk::TreeModel::Row& row = iter.GetRow();
      const cTrack* pTrack = pTrackList->GetTrackFromRow(row);
-     if (pTrack != nullptr) std::wcout<<"Properties selected for track "<<pTrack->metaData.sArtist<<" - "<<pTrack->metaData.sTitle<<std::endl;
+     if (pTrack != nullptr) std::wcout<<"cGtkmmMainWindow::OnActionTrackProperties Properties selected for track "<<pTrack->metaData.sArtist<<" - "<<pTrack->metaData.sTitle<<std::endl;
      else std::cout<<"cGtkmmMainWindow::OnActionTrackProperties Could not get track from row"<<std::endl;
 
      iter.Next();
@@ -826,5 +824,11 @@ void cGtkmmMainWindow::ApplySettings()
   }
 
   std::cout<<"cGtkmmMainWindow::ApplySettings returning"<<std::endl;
+}
+
+void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
+{
+  std::wcout<<"cGtkmmMainWindow::OnTrackAdded \""<<sFilePath<<"\""<<std::endl;
+  pTrackList->AddTrack(id, sFilePath, metaData);
 }
 }

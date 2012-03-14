@@ -46,6 +46,8 @@ public:
 
   void OnThemeChanged();
 
+  void OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
+
 private:
   const cTrack* GetPreviousTrack() const;
   const cTrack* GetNextTrack() const;
