@@ -12,12 +12,17 @@
 
 namespace medusa
 {
-  void cEventAddFile::EventFunction(cModel& model)
+  void cModelEventAddFile::EventFunction(cModel& model)
   {
     model.AddTrack(sFilePath);
   }
 
-  void cEventAddFolder::EventFunction(cModel& model)
+  cModelEventAddFile::cModelEventAddFile(const string_t& _sFilePath) :
+    sFilePath(_sFilePath)
+  {
+  }
+
+  void cModelEventAddFolder::EventFunction(cModel& model)
   {
     model.AddTracksFromFolder(sFolderPath);
   }
@@ -27,8 +32,7 @@ namespace medusa
   void cModel::AddTrack(const string_t& sFilePath)
   {
     if (spitfire::util::IsMainThread()) {
-      cEventAddFile* pEvent = new cEventAddFile;
-      pEvent->sFilePath = sFilePath;
+      cModelEventAddFile* pEvent = new cModelEventAddFile(sFilePath);
       eventQueue.AddItemToBack(pEvent);
     } else {
       cTrackPropertiesReader propertiesReader;
@@ -53,7 +57,7 @@ namespace medusa
   void cModel::AddTracksFromFolder(const string_t& sFolderPath)
   {
     if (spitfire::util::IsMainThread()) {
-      cEventAddFolder* pEvent = new cEventAddFolder;
+      cModelEventAddFolder* pEvent = new cModelEventAddFolder;
       pEvent->sFolderPath = sFolderPath;
       eventQueue.AddItemToBack(pEvent);
     } else {
@@ -108,12 +112,12 @@ namespace medusa
     LoadPlaylist();
 
     while (true) {
-      std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
+      //std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
       soAction.WaitTimeoutMS(10);
 
       if (IsToStop()) break;
 
-      cEvent* pEvent = eventQueue.RemoveItemFromFront();
+      cModelEvent* pEvent = eventQueue.RemoveItemFromFront();
       if (pEvent != nullptr) {
         pEvent->EventFunction(*this);
         spitfire::SAFE_DELETE(pEvent);
@@ -130,7 +134,7 @@ namespace medusa
 
     // Remove any further events because we don't care any more
     while (true) {
-      cEvent* pEvent = eventQueue.RemoveItemFromFront();
+      cModelEvent* pEvent = eventQueue.RemoveItemFromFront();
       if (pEvent == nullptr) break;
 
       spitfire::SAFE_DELETE(pEvent);

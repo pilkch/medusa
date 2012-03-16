@@ -8,10 +8,32 @@
 
 namespace medusa
 {
+  void cGtkmmViewEventPlayerAboutToFinish::EventFunction(cGtkmmView& view)
+  {
+    view.OnPlayerAboutToFinish();
+  }
+
+  cGtkmmViewEventTrackAdded::cGtkmmViewEventTrackAdded(trackid_t _id, const string_t& _sFilePath, const spitfire::audio::cMetaData& _metaData) :
+    id(_id),
+    sFilePath(_sFilePath),
+    metaData(_metaData)
+  {
+  }
+
+  void cGtkmmViewEventTrackAdded::EventFunction(cGtkmmView& view)
+  {
+    view.OnTrackAdded(id, sFilePath, metaData);
+  }
+
+
+  // ** cGtkmmView
+
 cGtkmmView::cGtkmmView(int argc, char** argv) :
   kit(argc, argv),
   pMainWindow(nullptr),
   player(*this),
+  soAction("cGtkmmView_soAction"),
+  eventQueue(soAction),
   mutexSettings("settings")
 {
   settings.Load();
@@ -111,22 +133,37 @@ void cGtkmmView::OnNotify()
 {
   std::cout<<"cGtkmmView::OnNotify"<<std::endl;
   assert(spitfire::util::IsMainThread());
+  cGtkmmViewEvent* pEvent = eventQueue.RemoveItemFromFront();
+  if (pEvent != nullptr) {
+    pEvent->EventFunction(*this);
+    spitfire::SAFE_DELETE(pEvent);
+  }
 }
 
 void cGtkmmView::OnPlayerAboutToFinish()
 {
-  // TODO: Should we just tell the player which track to play and not actually start playing it yet?
+  if (spitfire::util::IsMainThread()) {
+    cGtkmmViewEventPlayerAboutToFinish* pEvent = new cGtkmmViewEventPlayerAboutToFinish;
+    eventQueue.AddItemToBack(pEvent);
+    notifyMainThread.Notify();
+  } else {
+    // TODO: Should we just tell the player which track to play and not actually start playing it yet?
 
-  notifyMainThread.Notify();
-  //pMainWindow->OnActionPlayNextTrack();
+    pMainWindow->OnActionPlayNextTrack();
+  }
 }
 
 void cGtkmmView::OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
 {
   std::wcout<<"cGtkmmView::OnTrackAdded \""<<sFilePath<<"\""<<std::endl;
 
-  notifyMainThread.Notify();
-  //pMainWindow->OnTrackAdded(id, sFilePath, metaData);
+  if (spitfire::util::IsMainThread()) {
+    cGtkmmViewEventTrackAdded* pEvent = new cGtkmmViewEventTrackAdded(id, sFilePath, metaData);
+    eventQueue.AddItemToBack(pEvent);
+    notifyMainThread.Notify();
+  } else {
+    pMainWindow->OnTrackAdded(id, sFilePath, metaData);
+  }
 }
 
 void cGtkmmView::_Run()

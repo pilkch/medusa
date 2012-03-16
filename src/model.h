@@ -14,23 +14,25 @@ namespace medusa
 {
   class cModel;
 
-  class cEvent
+  class cModelEvent
   {
   public:
-    virtual ~cEvent() {}
+    virtual ~cModelEvent() {}
 
     virtual void EventFunction(cModel& model) = 0;
   };
 
-  class cEventAddFile : public cEvent
+  class cModelEventAddFile : public cModelEvent
   {
   public:
+    explicit cModelEventAddFile(const string_t& sFilePath);
+
     virtual void EventFunction(cModel& model) override;
 
     string_t sFilePath;
   };
 
-  class cEventAddFolder : public cEvent
+  class cModelEventAddFolder : public cModelEvent
   {
   public:
     virtual void EventFunction(cModel& model) override;
@@ -64,8 +66,7 @@ namespace medusa
     cController* pController;
 
     spitfire::util::cSignalObject soAction;
-
-    spitfire::util::cThreadSafeQueue<cEvent> eventQueue;
+    spitfire::util::cThreadSafeQueue<cModelEvent> eventQueue;
 
     std::vector<cTrack*> tracks;
   };
