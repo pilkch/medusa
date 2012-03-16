@@ -12,39 +12,53 @@
 
 namespace medusa
 {
-  void cModel::AddTrack(const string_t& sFilePath)
+  void cEventAddFile::EventFunction(cModel& model)
   {
-    cTrackPropertiesReader propertiesReader;
-
-    cTrack* pTrack = new cTrack;
-    pTrack->sFilePath = sFilePath;
-    std::wcout<<"cModel::AddTrack Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
-    propertiesReader.ReadTrackProperties(pTrack->metaData, pTrack->sFilePath);
-
-    tracks.push_back(pTrack);
-
-    pController->OnTrackAdded(pTrack, sFilePath, pTrack->metaData);
+    model.AddTrack(sFilePath);
   }
 
-  void cModel::AddTracks(const std::vector<string_t>& files)
+  void cEventAddFolder::EventFunction(cModel& model)
   {
-    cTrackPropertiesReader propertiesReader;
+    model.AddTracksFromFolder(sFolderPath);
+  }
 
-    const size_t n = files.size();
-    for (size_t i = 0; i < n; i++) {
+  // ** cModel
+
+  void cModel::AddTrack(const string_t& sFilePath)
+  {
+    if (spitfire::util::IsMainThread()) {
+      cEventAddFile* pEvent = new cEventAddFile;
+      pEvent->sFilePath = sFilePath;
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      cTrackPropertiesReader propertiesReader;
+
       cTrack* pTrack = new cTrack;
-      pTrack->sFilePath = files[i];
-      std::wcout<<"cModel::AddTracks Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
+      pTrack->sFilePath = sFilePath;
+      std::wcout<<"cModel::AddTrack Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
       propertiesReader.ReadTrackProperties(pTrack->metaData, pTrack->sFilePath);
 
       tracks.push_back(pTrack);
 
-      pController->OnTrackAdded(pTrack, pTrack->sFilePath, pTrack->metaData);
+      pController->OnTrackAdded(pTrack, sFilePath, pTrack->metaData);
     }
+  }
+
+  void cModel::AddTracks(const std::vector<string_t>& files)
+  {
+    const size_t n = files.size();
+    for (size_t i = 0; i < n; i++) AddTrack(files[i]);
   }
 
   void cModel::AddTracksFromFolder(const string_t& sFolderPath)
   {
+    if (spitfire::util::IsMainThread()) {
+      cEventAddFolder* pEvent = new cEventAddFolder;
+      pEvent->sFolderPath = sFolderPath;
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      // TODO: Add contents of folder
+    }
   }
 
   void cModel::LoadPlaylist()
@@ -87,21 +101,54 @@ namespace medusa
     util::SavePlaylistToCSV(util::GetPlayListFilePath(), playlist);
   }
 
+  void cModel::ThreadFunction()
+  {
+    std::cout<<"cModel::ThreadFunction"<<std::endl;
+
+    LoadPlaylist();
+
+    while (true) {
+      std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
+      soAction.WaitTimeoutMS(10);
+
+      if (IsToStop()) break;
+
+      cEvent* pEvent = eventQueue.RemoveItemFromFront();
+      if (pEvent != nullptr) {
+        pEvent->EventFunction(*this);
+        spitfire::SAFE_DELETE(pEvent);
+      }
+    }
+
+    SavePlaylist();
+
+    {
+      const size_t n = tracks.size();
+      for (size_t i = 0; i < n; i++) spitfire::SAFE_DELETE(tracks[i]);
+      tracks.clear();
+    }
+
+    // Remove any further events because we don't care any more
+    while (true) {
+      cEvent* pEvent = eventQueue.RemoveItemFromFront();
+      if (pEvent == nullptr) break;
+
+      spitfire::SAFE_DELETE(pEvent);
+    }
+  }
+
   void cModel::Start()
   {
-    LoadPlaylist();
+    Run();
   }
 
   void cModel::StopSoon()
   {
-    // TODO: Stop the thread soon
-
-    // TODO: Move this to the thread
-    SavePlaylist();
+    StopThreadSoon();
   }
 
   void cModel::StopNow()
   {
-    // TODO: Stop the thread
+    StopThreadNow();
   }
 }

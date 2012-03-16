@@ -4,15 +4,43 @@
 // Spitfire headers
 #include <spitfire/spitfire.h>
 #include <spitfire/audio/metadata.h>
+#include <spitfire/util/queue.h>
+#include <spitfire/util/thread.h>
 
 // Medusa headers
 #include "track.h"
 
 namespace medusa
 {
+  class cModel;
+
+  class cEvent
+  {
+  public:
+    virtual ~cEvent() {}
+
+    virtual void EventFunction(cModel& model) = 0;
+  };
+
+  class cEventAddFile : public cEvent
+  {
+  public:
+    virtual void EventFunction(cModel& model) override;
+
+    string_t sFilePath;
+  };
+
+  class cEventAddFolder : public cEvent
+  {
+  public:
+    virtual void EventFunction(cModel& model) override;
+
+    string_t sFolderPath;
+  };
+
   class cController;
 
-  class cModel
+  class cModel : public spitfire::util::cThread
   {
   public:
     cModel();
@@ -28,10 +56,16 @@ namespace medusa
     void AddTracksFromFolder(const string_t& sFolderPath);
 
   private:
+    virtual void ThreadFunction();
+
     void LoadPlaylist();
     void SavePlaylist() const;
 
     cController* pController;
+
+    spitfire::util::cSignalObject soAction;
+
+    spitfire::util::cThreadSafeQueue<cEvent> eventQueue;
 
     std::vector<cTrack*> tracks;
   };
@@ -39,7 +73,10 @@ namespace medusa
   // ** cModel
 
   inline cModel::cModel() :
-    pController(nullptr)
+    spitfire::util::cThread(soAction, "cModel"),
+    pController(nullptr),
+    soAction("cModel_soAction"),
+    eventQueue(soAction)
   {
   }
 

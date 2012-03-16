@@ -19,6 +19,8 @@ cGtkmmView::cGtkmmView(int argc, char** argv) :
   pMainWindow = new cGtkmmMainWindow(*this, settings);
 
   player.Create(argc, argv);
+
+  notifyMainThread.Create(*this, &cGtkmmView::OnNotify);
 }
 
 cGtkmmView::~cGtkmmView()
@@ -105,20 +107,26 @@ void cGtkmmView::OnPlayerUpdatePlaybackPosition()
   pMainWindow->SetPlaybackPositionMS(player.GetPlaybackPositionMS());
 }
 
+void cGtkmmView::OnNotify()
+{
+  std::cout<<"cGtkmmView::OnNotify"<<std::endl;
+  assert(spitfire::util::IsMainThread());
+}
+
 void cGtkmmView::OnPlayerAboutToFinish()
 {
   // TODO: Should we just tell the player which track to play and not actually start playing it yet?
 
-  // TODO: THIS NEEDS TO BE CALLED ON THE MAIN THREAD SO WE HAVE TO USE A GTKMM DISPATCHER
-  ... call this via a dispatcher: pMainWindow->OnActionPlayNextTrack();
+  notifyMainThread.Notify();
+  //pMainWindow->OnActionPlayNextTrack();
 }
 
 void cGtkmmView::OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
 {
   std::wcout<<"cGtkmmView::OnTrackAdded \""<<sFilePath<<"\""<<std::endl;
 
-  // TODO: THIS NEEDS TO BE CALLED ON THE MAIN THREAD SO WE HAVE TO USE A GTKMM DISPATCHER
-  ... call this via a dispatcher: pMainWindow->OnTrackAdded(id, sFilePath, metaData);
+  notifyMainThread.Notify();
+  //pMainWindow->OnTrackAdded(id, sFilePath, metaData);
 }
 
 void cGtkmmView::_Run()

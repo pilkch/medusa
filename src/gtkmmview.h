@@ -11,6 +11,7 @@
 #include "settings.h"
 #include "view.h"
 #include "gstreamermmplayer.h"
+#include "gtkmmdispatcher.h"
 #include "gtkmmmainwindow.h"
 
 namespace medusa
@@ -45,6 +46,8 @@ protected:
   virtual void OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData) override;
 
 private:
+  void OnNotify();
+
   void _Run();
 
   Gtk::Main kit;
@@ -54,6 +57,8 @@ private:
   cGStreamermmPlayer player;
 
   const cTrack* pCurrentTrack;
+
+  cGtkmmNotifyMainThread notifyMainThread;
 
   // TODO: Move this to a separate class
   spitfire::util::cMutex mutexSettings;
