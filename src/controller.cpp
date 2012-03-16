@@ -18,6 +18,21 @@ namespace medusa
     view.SetController(this);
   }
 
+  void cController::OnActionCreated()
+  {
+    model.Start();
+  }
+
+  void cController::OnActionQuitSoon()
+  {
+    model.StopSoon();
+  }
+
+  void cController::OnActionQuitNow()
+  {
+    model.StopNow();
+  }
+
   void cController::AddTrack(const string_t& sFilePath)
   {
     model.AddTrack(sFilePath);

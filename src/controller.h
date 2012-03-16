@@ -18,6 +18,10 @@ namespace medusa
   public:
     cController(cModel& model, cView& view);
 
+    void OnActionCreated();
+    void OnActionQuitSoon();
+    void OnActionQuitNow();
+
     void AddTrack(const string_t& sFilePath);
     void AddTracks(const std::vector<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);

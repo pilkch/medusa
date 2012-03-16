@@ -19,11 +19,18 @@ namespace medusa
 
     void SetController(cController* pController);
 
+    void Start();
+    void StopSoon();
+    void StopNow();
+
     void AddTrack(const string_t& sFilePath);
     void AddTracks(const std::vector<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
 
   private:
+    void LoadPlaylist();
+    void SavePlaylist() const;
+
     cController* pController;
 
     std::vector<cTrack*> tracks;

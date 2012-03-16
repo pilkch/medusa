@@ -28,9 +28,6 @@ public:
   void SetPlaybackPositionMS(uint64_t milliseconds);
   void SetPlaybackLengthMS(uint64_t milliseconds);
 
-  void LoadPlaylist();
-  void SavePlaylist() const;
-
   void OnActionBrowseFiles();
   void OnActionBrowseFolder();
   void OnActionRemoveTrack();

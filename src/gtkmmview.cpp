@@ -30,6 +30,23 @@ cGtkmmView::~cGtkmmView()
   settings.Save();
 }
 
+void cGtkmmView::OnActionMainWindowCreated()
+{
+  std::cout<<"cGtkmmView::OnActionMainWindowCreated"<<std::endl;
+  assert(pController != nullptr);
+  pController->OnActionCreated();
+}
+
+void cGtkmmView::OnActionMainWindowQuitSoon()
+{
+  pController->OnActionQuitSoon();
+}
+
+void cGtkmmView::OnActionMainWindowQuitNow()
+{
+  pController->OnActionQuitNow();
+}
+
 void cGtkmmView::OnActionAddTrack(const string_t& sFilePath)
 {
   pController->AddTrack(sFilePath);
@@ -106,6 +123,9 @@ void cGtkmmView::OnTrackAdded(trackid_t id, const string_t& sFilePath, const spi
 
 void cGtkmmView::_Run()
 {
+  // Listen for the first signal idle event to start our model thread
+  Glib::signal_idle().connect(sigc::bind_return(sigc::mem_fun(*this, &cGtkmmView::OnActionMainWindowCreated), false));
+
   // Display our window
   Gtk::Main::run(*pMainWindow);
 }
