@@ -142,7 +142,7 @@ void cGtkmmView::OnNotify()
 
 void cGtkmmView::OnPlayerAboutToFinish()
 {
-  if (spitfire::util::IsMainThread()) {
+  if (!spitfire::util::IsMainThread()) {
     cGtkmmViewEventPlayerAboutToFinish* pEvent = new cGtkmmViewEventPlayerAboutToFinish;
     eventQueue.AddItemToBack(pEvent);
     notifyMainThread.Notify();
@@ -157,7 +157,7 @@ void cGtkmmView::OnTrackAdded(trackid_t id, const string_t& sFilePath, const spi
 {
   std::wcout<<"cGtkmmView::OnTrackAdded \""<<sFilePath<<"\""<<std::endl;
 
-  if (spitfire::util::IsMainThread()) {
+  if (!spitfire::util::IsMainThread()) {
     cGtkmmViewEventTrackAdded* pEvent = new cGtkmmViewEventTrackAdded(id, sFilePath, metaData);
     eventQueue.AddItemToBack(pEvent);
     notifyMainThread.Notify();
