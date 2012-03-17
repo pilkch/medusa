@@ -597,11 +597,15 @@ void cGtkmmMainWindow::OnPlaybackRepeatMenuToggled()
   if (!bIsTogglingRepeat) {
     // Toggle the repeat button
     bIsTogglingRepeat = true;
-    buttonRepeat.set_active(!buttonRepeat.get_active());
+    const bool bIsRepeat = !buttonRepeat.get_active();
+    buttonRepeat.set_active(bIsRepeat);
     bIsTogglingRepeat = false;
 
     // Perform the action
     //view.OnActionRepeatToggle();
+
+    // Update the settings
+    settings.SetRepeat(bIsRepeat);
   }
 }
 
@@ -610,11 +614,15 @@ void cGtkmmMainWindow::OnPlaybackRepeatButtonToggled()
   if (!bIsTogglingRepeat) {
     // Toggle the repeat button
     bIsTogglingRepeat = true;
-    pRepeatAction->set_active(!pRepeatAction->get_active());
+    const bool bIsRepeat = !pRepeatAction->get_active();
+    pRepeatAction->set_active(bIsRepeat);
     bIsTogglingRepeat = false;
 
     // Perform the action
     //view.OnActionRepeatToggle();
+
+    // Update the settings
+    settings.SetRepeat(bIsRepeat);
   }
 }
 
@@ -693,6 +701,15 @@ trackid_t cGtkmmMainWindow::GetNextTrack() const
       }
 
       iter.Next();
+    }
+  }
+
+  if (settings.IsRepeat()) {
+    // We are at the end of the playlist so go back to the start of the playlist
+    cGtkmmTrackListIterator iter(*pTrackList);
+    if (iter.IsValid()) {
+      const Gtk::TreeModel::Row& row = iter.GetRow();
+      return pTrackList->GetTrackIDForRow(row);
     }
   }
 
