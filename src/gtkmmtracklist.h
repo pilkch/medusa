@@ -72,12 +72,15 @@ public:
 
   explicit cGtkmmTrackList(cGtkmmMainWindow& mainWindow);
 
-  void SetStatePlaying(const cTrack* pTrack);
-  void SetStatePaused(const cTrack* pTrack);
+  void SetStatePlaying(trackid_t id);
+  void SetStatePaused(trackid_t id);
 
-  int GetIDFromRow(const Gtk::TreeModel::Row& row) const;
+  trackid_t GetTrackIDForRow(const Gtk::TreeModel::Row& row) const;
+  bool GetPropertiesForRow(const Gtk::TreeModel::Row& row, string_t& sFilePath, spitfire::audio::cMetaData& metaData) const;
+  bool GetPropertiesForRow(trackid_t id, string_t& sFilePath, spitfire::audio::cMetaData& metaData) const;
 
-  const cTrack* GetTrackFromRow(const Gtk::TreeModel::Row& row) const;
+  void SetPropertiesForRow(const Gtk::TreeModel::Row& row, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
+  void SetPropertiesForRow(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
 
 protected:
   Gtk::Widget& GetWidget() { return playlistScrolledWindow; }
@@ -88,7 +91,6 @@ private:
   bool OnListButtonPressEvent(GdkEventButton* event);
   void OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 
-  void AddTrack(const int id, const cTrack& track);
   void AddTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
 
   cGtkmmMainWindow& mainWindow;
@@ -97,7 +99,8 @@ private:
   typedef Glib::RefPtr<Gdk::Pixbuf> cPixbufPtr;
   class cUserData : public Glib::Object {
   public:
-    const cTrack* pTrack;
+    string_t sFilePath;
+    spitfire::audio::cMetaData metaData;
   };
   typedef Glib::RefPtr<cUserData> cUserDataPtr;
 

@@ -23,7 +23,7 @@ public:
   cGtkmmMainWindow(cGtkmmView& view, cSettings& settings);
   virtual ~cGtkmmMainWindow() {}
 
-  void SetStatePlaying(const cTrack* pTrack);
+  void SetStatePlaying(trackid_t id);
   void SetStatePaused();
   void SetPlaybackPositionMS(uint64_t milliseconds);
   void SetPlaybackLengthMS(uint64_t milliseconds);
@@ -32,7 +32,7 @@ public:
   void OnActionBrowseFolder();
   void OnActionRemoveTrack();
   void OnActionTrackProperties();
-  void OnActionPlayTrack(const cTrack* pTrack);
+  void OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
   void OnActionPlayPreviousTrack();
   void OnActionPlayNextTrack();
   void OnActionPlaylistRightClick(GdkEventButton* event);
@@ -46,8 +46,8 @@ public:
   void OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
 
 private:
-  const cTrack* GetPreviousTrack() const;
-  const cTrack* GetNextTrack() const;
+  trackid_t GetPreviousTrack() const;
+  trackid_t GetNextTrack() const;
 
   std::string TimeToString(uint64_t milliseconds) const;
 

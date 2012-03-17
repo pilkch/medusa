@@ -86,11 +86,11 @@ void cGtkmmView::OnActionAddTracksFromFolder(const string_t& sFolderPath)
   pController->AddTracksFromFolder(sFolderPath);
 }
 
-void cGtkmmView::OnActionPlayTrack(const cTrack* pTrack)
+void cGtkmmView::OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
 {
-  player.SetTrack(pTrack->sFilePath, pTrack->metaData.uiDurationMilliSeconds);
+  player.SetTrack(sFilePath, metaData.uiDurationMilliSeconds);
 
-  pCurrentTrack = pTrack;
+  pCurrentTrack = id;
 
   OnActionPlay();
 }

@@ -55,7 +55,7 @@ public:
   cGtkmmView(int argc, char** argv);
   ~cGtkmmView();
 
-  const cTrack* GetTrack() const { return pCurrentTrack; }
+  trackid_t GetCurrentTrackID() const { return pCurrentTrack; }
 
 protected:
   void OnActionMainWindowCreated();
@@ -65,7 +65,7 @@ protected:
   void OnActionAddTrack(const string_t& sFilePath);
   void OnActionAddTracks(const std::vector<string_t>& files);
   void OnActionAddTracksFromFolder(const string_t& sFolderPath);
-  void OnActionPlayTrack(const cTrack* pTrack);
+  void OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
   void OnActionPlaybackPositionChanged(uint64_t seconds);
   void OnActionVolumeChanged(unsigned int uiVolume0To100);
   void OnActionPlay();

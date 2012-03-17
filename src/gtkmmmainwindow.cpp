@@ -510,9 +510,10 @@ void cGtkmmMainWindow::OnActionRemoveTrack()
    while (iter.IsValid()) {
      std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack Item was selected"<<std::endl;
      const Gtk::TreeModel::Row& row = iter.GetRow();
-     const cTrack* pTrack = pTrackList->GetTrackFromRow(row);
-     if (pTrack != nullptr) std::wcout<<"cGtkmmMainWindow::OnActionRemoveTrack Properties selected for track "<<pTrack->metaData.sArtist<<" - "<<pTrack->metaData.sTitle<<std::endl;
-     else std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack Could not get track from row"<<std::endl;
+    string_t sFilePath;
+    spitfire::audio::cMetaData metaData;
+    pTrackList->GetPropertiesForRow(row, sFilePath, metaData);
+    std::wcout<<"cGtkmmMainWindow::OnActionRemoveTrack Properties selected for track "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
 
      iter.Next();
    }
@@ -525,9 +526,10 @@ void cGtkmmMainWindow::OnActionTrackProperties()
    while (iter.IsValid()) {
      std::cout<<"cGtkmmMainWindow::OnActionTrackProperties Item was selected"<<std::endl;
      const Gtk::TreeModel::Row& row = iter.GetRow();
-     const cTrack* pTrack = pTrackList->GetTrackFromRow(row);
-     if (pTrack != nullptr) std::wcout<<"cGtkmmMainWindow::OnActionTrackProperties Properties selected for track "<<pTrack->metaData.sArtist<<" - "<<pTrack->metaData.sTitle<<std::endl;
-     else std::cout<<"cGtkmmMainWindow::OnActionTrackProperties Could not get track from row"<<std::endl;
+    string_t sFilePath;
+    spitfire::audio::cMetaData metaData;
+    pTrackList->GetPropertiesForRow(row, sFilePath, metaData);
+    std::wcout<<"cGtkmmMainWindow::OnActionTrackProperties Properties selected for track "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
 
      iter.Next();
    }
@@ -555,11 +557,11 @@ void cGtkmmMainWindow::OnActionSliderValueChanged(const cGtkmmSlider& slider, ui
   else OnActionVolumeValueChanged(uiValue);
 }
 
-void cGtkmmMainWindow::OnActionPlayTrack(const cTrack* pTrack)
+void cGtkmmMainWindow::OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
 {
-  view.OnActionPlayTrack(pTrack);
+  view.OnActionPlayTrack(id, sFilePath, metaData);
 
-  lastfm.StartPlayingTrack(pTrack->metaData);
+  lastfm.StartPlayingTrack(metaData);
 }
 
 void cGtkmmMainWindow::OnPlaybackPlayPauseMenuToggled()
@@ -626,33 +628,33 @@ void cGtkmmMainWindow::OnPlaybackNextClicked()
   OnActionPlayNextTrack();
 }
 
-const cTrack* cGtkmmMainWindow::GetPreviousTrack() const
+trackid_t cGtkmmMainWindow::GetPreviousTrack() const
 {
-  const cTrack* pCurrentTrack = view.GetTrack();
-  if (pCurrentTrack == nullptr) {
+  trackid_t id = view.GetCurrentTrackID();
+  if (id == INVALID_TRACK) {
     // There was no current track so just pick the last one
-    const cTrack* pPreviousTrack = nullptr;
+    trackid_t idPrevious = INVALID_TRACK;
     cGtkmmTrackListIterator iter(*pTrackList);
     while (iter.IsValid()) {
       const Gtk::TreeModel::Row& row = iter.GetRow();
-      pPreviousTrack = pTrackList->GetTrackFromRow(row);
+      idPrevious = pTrackList->GetTrackIDForRow(row);
 
       iter.Next();
     }
 
-    return pPreviousTrack;
+    return idPrevious;
   } else {
-    const cTrack* pPreviousTrack = nullptr;
+    trackid_t idPrevious = INVALID_TRACK;
     cGtkmmTrackListIterator iter(*pTrackList);
     while (iter.IsValid()) {
       const Gtk::TreeModel::Row& row = iter.GetRow();
-      const cTrack* pThisTrack = pTrackList->GetTrackFromRow(row);
-      if (pThisTrack == pCurrentTrack) {
+      trackid_t idThisTrack = pTrackList->GetTrackIDForRow(row);
+      if (idThisTrack == id) {
         // Found our current track so return the previous one
-        return pPreviousTrack;
+        return idPrevious;
       }
 
-      pPreviousTrack = pThisTrack;
+      idPrevious = idThisTrack;
 
       iter.Next();
     }
@@ -661,28 +663,28 @@ const cTrack* cGtkmmMainWindow::GetPreviousTrack() const
   return nullptr;
 }
 
-const cTrack* cGtkmmMainWindow::GetNextTrack() const
+trackid_t cGtkmmMainWindow::GetNextTrack() const
 {
-  const cTrack* pCurrentTrack = view.GetTrack();
-  if (pCurrentTrack == nullptr) {
+  trackid_t id = view.GetCurrentTrackID();
+  if (id == INVALID_TRACK) {
     // There was no current track so just pick the first one
     cGtkmmTrackListIterator iter(*pTrackList);
     if (iter.IsValid()) {
       const Gtk::TreeModel::Row& row = iter.GetRow();
-      return pTrackList->GetTrackFromRow(row);
+      return pTrackList->GetTrackIDForRow(row);
     }
   } else {
     cGtkmmTrackListIterator iter(*pTrackList);
     while (iter.IsValid()) {
       const Gtk::TreeModel::Row& row = iter.GetRow();
-      const cTrack* pNextTrack = pTrackList->GetTrackFromRow(row);
-      if (pNextTrack == pCurrentTrack) {
+      trackid_t idNext = pTrackList->GetTrackIDForRow(row);
+      if (idNext == id) {
         // Found our current track so return the next one
         iter.Next();
 
         if (iter.IsValid()) {
           const Gtk::TreeModel::Row& row = iter.GetRow();
-          return pTrackList->GetTrackFromRow(row);
+          return pTrackList->GetTrackIDForRow(row);
         }
 
         break;
@@ -697,14 +699,24 @@ const cTrack* cGtkmmMainWindow::GetNextTrack() const
 
 void cGtkmmMainWindow::OnActionPlayPreviousTrack()
 {
-  const cTrack* pPreviousTrack = GetPreviousTrack();
-  if (pPreviousTrack != nullptr) OnActionPlayTrack(pPreviousTrack);
+  trackid_t id = GetPreviousTrack();
+  if (id != nullptr) {
+    string_t sFilePath;
+    spitfire::audio::cMetaData metaData;
+    pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+    OnActionPlayTrack(id, sFilePath, metaData);
+  }
 }
 
 void cGtkmmMainWindow::OnActionPlayNextTrack()
 {
-  const cTrack* pNextTrack = GetNextTrack();
-  if (pNextTrack != nullptr) OnActionPlayTrack(pNextTrack);
+  trackid_t id = GetNextTrack();
+  if (id != nullptr) {
+    string_t sFilePath;
+    spitfire::audio::cMetaData metaData;
+    pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+    OnActionPlayTrack(id, sFilePath, metaData);
+  }
 }
 
 void cGtkmmMainWindow::SetPlaybackPositionMS(uint64_t milliseconds)
@@ -723,34 +735,38 @@ void cGtkmmMainWindow::SetPlaybackLengthMS(uint64_t milliseconds)
   textLength.set_text(spitfire::string::ToUTF8(util::FormatTime(milliseconds)).c_str());
 }
 
-void cGtkmmMainWindow::SetStatePlaying(const cTrack* pTrack)
+void cGtkmmMainWindow::SetStatePlaying(trackid_t id)
 {
+  string_t sFilePath;
+  spitfire::audio::cMetaData metaData;
+  pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+
   std::ostringstream o;
-  if (!pTrack->metaData.sArtist.empty()) o<<"<b><big>"<<spitfire::string::HTMLEncode(spitfire::string::ToUTF8(pTrack->metaData.sArtist))<<"</big></b>";
-  if (!pTrack->metaData.sArtist.empty() && !pTrack->metaData.sTitle.empty()) o<<" - ";
-  if (!pTrack->metaData.sTitle.empty()) o<<"<b><big>"<<spitfire::string::HTMLEncode(spitfire::string::ToUTF8(pTrack->metaData.sTitle))<<"</big></b>";
-  if ((pTrack->metaData.uiTracknum != 0) && !pTrack->metaData.sAlbum.empty()) o<<",";
-  if (pTrack->metaData.uiTracknum != 0) o<<" track "<<pTrack->metaData.uiTracknum;
-  if (!pTrack->metaData.sAlbum.empty()) o<<" on "<<spitfire::string::HTMLEncode(spitfire::string::ToUTF8(pTrack->metaData.sAlbum));
+  if (!metaData.sArtist.empty()) o<<"<b><big>"<<spitfire::string::HTMLEncode(spitfire::string::ToUTF8(metaData.sArtist))<<"</big></b>";
+  if (!metaData.sArtist.empty() && !metaData.sTitle.empty()) o<<" - ";
+  if (!metaData.sTitle.empty()) o<<"<b><big>"<<spitfire::string::HTMLEncode(spitfire::string::ToUTF8(metaData.sTitle))<<"</big></b>";
+  if ((metaData.uiTracknum != 0) && !metaData.sAlbum.empty()) o<<",";
+  if (metaData.uiTracknum != 0) o<<" track "<<metaData.uiTracknum;
+  if (!metaData.sAlbum.empty()) o<<" on "<<spitfire::string::HTMLEncode(spitfire::string::ToUTF8(metaData.sAlbum));
 
   textCurrentlyPlaying.set_markup(o.str().c_str());
 
   // Update position slider
-  SetPlaybackLengthMS(pTrack->metaData.uiDurationMilliSeconds);
+  SetPlaybackLengthMS(metaData.uiDurationMilliSeconds);
 
-  pTrackList->SetStatePlaying(pTrack);
+  pTrackList->SetStatePlaying(id);
 
   bIsTogglingPlayPause = true;
   buttonPlayPause.set_active(true);
   pPlayPauseAction->set_active(true);
   bIsTogglingPlayPause = false;
 
-  if (lastfm.IsRunning()) lastfm.StartPlayingTrack(pTrack->metaData);
+  if (lastfm.IsRunning()) lastfm.StartPlayingTrack(metaData);
 }
 
 void cGtkmmMainWindow::SetStatePaused()
 {
-  pTrackList->SetStatePaused(view.GetTrack());
+  pTrackList->SetStatePaused(view.GetCurrentTrackID());
 
   bIsTogglingPlayPause = true;
   buttonPlayPause.set_active(false);

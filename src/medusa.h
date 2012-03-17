@@ -4,6 +4,8 @@
 // Spitfire headers
 #include <spitfire/util/string.h>
 
+#define INVALID_TRACK nullptr
+
 namespace medusa
 {
   using spitfire::string_t;
