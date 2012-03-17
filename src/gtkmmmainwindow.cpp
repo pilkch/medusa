@@ -505,34 +505,34 @@ void cGtkmmMainWindow::OnMenuEditPreferences()
 
 void cGtkmmMainWindow::OnActionRemoveTrack()
 {
-   std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack A popup menu item was selected"<<std::endl;
-   cGtkmmTrackListSelectedIterator iter(*pTrackList);
-   while (iter.IsValid()) {
-     std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack Item was selected"<<std::endl;
-     const Gtk::TreeModel::Row& row = iter.GetRow();
+  std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack A popup menu item was selected"<<std::endl;
+  cGtkmmTrackListSelectedIterator iter(*pTrackList);
+  while (iter.IsValid()) {
+    std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack Item was selected"<<std::endl;
+    const Gtk::TreeModel::Row& row = iter.GetRow();
     string_t sFilePath;
     spitfire::audio::cMetaData metaData;
     pTrackList->GetPropertiesForRow(row, sFilePath, metaData);
     std::wcout<<"cGtkmmMainWindow::OnActionRemoveTrack Properties selected for track "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
 
-     iter.Next();
-   }
+    iter.Next();
+  }
 }
 
 void cGtkmmMainWindow::OnActionTrackProperties()
 {
-   std::cout<<"cGtkmmMainWindow::OnActionTrackProperties A popup menu item was selected"<<std::endl;
-   cGtkmmTrackListSelectedIterator iter(*pTrackList);
-   while (iter.IsValid()) {
-     std::cout<<"cGtkmmMainWindow::OnActionTrackProperties Item was selected"<<std::endl;
-     const Gtk::TreeModel::Row& row = iter.GetRow();
+  std::cout<<"cGtkmmMainWindow::OnActionTrackProperties A popup menu item was selected"<<std::endl;
+  cGtkmmTrackListSelectedIterator iter(*pTrackList);
+  while (iter.IsValid()) {
+    std::cout<<"cGtkmmMainWindow::OnActionTrackProperties Item was selected"<<std::endl;
+    const Gtk::TreeModel::Row& row = iter.GetRow();
     string_t sFilePath;
     spitfire::audio::cMetaData metaData;
     pTrackList->GetPropertiesForRow(row, sFilePath, metaData);
     std::wcout<<"cGtkmmMainWindow::OnActionTrackProperties Properties selected for track "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
 
-     iter.Next();
-   }
+    iter.Next();
+  }
 }
 
 void cGtkmmMainWindow::OnActionPlaylistRightClick(GdkEventButton* event)
