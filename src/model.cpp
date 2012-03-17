@@ -113,7 +113,7 @@ namespace medusa
 
     while (true) {
       //std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
-      soAction.WaitTimeoutMS(10);
+      soAction.WaitTimeoutMS(100);
 
       if (IsToStop()) break;
 
