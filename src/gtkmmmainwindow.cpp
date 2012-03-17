@@ -43,7 +43,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   set_title("Medusa");
   set_icon_from_file("application.xpm");
   set_border_width(5);
-  set_skip_taskbar_hint(true); // Minimise to status icon
+  //set_skip_taskbar_hint(true); // Minimise to status icon
   set_size_request(400, 300);
   set_default_size(800, 400);
   resize(400, 300);
