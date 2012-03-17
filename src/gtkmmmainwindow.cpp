@@ -398,33 +398,6 @@ void cGtkmmMainWindow::SetPlaybackButtonIcons()
   buttonRepeat.set_image(*pImageRepeatToggle);
 }
 
-void cGtkmmMainWindow::OnActionBrowseFiles()
-{
-  cGtkmmFileDialog dialog;
-  dialog.SetType(cGtkmmFileDialog::TYPE::OPEN);
-  dialog.SetSelectMultipleFiles(true);
-  dialog.SetCaption(TEXT("Add audio files"));
-  dialog.SetDefaultFolder(spitfire::filesystem::GetHomeMusicDirectory());
-  if (dialog.Run(*this)) {
-    std::cout<<"cGtkmmMainWindow::OnActionBrowseFiles Selected files"<<std::endl;
-    const std::vector<string_t>& vSelectedFiles = dialog.GetSelectedFiles();
-    view.OnActionAddTracks(vSelectedFiles);
-  }
-}
-
-void cGtkmmMainWindow::OnActionBrowseFolder()
-{
-  cGtkmmFolderDialog dialog;
-  dialog.SetType(cGtkmmFolderDialog::TYPE::SELECT);
-  dialog.SetCaption(TEXT("Add audio folder"));
-  dialog.SetDefaultFolder(spitfire::filesystem::GetHomeMusicDirectory());
-  if (dialog.Run(*this)) {
-    std::cout<<"cGtkmmMainWindow::OnActionBrowseFolder Selected folder"<<std::endl;
-    const string_t sSelectedFolder = dialog.GetSelectedFolder();
-    view.OnActionAddTracksFromFolder(sSelectedFolder);
-  }
-}
-
 void cGtkmmMainWindow::SetStatusIconText(const string_t& sText)
 {
   pStatusIcon->set_tooltip_text(spitfire::string::ToUTF8(sText).c_str());
@@ -500,6 +473,33 @@ void cGtkmmMainWindow::OnMenuEditPreferences()
   if (dialog.Run()) {
     // Update our state from the settings
     ApplySettings();
+  }
+}
+
+void cGtkmmMainWindow::OnActionBrowseFiles()
+{
+  cGtkmmFileDialog dialog;
+  dialog.SetType(cGtkmmFileDialog::TYPE::OPEN);
+  dialog.SetSelectMultipleFiles(true);
+  dialog.SetCaption(TEXT("Add audio files"));
+  dialog.SetDefaultFolder(spitfire::filesystem::GetHomeMusicDirectory());
+  if (dialog.Run(*this)) {
+    std::cout<<"cGtkmmMainWindow::OnActionBrowseFiles Selected files"<<std::endl;
+    const std::vector<string_t>& vSelectedFiles = dialog.GetSelectedFiles();
+    view.OnActionAddTracks(vSelectedFiles);
+  }
+}
+
+void cGtkmmMainWindow::OnActionBrowseFolder()
+{
+  cGtkmmFolderDialog dialog;
+  dialog.SetType(cGtkmmFolderDialog::TYPE::SELECT);
+  dialog.SetCaption(TEXT("Add audio folder"));
+  dialog.SetDefaultFolder(spitfire::filesystem::GetHomeMusicDirectory());
+  if (dialog.Run(*this)) {
+    std::cout<<"cGtkmmMainWindow::OnActionBrowseFolder Selected folder"<<std::endl;
+    const string_t sSelectedFolder = dialog.GetSelectedFolder();
+    view.OnActionAddTracksFromFolder(sSelectedFolder);
   }
 }
 
