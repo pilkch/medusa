@@ -70,19 +70,16 @@ namespace medusa
     std::cout<<"cModel::LoadPlaylist"<<std::endl;
 
     // Save the playlist
-    spitfire::audio::cPlaylist playlist;
+    std::vector<cTrack*> playlist;
     util::LoadPlaylistFromCSV(util::GetPlayListFilePath(), playlist);
 
-    const size_t n = playlist.tracks.size();
+    const size_t n = playlist.size();
     for (size_t i = 0; i < n; i++) {
-      const spitfire::audio::cTrack* pPlaylistTrack = playlist.tracks[i];
+      const cTrack* pPlaylistTrack = playlist[i];
 
       cTrack* pTrack = new cTrack;
-      pTrack->sFilePath = pPlaylistTrack->sFullPath;
-
-      pTrack->metaData.sArtist = pPlaylistTrack->sArtist;
-      pTrack->metaData.sTitle = pPlaylistTrack->sTitle;
-      pTrack->metaData.uiDurationMilliSeconds = pPlaylistTrack->uiTrackLengthMS;
+      pTrack->sFilePath = pPlaylistTrack->sFilePath;
+      pTrack->metaData = pPlaylistTrack->metaData;
 
       tracks.push_back(pTrack);
 
@@ -93,13 +90,17 @@ namespace medusa
   void cModel::SavePlaylist() const
   {
     // Save the playlist
-    spitfire::audio::cPlaylist playlist;
+    std::vector<cTrack*> playlist;
 
     const size_t n = tracks.size();
     for (size_t i = 0; i < n; i++) {
       const cTrack* pTrack = tracks[i];
 
-      util::AddTrackToPlaylist(playlist, pTrack);
+      cTrack* pPlaylistTrack = new cTrack;
+      pPlaylistTrack->sFilePath = pTrack->sFilePath;
+      pPlaylistTrack->metaData = pTrack->metaData;
+
+      playlist.push_back(pPlaylistTrack);
     }
 
     util::SavePlaylistToCSV(util::GetPlayListFilePath(), playlist);

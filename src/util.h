@@ -2,7 +2,7 @@
 #define MEDUSA_UTIL_H
 
 // Spitfire headers
-#include <spitfire/audio/playlist.h>
+#include <spitfire/audio/metadata.h>
 
 // Medusa headers
 #include "medusa.h"
@@ -20,10 +20,8 @@ namespace medusa
 
     string_t GetPlayListFilePath();
 
-    void AddTrackToPlaylist(spitfire::audio::cPlaylist& playlist, const cTrack* pTrack);
-
-    bool LoadPlaylistFromCSV(const string_t& sFilePath, spitfire::audio::cPlaylist& playlist);
-    bool SavePlaylistToCSV(const string_t& sFilePath, const spitfire::audio::cPlaylist& playlist);
+    bool LoadPlaylistFromCSV(const string_t& sFilePath, std::vector<cTrack*>& playlist);
+    bool SavePlaylistToCSV(const string_t& sFilePath, const std::vector<cTrack*>& playlist);
   }
 }
 
