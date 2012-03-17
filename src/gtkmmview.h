@@ -65,6 +65,7 @@ protected:
   void OnActionAddTrack(const string_t& sFilePath);
   void OnActionAddTracks(const std::vector<string_t>& files);
   void OnActionAddTracksFromFolder(const string_t& sFolderPath);
+  void OnActionRemoveTrack(trackid_t id);
   void OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
   void OnActionPlaybackPositionChanged(uint64_t seconds);
   void OnActionVolumeChanged(unsigned int uiVolume0To100);

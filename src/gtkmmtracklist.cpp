@@ -303,6 +303,33 @@ void cGtkmmTrackList::AddTrack(trackid_t id, const string_t& sFilePath, const sp
   row[columns.userdata]  = pUserData;
 }
 
+void cGtkmmTrackList::DeleteAll()
+{
+  playlistTreeModelRef.clear();
+}
+
+void cGtkmmTrackList::DeleteAllSelected()
+{
+  // http://www.mail-archive.com/gtkmm-list@gnome.org/msg08840.html
+  Glib::RefPtr<Gtk::TreeView::Selection> selectionRef(get_selection());
+  if (selectionRef) {
+    std::vector<Gtk::TreeModel::Path> selected = selectionRef->get_selected_rows();
+    if (selected.size() != 0) {
+      // Convert the selected paths to RowReferences
+      std::list<Gtk::TreeModel::RowReference> rows;
+      for (std::vector<Gtk::TreeModel::Path>::iterator iter = selected.begin(); iter != selected.end(); iter++) {
+        rows.push_back(Gtk::TreeModel::RowReference(get_model(), *iter));
+      }
+
+      // Remove the rows from the treemodel
+      for (std::list<Gtk::TreeModel::RowReference>::iterator iter = rows.begin(); iter != rows.end(); iter++) {
+        Gtk::TreeModel::iterator treeiter = playlistTreeModelRef->get_iter(iter->get_path());
+        playlistTreeModelRef->erase(treeiter);
+      }
+    }
+  }
+}
+
 void cGtkmmTrackList::SetStatePlaying(trackid_t id)
 {
   // Update the icons in the tree view

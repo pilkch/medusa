@@ -506,17 +506,19 @@ void cGtkmmMainWindow::OnMenuEditPreferences()
 void cGtkmmMainWindow::OnActionRemoveTrack()
 {
   std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack A popup menu item was selected"<<std::endl;
+  // Tell the view that we are removing these tracks
   cGtkmmTrackListSelectedIterator iter(*pTrackList);
   while (iter.IsValid()) {
     std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack Item was selected"<<std::endl;
     const Gtk::TreeModel::Row& row = iter.GetRow();
-    string_t sFilePath;
-    spitfire::audio::cMetaData metaData;
-    pTrackList->GetPropertiesForRow(row, sFilePath, metaData);
-    std::wcout<<"cGtkmmMainWindow::OnActionRemoveTrack Properties selected for track "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
+    trackid_t id = pTrackList->GetTrackIDForRow(row);
+    view.OnActionRemoveTrack(id);
 
     iter.Next();
   }
+
+  // Remove the selected tracks
+  pTrackList->DeleteAllSelected();
 }
 
 void cGtkmmMainWindow::OnActionTrackProperties()

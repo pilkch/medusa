@@ -12,19 +12,34 @@
 
 namespace medusa
 {
+  cModelEventAddFile::cModelEventAddFile(const string_t& _sFilePath) :
+    sFilePath(_sFilePath)
+  {
+  }
+
   void cModelEventAddFile::EventFunction(cModel& model)
   {
     model.AddTrack(sFilePath);
   }
 
-  cModelEventAddFile::cModelEventAddFile(const string_t& _sFilePath) :
-    sFilePath(_sFilePath)
+  cModelEventAddFolder::cModelEventAddFolder(const string_t& _sFolderPath) :
+    sFolderPath(_sFolderPath)
   {
   }
 
   void cModelEventAddFolder::EventFunction(cModel& model)
   {
     model.AddTracksFromFolder(sFolderPath);
+  }
+
+  cModelEventRemoveTrack::cModelEventRemoveTrack(trackid_t _id) :
+    id(_id)
+  {
+  }
+
+  void cModelEventRemoveTrack::EventFunction(cModel& model)
+  {
+    model.RemoveTrack(id);
   }
 
   // ** cModel
@@ -57,11 +72,30 @@ namespace medusa
   void cModel::AddTracksFromFolder(const string_t& sFolderPath)
   {
     if (spitfire::util::IsMainThread()) {
-      cModelEventAddFolder* pEvent = new cModelEventAddFolder;
-      pEvent->sFolderPath = sFolderPath;
+      cModelEventAddFolder* pEvent = new cModelEventAddFolder(sFolderPath);
       eventQueue.AddItemToBack(pEvent);
     } else {
       // TODO: Add contents of folder
+    }
+  }
+
+  void cModel::RemoveTrack(trackid_t id)
+  {
+    if (spitfire::util::IsMainThread()) {
+      cModelEventRemoveTrack* pEvent = new cModelEventRemoveTrack(id);
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      std::vector<cTrack*>::iterator iter = tracks.begin();
+      const std::vector<cTrack*>::iterator iterEnd = tracks.end();
+      while (iter != iterEnd) {
+        if (*iter == id) {
+          std::wcout<<"cModel::RemoveTrack Removing track \""<<(*iter)->sFilePath<<"\""<<std::endl;
+          tracks.erase(iter);
+          break;
+        }
+
+        iter++;
+      }
     }
   }
 

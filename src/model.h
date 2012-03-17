@@ -35,9 +35,21 @@ namespace medusa
   class cModelEventAddFolder : public cModelEvent
   {
   public:
+    explicit cModelEventAddFolder(const string_t& sFolderPath);
+
     virtual void EventFunction(cModel& model) override;
 
     string_t sFolderPath;
+  };
+
+  class cModelEventRemoveTrack : public cModelEvent
+  {
+  public:
+    explicit cModelEventRemoveTrack(trackid_t id);
+
+    virtual void EventFunction(cModel& model) override;
+
+    trackid_t id;
   };
 
   class cController;
@@ -56,6 +68,7 @@ namespace medusa
     void AddTrack(const string_t& sFilePath);
     void AddTracks(const std::vector<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
+    void RemoveTrack(trackid_t id);
 
   private:
     virtual void ThreadFunction();

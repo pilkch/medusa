@@ -48,6 +48,11 @@ namespace medusa
     model.AddTracksFromFolder(sFolderPath);
   }
 
+  void cController::RemoveTrack(trackid_t id)
+  {
+    model.RemoveTrack(id);
+  }
+
   void cController::OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
   {
     std::wcout<<"cController::OnTrackAdded \""<<sFilePath<<"\""<<std::endl;

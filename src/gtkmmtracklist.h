@@ -93,6 +93,9 @@ private:
 
   void AddTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
 
+  void DeleteAll();
+  void DeleteAllSelected();
+
   cGtkmmMainWindow& mainWindow;
 
   // Tree view
