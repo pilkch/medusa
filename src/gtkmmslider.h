@@ -41,6 +41,9 @@ private:
   #ifdef BUILD_GTKMM_SLIDER_DONT_JUMP_HACK
   bool bLeftClickedPressEventChanged;
   #endif
+
+  uint64_t uiMin;
+  uint64_t uiMax;
 };
 }
 

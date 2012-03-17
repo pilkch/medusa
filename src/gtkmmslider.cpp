@@ -2,6 +2,9 @@
 #include <iostream>
 #include <iomanip>
 
+// Spitfire headers
+#include <spitfire/math/math.h>
+
 // Medusa headers
 #include "gtkmmview.h"
 #include "gtkmmslider.h"
@@ -13,7 +16,9 @@ namespace medusa
 cGtkmmSlider::cGtkmmSlider(cGtkmmMainWindow& _mainWindow, bool bVertical) :
   Scale(bVertical ? Gtk::Orientation::ORIENTATION_VERTICAL : Gtk::Orientation::ORIENTATION_HORIZONTAL),
   mainWindow(_mainWindow),
-  bLeftClickedPressEventChanged(false)
+  bLeftClickedPressEventChanged(false),
+  uiMin(0),
+  uiMax(100)
 {
   #ifdef BUILD_GTKMM_SLIDER_HIGHLIGHT
   set_restrict_to_fill_level(false);
@@ -64,7 +69,9 @@ bool cGtkmmSlider::OnButtonPressReleaseEvent(GdkEventButton* event)
 
 bool cGtkmmSlider::OnValueChanged(Gtk::ScrollType scrollType, double value)
 {
-  std::cout<<"cGtkmmSlider::OnValueChanged"<<std::endl;
+  std::cout<<"cGtkmmSlider::OnValueChanged "<<value<<std::endl;
+
+  value = double(spitfire::math::clamp(uint64_t(value), uiMin, uiMax));
 
   #ifdef BUILD_GTKMM_SLIDER_HIGHLIGHT
   set_fill_level(value);
@@ -89,8 +96,10 @@ void cGtkmmSlider::SetValue(uint64_t uiValue)
   set_value(double(uiValue));
 }
 
-void cGtkmmSlider::SetRange(uint64_t uiMin, uint64_t uiMax)
+void cGtkmmSlider::SetRange(uint64_t _uiMin, uint64_t _uiMax)
 {
+  uiMin = _uiMin;
+  uiMax = _uiMax;
   set_range(double(uiMin), double(uiMax));
 }
 }
