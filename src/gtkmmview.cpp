@@ -47,6 +47,13 @@ cGtkmmView::cGtkmmView(int argc, char** argv) :
 
 cGtkmmView::~cGtkmmView()
 {
+  // Destroy any further events
+  while (true) {
+    cGtkmmViewEvent* pEvent = eventQueue.RemoveItemFromFront();
+    if (pEvent == nullptr) break;
+    else spitfire::SAFE_DELETE(pEvent);
+  }
+
   player.Destroy();
 
   delete pMainWindow;

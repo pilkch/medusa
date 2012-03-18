@@ -3,6 +3,7 @@
 
 // Spitfire headers
 #include <spitfire/audio/playlist.h>
+#include <spitfire/storage/filesystem.h>
 
 // Medusa headers
 #include "controller.h"
@@ -12,6 +13,11 @@
 
 namespace medusa
 {
+  bool IsFileTypeSupported(const string_t& sFileExtension)
+  {
+    return ((sFileExtension == TEXT("mp3")) || (sFileExtension == TEXT(".wav")));
+  }
+
   cModelEventAddFile::cModelEventAddFile(const string_t& _sFilePath) :
     sFilePath(_sFilePath)
   {
@@ -46,6 +52,8 @@ namespace medusa
 
   void cModel::AddTrack(const string_t& sFilePath)
   {
+    if (!IsFileTypeSupported(spitfire::filesystem::GetExtension(sFilePath))) return;
+
     if (spitfire::util::IsMainThread()) {
       cModelEventAddFile* pEvent = new cModelEventAddFile(sFilePath);
       eventQueue.AddItemToBack(pEvent);
@@ -75,7 +83,17 @@ namespace medusa
       cModelEventAddFolder* pEvent = new cModelEventAddFolder(sFolderPath);
       eventQueue.AddItemToBack(pEvent);
     } else {
-      // TODO: Add contents of folder
+      spitfire::filesystem::cFolderIterator iter(sFolderPath);
+      iter.SetIgnoreHiddenFilesAndFolders();
+      while (iter.IsValid()) {
+        if (iter.IsFolder()) {
+          // Add an event to iterate into this folder later
+          cModelEventAddFolder* pEvent = new cModelEventAddFolder(iter.GetFullPath());
+          eventQueue.AddItemToBack(pEvent);
+        } else AddTrack(iter.GetFullPath());
+
+        iter.Next();
+      }
     }
   }
 
