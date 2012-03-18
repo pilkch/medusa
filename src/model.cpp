@@ -166,7 +166,7 @@ namespace medusa
 
     while (true) {
       //std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
-      soAction.WaitTimeoutMS(100);
+      soAction.WaitTimeoutMS(1000);
 
       if (IsToStop()) break;
 
@@ -175,6 +175,8 @@ namespace medusa
         pEvent->EventFunction(*this);
         spitfire::SAFE_DELETE(pEvent);
       }
+
+      Yield();
     }
 
     SavePlaylist();
