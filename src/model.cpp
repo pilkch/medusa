@@ -134,9 +134,9 @@ namespace medusa
       pTrack->metaData = pPlaylistTrack->metaData;
 
       tracks.push_back(pTrack);
-
-      pController->OnTrackAdded(pTrack, pTrack->sFilePath, pTrack->metaData);
     }
+
+    pController->OnTracksAdded(tracks);
   }
 
   void cModel::SavePlaylist() const

@@ -25,6 +25,16 @@ namespace medusa
     view.OnTrackAdded(id, sFilePath, metaData);
   }
 
+  cGtkmmViewEventTracksAdded::cGtkmmViewEventTracksAdded(const std::vector<cTrack*>& _tracks) :
+    tracks(_tracks)
+  {
+  }
+
+  void cGtkmmViewEventTracksAdded::EventFunction(cGtkmmView& view)
+  {
+    view.OnTracksAdded(tracks);
+  }
+
 
   // ** cGtkmmView
 
@@ -175,6 +185,24 @@ void cGtkmmView::OnTrackAdded(trackid_t id, const string_t& sFilePath, const spi
     notifyMainThread.Notify();
   } else {
     pMainWindow->OnTrackAdded(id, sFilePath, metaData);
+  }
+}
+
+void cGtkmmView::OnTracksAdded(const std::vector<cTrack*>& tracks)
+{
+  std::cout<<"cGtkmmView::OnTracksAdded"<<std::endl;
+
+  if (!spitfire::util::IsMainThread()) {
+    cGtkmmViewEventTracksAdded* pEvent = new cGtkmmViewEventTracksAdded(tracks);
+    eventQueue.AddItemToBack(pEvent);
+    notifyMainThread.Notify();
+  } else {
+    const size_t n = tracks.size();
+    for (size_t i = 0; i < n; i++) {
+      const cTrack* pTrack = tracks[i];
+      ASSERT(pTrack != nullptr);
+      pMainWindow->OnTrackAdded(pTrack, pTrack->sFilePath, pTrack->metaData);
+    }
   }
 }
 

@@ -58,4 +58,10 @@ namespace medusa
     std::wcout<<"cController::OnTrackAdded \""<<sFilePath<<"\""<<std::endl;
     view.OnTrackAdded(id, sFilePath, metaData);
   }
+
+  void cController::OnTracksAdded(const std::vector<cTrack*>& tracks)
+  {
+    std::cout<<"cController::OnTracksAdded"<<std::endl;
+    view.OnTracksAdded(tracks);
+  }
 }

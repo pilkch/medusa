@@ -18,6 +18,7 @@ namespace medusa
     void SetController(cController* pController);
 
     virtual void OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData) = 0;
+    virtual void OnTracksAdded(const std::vector<cTrack*>& tracks) = 0;
 
     void Run() { _Run(); }
 
