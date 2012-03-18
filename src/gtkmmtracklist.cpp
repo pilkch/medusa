@@ -271,12 +271,7 @@ void cGtkmmTrackList::OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::T
 
     trackid_t id = row[columns.id];
 
-    string_t sFilePath;
-    spitfire::audio::cMetaData metaData;
-    if (GetPropertiesForRow(row, sFilePath, metaData)) {
-      std::wcout<<"cGtkmmTrackList::OnListDoubleClick Track: "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
-      mainWindow.OnActionPlayTrack(id, sFilePath, metaData);
-    }
+    mainWindow.OnActionPlaylistDoubleClick(id);
   }
 }
 

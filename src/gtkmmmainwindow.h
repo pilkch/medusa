@@ -36,6 +36,7 @@ public:
   void OnActionPlayPreviousTrack();
   void OnActionPlayNextTrack();
   void OnActionPlaylistRightClick(GdkEventButton* event);
+  void OnActionPlaylistDoubleClick(trackid_t id);
   void OnActionPlaybackPositionValueChanged(uint64_t uiValue);
   void OnActionVolumeValueChanged(unsigned int uiVolume0To100);
 

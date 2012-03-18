@@ -543,6 +543,16 @@ void cGtkmmMainWindow::OnActionPlaylistRightClick(GdkEventButton* event)
   pMenuPopup->popup(event->button, event->time);
 }
 
+void cGtkmmMainWindow::OnActionPlaylistDoubleClick(trackid_t id)
+{
+  string_t sFilePath;
+  spitfire::audio::cMetaData metaData;
+  if (pTrackList->GetPropertiesForRow(id, sFilePath, metaData)) {
+    std::wcout<<"cGtkmmTrackList::OnActionPlaylistDoubleClick Track: "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
+    OnActionPlayTrack(id, sFilePath, metaData);
+  }
+}
+
 void cGtkmmMainWindow::OnActionPlaybackPositionValueChanged(uint64_t uiValue)
 {
   view.OnActionPlaybackPositionChanged(uiValue);
