@@ -16,7 +16,9 @@ namespace medusa
 cGtkmmSlider::cGtkmmSlider(cGtkmmMainWindow& _mainWindow, bool bVertical) :
   Scale(bVertical ? Gtk::Orientation::ORIENTATION_VERTICAL : Gtk::Orientation::ORIENTATION_HORIZONTAL),
   mainWindow(_mainWindow),
+  #ifdef BUILD_GTKMM_SLIDER_DONT_JUMP_HACK
   bLeftClickedPressEventChanged(false),
+  #endif
   uiMin(0),
   uiMax(100)
 {
@@ -71,7 +73,8 @@ bool cGtkmmSlider::OnValueChanged(Gtk::ScrollType scrollType, double value)
 {
   std::cout<<"cGtkmmSlider::OnValueChanged "<<value<<std::endl;
 
-  value = double(spitfire::math::clamp(uint64_t(value), uiMin, uiMax));
+  value = spitfire::math::clamp(value, double(uiMin), double(uiMax));
+  std::cout<<"cGtkmmSlider::OnValueChanged Clamped="<<value<<std::endl;
 
   #ifdef BUILD_GTKMM_SLIDER_HIGHLIGHT
   set_fill_level(value);
