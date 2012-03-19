@@ -87,6 +87,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   m_refActionGroup->add(Gtk::Action::create("PlaybackNext", Gtk::Stock::MEDIA_NEXT),
           Gtk::AccelKey("<control><alt>S"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackNextClicked));
+  m_refActionGroup->add(Gtk::Action::create("JumpToPlaying", "Jump to Playing"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionJumpToPlaying));
   pRepeatAction = Gtk::ToggleAction::create("PlaybackRepeatToggle", Gtk::Stock::GOTO_TOP, "Repeat");
   m_refActionGroup->add(pRepeatAction, sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackRepeatMenuToggled));
 
@@ -120,6 +122,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "      <menuitem action='PlaybackPrevious'/>"
       "      <menuitem action='PlaybackPlayPause'/>"
       "      <menuitem action='PlaybackNext'/>"
+      "      <menuitem action='JumpToPlaying'/>"
+      "      <separator/>"
       "      <menuitem action='PlaybackRepeatToggle'/>"
       "    </menu>"
       "    <menu action='HelpMenu'>"
@@ -535,6 +539,12 @@ void cGtkmmMainWindow::OnActionTrackProperties()
 
     iter.Next();
   }
+}
+
+void cGtkmmMainWindow::OnActionJumpToPlaying()
+{
+  trackid_t id = view.GetCurrentTrackID();
+  if (id != INVALID_TRACK) pTrackList->EnsureRowIsVisible(id);
 }
 
 void cGtkmmMainWindow::OnActionPlaylistRightClick(GdkEventButton* event)

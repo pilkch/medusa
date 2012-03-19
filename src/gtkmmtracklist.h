@@ -82,6 +82,8 @@ public:
   void SetPropertiesForRow(const Gtk::TreeModel::Row& row, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
   void SetPropertiesForRow(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
 
+  void EnsureRowIsVisible(trackid_t id);
+
 protected:
   Gtk::Widget& GetWidget() { return playlistScrolledWindow; }
 

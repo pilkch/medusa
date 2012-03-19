@@ -35,6 +35,7 @@ public:
   void OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
   void OnActionPlayPreviousTrack();
   void OnActionPlayNextTrack();
+  void OnActionJumpToPlaying();
   void OnActionPlaylistRightClick(GdkEventButton* event);
   void OnActionPlaylistDoubleClick(trackid_t id);
   void OnActionPlaybackPositionValueChanged(uint64_t uiValue);

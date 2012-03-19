@@ -352,4 +352,21 @@ void cGtkmmTrackList::SetStatePaused(trackid_t id)
     }
   }
 }
+
+  void cGtkmmTrackList::EnsureRowIsVisible(trackid_t id)
+  {
+    if (id != INVALID_TRACK) {
+      Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
+      while (iter) {
+        Gtk::TreeModel::Row row = *iter;
+        if (row[columns.id] == id) {
+          // Scroll to the requested row
+          scroll_to_row(playlistTreeModelRef->get_path(iter));
+          break;
+        }
+
+        iter++;
+      }
+    }
+  }
 }
