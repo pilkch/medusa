@@ -486,9 +486,39 @@ void cGtkmmMainWindow::OnActionBrowseFiles()
   dialog.SetType(cGtkmmFileDialog::TYPE::OPEN);
   dialog.SetSelectMultipleFiles(true);
   dialog.SetCaption(TEXT("Add audio files"));
-  dialog.SetDefaultFolder(spitfire::filesystem::GetHomeMusicDirectory());
+  dialog.SetDefaultFolder(settings.GetLastAddLocation());
+
+  // http://filext.com/file-extension/MP3
+  cFilter filterMp3;
+  filterMp3.sName = TEXT("MP3 files");
+  filterMp3.mimeTypes.push_back("audio/mpeg");
+  filterMp3.mimeTypes.push_back("audio/x-mpeg");
+  filterMp3.mimeTypes.push_back("audio/mp3");
+  filterMp3.mimeTypes.push_back("audio/x-mp3");
+  filterMp3.mimeTypes.push_back("audio/mpeg3");
+  filterMp3.mimeTypes.push_back("audio/x-mpeg3");
+  filterMp3.mimeTypes.push_back("audio/mpg");
+  filterMp3.mimeTypes.push_back("audio/x-mpg");
+  filterMp3.mimeTypes.push_back("audio/x-mpegaudio");
+
+  // http://filext.com/file-extension/WAV
+  cFilter filterWav;
+  filterWav.sName = TEXT("Wav files");
+  filterWav.mimeTypes.push_back("audio/wav");
+  filterWav.mimeTypes.push_back("audio/x-wav");
+  filterWav.mimeTypes.push_back("audio/wave");
+  filterWav.mimeTypes.push_back("audio/x-pn-wav");
+
+  cFilterList filterList;
+  filterList.AddFilter(filterMp3);
+  filterList.AddFilter(filterWav);
+  filterList.AddFilterAllFiles();
+
+  dialog.SetFilterList(filterList);
+
   if (dialog.Run(*this)) {
     std::cout<<"cGtkmmMainWindow::OnActionBrowseFiles Selected files"<<std::endl;
+    settings.SetLastAddLocation(dialog.GetSelectedFolder());
     const std::vector<string_t>& vSelectedFiles = dialog.GetSelectedFiles();
     view.OnActionAddTracks(vSelectedFiles);
   }
@@ -499,9 +529,10 @@ void cGtkmmMainWindow::OnActionBrowseFolder()
   cGtkmmFolderDialog dialog;
   dialog.SetType(cGtkmmFolderDialog::TYPE::SELECT);
   dialog.SetCaption(TEXT("Add audio folder"));
-  dialog.SetDefaultFolder(spitfire::filesystem::GetHomeMusicDirectory());
+  dialog.SetDefaultFolder(settings.GetLastAddLocation());
   if (dialog.Run(*this)) {
     std::cout<<"cGtkmmMainWindow::OnActionBrowseFolder Selected folder"<<std::endl;
+    settings.SetLastAddLocation(dialog.GetSelectedFolder());
     const string_t sSelectedFolder = dialog.GetSelectedFolder();
     view.OnActionAddTracksFromFolder(sSelectedFolder);
   }

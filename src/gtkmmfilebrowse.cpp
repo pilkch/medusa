@@ -46,6 +46,11 @@ void cGtkmmFileDialog::SetFilterList(const cFilterList& _filterList)
   filterList = _filterList;
 }
 
+const string_t& cGtkmmFileDialog::GetSelectedFolder() const
+{
+  return sSelectedFolder;
+}
+
 const string_t& cGtkmmFileDialog::GetSelectedFile() const
 {
   return sSelectedFile;
@@ -58,6 +63,9 @@ const std::vector<string_t>& cGtkmmFileDialog::GetSelectedFiles() const
 
 bool cGtkmmFileDialog::Run(Gtk::Window& parent)
 {
+  assert(!filterList.filters.empty());
+
+  sSelectedFolder.clear();
   sSelectedFile.clear();
   vSelectedFiles.clear();
 
@@ -66,6 +74,7 @@ bool cGtkmmFileDialog::Run(Gtk::Window& parent)
   dialog(spitfire::string::ToUTF8(sCaption).c_str(), (type == TYPE::SAVE) ? Gtk::FILE_CHOOSER_ACTION_SAVE : Gtk::FILE_CHOOSER_ACTION_OPEN);
   dialog.set_transient_for(parent);
   dialog.set_select_multiple(bSelectMultipleFiles);
+  dialog.set_current_folder(spitfire::string::ToUTF8(sDefaultFolder).c_str());
 
   // Add response buttons the the dialog
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -98,6 +107,7 @@ bool cGtkmmFileDialog::Run(Gtk::Window& parent)
   int iResult = dialog.run();
   if (iResult == Gtk::RESPONSE_OK) {
     bResult = true;
+    sSelectedFolder = spitfire::string::ToString_t(dialog.get_current_folder());
     sSelectedFile = spitfire::string::ToString_t(dialog.get_filename());
     const std::vector<std::string>& files = dialog.get_filenames();
     const size_t n = files.size();
@@ -138,6 +148,7 @@ bool cGtkmmFolderDialog::Run(Gtk::Window& parent)
   Gtk::FileChooserDialog
   dialog(spitfire::string::ToUTF8(sCaption).c_str(), Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
   dialog.set_transient_for(parent);
+  dialog.set_current_folder(spitfire::string::ToUTF8(sDefaultFolder).c_str());
 
   // Add response buttons the the dialog
   dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);

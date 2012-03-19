@@ -35,6 +35,8 @@ namespace medusa
 // filterList.AddFilter(filterCpp);
 // filterList.AddFilterAllFiles();
 //
+// dialog.SetFilterList(filterList);
+//
 // if (dialog.Run(*this)) {
 //   ... set file (dialog.GetSelectedFile());
 // }
@@ -96,6 +98,7 @@ public:
   void SetDefaultFolder(const string_t& sDefaultFolder);
   void SetFilterList(const cFilterList& filterList);
 
+  const string_t& GetSelectedFolder() const;
   const string_t& GetSelectedFile() const;
   const std::vector<string_t>& GetSelectedFiles() const;
 
@@ -108,6 +111,7 @@ private:
   string_t sDefaultFolder;
   cFilterList filterList;
 
+  string_t sSelectedFolder;
   string_t sSelectedFile;
   std::vector<string_t> vSelectedFiles;
 };

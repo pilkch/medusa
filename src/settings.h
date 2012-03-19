@@ -38,6 +38,9 @@ public:
   string_t GetLastFMPassword() const;
   void SetLastFMPassword(const string_t& sPassword);
 
+  string_t GetLastAddLocation();
+  void SetLastAddLocation(const string_t& sLastAddLocation);
+
 private:
   template <class T>
   T GetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& valueDefault) const;

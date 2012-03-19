@@ -202,4 +202,14 @@ void cSettings::SetLastFMPassword(const string_t& sPassword)
 {
   SetXMLValue(TEXT("settings"), TEXT("lastfm"), TEXT("password"), sPassword);
 }
+
+  string_t cSettings::GetLastAddLocation()
+  {
+    return GetXMLValue<string_t>(TEXT("settings"), TEXT("path"), TEXT("lastAddLocation"), spitfire::filesystem::GetHomeMusicDirectory());
+  }
+
+  void cSettings::SetLastAddLocation(const string_t& sLastAddLocation)
+  {
+    SetXMLValue(TEXT("settings"), TEXT("path"), TEXT("lastAddLocation"), sLastAddLocation);
+  }
 }
