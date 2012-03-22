@@ -162,8 +162,6 @@ namespace medusa
   {
     std::cout<<"cModel::ThreadFunction"<<std::endl;
 
-    LoadPlaylist();
-
     while (true) {
       //std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
       soAction.WaitTimeoutMS(1000);
@@ -198,6 +196,11 @@ namespace medusa
 
   void cModel::Start()
   {
+    // Load the playlist on the main thread so that we can populate the track list and start playing as soon as possible
+    LoadPlaylist();
+
+    pController->OnPlaylistLoaded();
+
     Run();
   }
 

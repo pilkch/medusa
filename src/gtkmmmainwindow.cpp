@@ -361,8 +361,6 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   show_all_children();
 
-  if (settings.IsShowMainWindow()) show();
-
   ApplySettings();
 }
 
@@ -457,6 +455,9 @@ void cGtkmmMainWindow::OnMenuFileQuit()
   if (lastfm.IsRunning()) lastfm.StopSoon();
 
   view.OnActionMainWindowQuitSoon();
+
+  // Save the window settings
+  settings.SetShowMainWindow(!bIsIconified);
 
   // Save volume settings
   settings.SetVolume0To100(pVolumeSlider->GetValue());
@@ -870,4 +871,11 @@ void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const string_t& sFilePath, con
   std::wcout<<"cGtkmmMainWindow::OnTrackAdded \""<<sFilePath<<"\""<<std::endl;
   pTrackList->AddTrack(id, sFilePath, metaData);
 }
+
+  void cGtkmmMainWindow::OnPlaylistLoaded()
+  {
+    std::wcout<<"cGtkmmMainWindow::OnPlaylistLoaded"<<std::endl;
+    if (!settings.IsShowMainWindow()) HideWindow();
+    //if (settings.IsPlayAtStart()) OnActionPlayTrack();
+  }
 }

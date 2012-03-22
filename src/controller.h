@@ -29,6 +29,7 @@ namespace medusa
 
     void OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
     void OnTracksAdded(const std::vector<cTrack*>& tracks);
+    void OnPlaylistLoaded();
 
   private:
     cModel& model;

@@ -54,6 +54,12 @@ namespace medusa
     std::vector<cTrack*> tracks;
   };
 
+  class cGtkmmViewEventPlaylistLoaded : public cGtkmmViewEvent
+  {
+  public:
+    virtual void EventFunction(cGtkmmView& view) override;
+  };
+
 class cGtkmmView : public cView
 {
 public:
@@ -62,6 +68,7 @@ public:
   friend class cGtkmmViewEventPlayerAboutToFinish;
   friend class cGtkmmViewEventTrackAdded;
   friend class cGtkmmViewEventTracksAdded;
+  friend class cGtkmmViewEventPlaylistLoaded;
 
   cGtkmmView(int argc, char** argv);
   ~cGtkmmView();
@@ -87,6 +94,7 @@ protected:
 
   virtual void OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData) override;
   virtual void OnTracksAdded(const std::vector<cTrack*>& tracks) override;
+  virtual void OnPlaylistLoaded() override;
 
 private:
   void OnNotify();

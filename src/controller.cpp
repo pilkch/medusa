@@ -64,4 +64,10 @@ namespace medusa
     std::cout<<"cController::OnTracksAdded"<<std::endl;
     view.OnTracksAdded(tracks);
   }
+
+  void cController::OnPlaylistLoaded()
+  {
+    std::cout<<"cController::OnPlaylistLoaded"<<std::endl;
+    view.OnPlaylistLoaded();
+  }
 }

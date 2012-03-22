@@ -35,6 +35,11 @@ namespace medusa
     view.OnTracksAdded(tracks);
   }
 
+  void cGtkmmViewEventPlaylistLoaded::EventFunction(cGtkmmView& view)
+  {
+    view.OnPlaylistLoaded();
+  }
+
 
   // ** cGtkmmView
 
@@ -205,6 +210,17 @@ void cGtkmmView::OnTracksAdded(const std::vector<cTrack*>& tracks)
     }
   }
 }
+
+  void cGtkmmView::OnPlaylistLoaded()
+  {
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventPlaylistLoaded* pEvent = new cGtkmmViewEventPlaylistLoaded;
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnPlaylistLoaded();
+    }
+  }
 
 void cGtkmmView::_Run()
 {
