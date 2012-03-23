@@ -3,6 +3,7 @@
 
 // Spitfire headers
 #include <spitfire/audio/metadata.h>
+#include <spitfire/util/datetime.h>
 
 // Medusa headers
 #include "medusa.h"
@@ -14,6 +15,10 @@ namespace medusa
   {
     string_t FormatNumber(uint64_t uiValue);
     string_t FormatTime(uint64_t milliseconds);
+
+    // YYYY-MM-DD HH:MM:SS.MMM
+    string_t FormatDateTime(const spitfire::util::cDateTime& dateTime);
+    bool ParseDateTime(spitfire::util::cDateTime& dateTime, const string_t& sDateTime);
 
     void ClearPassword(std::string& sPassword);
     void ClearPassword(std::wstring& sPassword);

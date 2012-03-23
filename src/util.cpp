@@ -55,6 +55,100 @@ namespace medusa
       return o.str();
     }
 
+    string_t FormatDateTime(const spitfire::util::cDateTime& dateTime)
+    {
+      spitfire::ostringstream_t o;
+
+      o<<std::right<<std::setfill(TEXT('0'));
+
+      const int year = dateTime.GetYear();
+      o<<std::setw(4)<<year<<TEXT("-");
+
+      const int month = dateTime.GetMonth();
+      o<<std::setw(2)<<month<<TEXT("-");
+
+      const int day = dateTime.GetDay();
+      o<<std::setw(2)<<day<<TEXT(" ");
+
+      const int hours = dateTime.GetHours();
+      o<<std::setw(2)<<hours<<TEXT(":");
+
+      const int minutes = dateTime.GetMinutes();
+      o<<std::setw(2)<<minutes<<":";
+
+      const int seconds = dateTime.GetSeconds();
+      o<<std::setw(2)<<seconds<<".";
+
+      const int milliseconds = dateTime.GetMilliSeconds();
+      o<<std::setw(3)<<milliseconds;
+
+      return o.str();
+    }
+
+    bool ParseDateTime(spitfire::util::cDateTime& dateTime, const string_t& sText)
+    {
+      spitfire::string::cStringParser sp(sText);
+
+      if (sp.IsEnd()) return false;
+      const string_t sYear = sp.GetCharactersAndSkip(4);
+
+      if (sp.IsEnd()) return false;
+      char_t c = sp.GetCharacterAndSkip();
+      if (c != TEXT('-')) return false;
+
+      if (sp.IsEnd()) return false;
+      const string_t sMonth = sp.GetCharactersAndSkip(2);
+
+      if (sp.IsEnd()) return false;
+      c = sp.GetCharacterAndSkip();
+      if (c != TEXT('-')) return false;
+
+      if (sp.IsEnd()) return false;
+      const string_t sDay = sp.GetCharactersAndSkip(2);
+
+      if (sp.IsEnd()) return false;
+      c = sp.GetCharacterAndSkip();
+      if (c != TEXT(' ')) return false;
+
+      if (sp.IsEnd()) return false;
+      const string_t sHour = sp.GetCharactersAndSkip(2);
+
+      if (sp.IsEnd()) return false;
+      c = sp.GetCharacterAndSkip();
+      if (c != TEXT(':')) return false;
+
+      if (sp.IsEnd()) return false;
+      const string_t sMinute = sp.GetCharactersAndSkip(2);
+
+      if (sp.IsEnd()) return false;
+      c = sp.GetCharacterAndSkip();
+      if (c != TEXT(':')) return false;
+
+      if (sp.IsEnd()) return false;
+      const string_t sSecond = sp.GetCharactersAndSkip(2);
+
+      if (sp.IsEnd()) return false;
+      c = sp.GetCharacterAndSkip();
+      if (c != TEXT('.')) return false;
+
+      if (sp.IsEnd()) return false;
+      const string_t sMilliSecond = sp.GetCharactersAndSkip(3);
+
+      const unsigned int year = spitfire::string::ToUnsignedInt(sYear);
+      const unsigned int month = spitfire::string::ToUnsignedInt(sMonth);
+      const unsigned int day = spitfire::string::ToUnsignedInt(sDay);
+      const unsigned int hour = spitfire::string::ToUnsignedInt(sHour);
+      const unsigned int minute = spitfire::string::ToUnsignedInt(sMinute);
+      const unsigned int second = spitfire::string::ToUnsignedInt(sSecond);
+      const unsigned int millisecond = spitfire::string::ToUnsignedInt(sMilliSecond);
+      // Sanity check
+      if ((month > 12) || (day > 31) || (hour > 24) || (minute > 60) || (second > 60) || (millisecond > 1000)) return false;
+
+      dateTime = spitfire::util::cDateTime(year, month, day, hour, minute, second, millisecond);
+
+      return true;
+    }
+
     void ClearPassword(std::string& sPassword)
     {
       const size_t n = sPassword.length();
@@ -91,20 +185,21 @@ namespace medusa
 
       while (reader.ReadLine(values)) {
         std::wcerr<<"LoadPlaylistFromCSV Reading "<<values.size()<<" values"<<std::endl;
-        if (values.size() != 10) break;
+        if (values.size() != 11) break;
 
         std::wcerr<<"LoadPlaylistFromCSV Adding track \""<<values[0]<<"\", \""<<values[1]<<"\", \""<<values[2]<<std::endl;
         cTrack* pTrack = new cTrack;
         pTrack->sFilePath = values[0];
-        pTrack->metaData.sArtist = values[1];
-        pTrack->metaData.sTitle = values[2];
-        pTrack->metaData.sAlbum = values[3];
-        pTrack->metaData.sAlbumArtist = values[4];
-        pTrack->metaData.sGenre = values[5];
-        pTrack->metaData.sComment = values[6];
-        pTrack->metaData.uiYear = spitfire::string::ToUnsignedInt(values[7]);
-        pTrack->metaData.uiTracknum = spitfire::string::ToUnsignedInt(values[8]);
-        pTrack->metaData.uiDurationMilliSeconds = spitfire::string::ToUnsignedInt(values[9]);
+        ParseDateTime(pTrack->dateAdded, values[1]);
+        pTrack->metaData.sArtist = values[2];
+        pTrack->metaData.sTitle = values[3];
+        pTrack->metaData.sAlbum = values[4];
+        pTrack->metaData.sAlbumArtist = values[5];
+        pTrack->metaData.sGenre = values[6];
+        pTrack->metaData.sComment = values[7];
+        pTrack->metaData.uiYear = spitfire::string::ToUnsignedInt(values[8]);
+        pTrack->metaData.uiTracknum = spitfire::string::ToUnsignedInt(values[9]);
+        pTrack->metaData.uiDurationMilliSeconds = spitfire::string::ToUnsignedInt(values[10]);
 
         playlist.push_back(pTrack);
       }
@@ -122,6 +217,7 @@ namespace medusa
 
       // Write titles
       writer.AddValue(TEXT("Full Path"));
+      writer.AddValue(TEXT("Date Added"));
       writer.AddValue(TEXT("Artist"));
       writer.AddValue(TEXT("Title"));
       writer.AddValue(TEXT("Album"));
@@ -140,6 +236,7 @@ namespace medusa
         assert(pTrack != nullptr);
         const cTrack& track = *pTrack;
         writer.AddValue(track.sFilePath);
+        writer.AddValue(FormatDateTime(track.dateAdded));
         writer.AddValue(track.metaData.sArtist);
         writer.AddValue(track.metaData.sTitle);
         writer.AddValue(track.metaData.sAlbum);

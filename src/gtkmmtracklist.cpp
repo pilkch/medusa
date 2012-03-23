@@ -282,13 +282,13 @@ void cGtkmmTrackList::AddTrack(trackid_t id, const cTrack& track)
   Gtk::TreeModel::Row row = *(playlistTreeModelRef->append());
   row[columns.id] = id;
   row[columns.pixbuf] = Gdk::Pixbuf::create_from_file("empty.xpm");
-  row[columns.dateAdded] = "2012/02/28"; //spitfire::string::ToUTF8(medusa::util::FormatTime(ui));
   row[columns.artist] = spitfire::string::ToUTF8(track.metaData.sArtist);
   row[columns.title] = spitfire::string::ToUTF8(track.metaData.sTitle);
   row[columns.album] = spitfire::string::ToUTF8(track.metaData.sAlbum);
   row[columns.track] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiTracknum));
   row[columns.year] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiYear));
   row[columns.time] = spitfire::string::ToUTF8(medusa::util::FormatTime(track.metaData.uiDurationMilliSeconds));
+  row[columns.dateAdded] = spitfire::string::ToUTF8(medusa::util::FormatDateTime(track.dateAdded));
   row[columns.filePath] = spitfire::string::ToUTF8(track.sFilePath);
 
   // Custom data

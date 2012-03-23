@@ -8,6 +8,7 @@
 
 namespace medusa
 {
+  using spitfire::char_t;
   using spitfire::string_t;
 
   class cTrack;

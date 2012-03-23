@@ -3,6 +3,7 @@
 
 // Spitfire headers
 #include <spitfire/audio/metadata.h>
+#include <spitfire/util/datetime.h>
 
 // Medusa headers
 #include "medusa.h"
@@ -16,6 +17,7 @@ namespace medusa
 
     spitfire::audio::cMetaData metaData;
 
+    spitfire::util::cDateTime dateAdded;
     bool bIsPropertiesLoaded;
   };
 }
