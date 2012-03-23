@@ -67,7 +67,7 @@ namespace medusa
 
       tracks.push_back(pTrack);
 
-      pController->OnTrackAdded(pTrack, sFilePath, pTrack->metaData);
+      pController->OnTrackAdded(pTrack, *pTrack);
     }
   }
 
@@ -130,8 +130,7 @@ namespace medusa
       const cTrack* pPlaylistTrack = playlist[i];
 
       cTrack* pTrack = new cTrack;
-      pTrack->sFilePath = pPlaylistTrack->sFilePath;
-      pTrack->metaData = pPlaylistTrack->metaData;
+      *pTrack = *pPlaylistTrack;
 
       tracks.push_back(pTrack);
     }
@@ -149,8 +148,7 @@ namespace medusa
       const cTrack* pTrack = tracks[i];
 
       cTrack* pPlaylistTrack = new cTrack;
-      pPlaylistTrack->sFilePath = pTrack->sFilePath;
-      pPlaylistTrack->metaData = pTrack->metaData;
+      *pPlaylistTrack = *pTrack;
 
       playlist.push_back(pPlaylistTrack);
     }

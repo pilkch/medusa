@@ -866,10 +866,10 @@ void cGtkmmMainWindow::ApplySettings()
   std::cout<<"cGtkmmMainWindow::ApplySettings returning"<<std::endl;
 }
 
-void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
+void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
 {
-  std::wcout<<"cGtkmmMainWindow::OnTrackAdded \""<<sFilePath<<"\""<<std::endl;
-  pTrackList->AddTrack(id, sFilePath, metaData);
+  std::wcout<<"cGtkmmMainWindow::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
+  pTrackList->AddTrack(id, track);
 }
 
   void cGtkmmMainWindow::OnPlaylistLoaded()

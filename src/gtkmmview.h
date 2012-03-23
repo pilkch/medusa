@@ -35,13 +35,12 @@ namespace medusa
   class cGtkmmViewEventTrackAdded : public cGtkmmViewEvent
   {
   public:
-    cGtkmmViewEventTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
+    cGtkmmViewEventTrackAdded(trackid_t id, const cTrack& track);
 
     virtual void EventFunction(cGtkmmView& view) override;
 
     trackid_t id;
-    string_t sFilePath;
-    spitfire::audio::cMetaData metaData;
+    cTrack track;
   };
 
   class cGtkmmViewEventTracksAdded : public cGtkmmViewEvent
@@ -92,7 +91,7 @@ protected:
   void OnPlayerUpdatePlaybackPosition();
   void OnPlayerAboutToFinish();
 
-  virtual void OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData) override;
+  virtual void OnTrackAdded(trackid_t id, const cTrack& track) override;
   virtual void OnTracksAdded(const std::vector<cTrack*>& tracks) override;
   virtual void OnPlaylistLoaded() override;
 

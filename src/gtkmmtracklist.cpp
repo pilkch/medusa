@@ -275,26 +275,26 @@ void cGtkmmTrackList::OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::T
   }
 }
 
-void cGtkmmTrackList::AddTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
+void cGtkmmTrackList::AddTrack(trackid_t id, const cTrack& track)
 {
-  std::wcout<<"cGtkmmTrackList::AddTrack \""<<sFilePath<<"\""<<std::endl;
+  std::wcout<<"cGtkmmTrackList::AddTrack \""<<track.sFilePath<<"\""<<std::endl;
 
   Gtk::TreeModel::Row row = *(playlistTreeModelRef->append());
   row[columns.id] = id;
   row[columns.pixbuf] = Gdk::Pixbuf::create_from_file("empty.xpm");
-  row[columns.artist] = spitfire::string::ToUTF8(metaData.sArtist);
-  row[columns.title] = spitfire::string::ToUTF8(metaData.sTitle);
-  row[columns.album] = spitfire::string::ToUTF8(metaData.sAlbum);
-  row[columns.track] = spitfire::string::ToUTF8(medusa::util::FormatNumber(metaData.uiTracknum));
-  row[columns.year] = spitfire::string::ToUTF8(medusa::util::FormatNumber(metaData.uiYear));
-  row[columns.time] = spitfire::string::ToUTF8(medusa::util::FormatTime(metaData.uiDurationMilliSeconds));
   row[columns.dateAdded] = "2012/02/28"; //spitfire::string::ToUTF8(medusa::util::FormatTime(ui));
-  row[columns.filePath] = spitfire::string::ToUTF8(sFilePath);
+  row[columns.artist] = spitfire::string::ToUTF8(track.metaData.sArtist);
+  row[columns.title] = spitfire::string::ToUTF8(track.metaData.sTitle);
+  row[columns.album] = spitfire::string::ToUTF8(track.metaData.sAlbum);
+  row[columns.track] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiTracknum));
+  row[columns.year] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiYear));
+  row[columns.time] = spitfire::string::ToUTF8(medusa::util::FormatTime(track.metaData.uiDurationMilliSeconds));
+  row[columns.filePath] = spitfire::string::ToUTF8(track.sFilePath);
 
   // Custom data
   cUserDataPtr pUserData(new cUserData);
-  pUserData->sFilePath = sFilePath;
-  pUserData->metaData = metaData;
+  pUserData->sFilePath = track.sFilePath;
+  pUserData->metaData = track.metaData;
   row[columns.userdata]  = pUserData;
 }
 

@@ -13,16 +13,15 @@ namespace medusa
     view.OnPlayerAboutToFinish();
   }
 
-  cGtkmmViewEventTrackAdded::cGtkmmViewEventTrackAdded(trackid_t _id, const string_t& _sFilePath, const spitfire::audio::cMetaData& _metaData) :
+  cGtkmmViewEventTrackAdded::cGtkmmViewEventTrackAdded(trackid_t _id, const cTrack& _track) :
     id(_id),
-    sFilePath(_sFilePath),
-    metaData(_metaData)
+    track(_track)
   {
   }
 
   void cGtkmmViewEventTrackAdded::EventFunction(cGtkmmView& view)
   {
-    view.OnTrackAdded(id, sFilePath, metaData);
+    view.OnTrackAdded(id, track);
   }
 
   cGtkmmViewEventTracksAdded::cGtkmmViewEventTracksAdded(const std::vector<cTrack*>& _tracks) :
@@ -180,16 +179,16 @@ void cGtkmmView::OnPlayerAboutToFinish()
   }
 }
 
-void cGtkmmView::OnTrackAdded(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
+void cGtkmmView::OnTrackAdded(trackid_t id, const cTrack& track)
 {
-  std::wcout<<"cGtkmmView::OnTrackAdded \""<<sFilePath<<"\""<<std::endl;
+  std::wcout<<"cGtkmmView::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
 
   if (!spitfire::util::IsMainThread()) {
-    cGtkmmViewEventTrackAdded* pEvent = new cGtkmmViewEventTrackAdded(id, sFilePath, metaData);
+    cGtkmmViewEventTrackAdded* pEvent = new cGtkmmViewEventTrackAdded(id, track);
     eventQueue.AddItemToBack(pEvent);
     notifyMainThread.Notify();
   } else {
-    pMainWindow->OnTrackAdded(id, sFilePath, metaData);
+    pMainWindow->OnTrackAdded(id, track);
   }
 }
 
@@ -206,7 +205,7 @@ void cGtkmmView::OnTracksAdded(const std::vector<cTrack*>& tracks)
     for (size_t i = 0; i < n; i++) {
       const cTrack* pTrack = tracks[i];
       ASSERT(pTrack != nullptr);
-      pMainWindow->OnTrackAdded(pTrack, pTrack->sFilePath, pTrack->metaData);
+      pMainWindow->OnTrackAdded(pTrack, *pTrack);
     }
   }
 }

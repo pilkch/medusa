@@ -93,7 +93,7 @@ private:
   bool OnListButtonPressEvent(GdkEventButton* event);
   void OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 
-  void AddTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
+  void AddTrack(trackid_t id, const cTrack& track);
 
   void DeleteAll();
   void DeleteAllSelected();
