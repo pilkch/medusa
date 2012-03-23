@@ -164,18 +164,10 @@ INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIR})
 
 
 SET(LIBRARIES
-  SDL
-  SDL_image
-  SDL_ttf
   XDG-basedir
 )
 # Some of the libraries have different names than their Find*.cmake name
 SET(LIBRARIES_LINKED
-  alut
-  openal
-  SDL
-  SDL_image
-  SDL_ttf
   boost_iostreams
   boost_filesystem
   boost_system
