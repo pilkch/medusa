@@ -96,7 +96,7 @@ cGtkmmView::~cGtkmmView()
     o<<"GenericName=Music Player"<<std::endl;
     o<<"X-GNOME-FullName=Medusa Music Player"<<std::endl;
     o<<"Comment=Play and organize your music collection"<<std::endl;
-    o<<"Version=1.0"<<std::endl;
+    o<<"Version="<<BUILD_APPLICATION_VERSION_STRING<<std::endl;
     o<<"Type=Application"<<std::endl;
     //o<<"Exec="<<spitfire::string::ToUTF8(sApplicationFolder)<<"/medusa %U"<<std::endl;
     //o<<"Exec=medusa %U"<<std::endl;

@@ -45,7 +45,6 @@ cd medusa/project/
 cmake .  
 make  
 cd ..  
-cp project/medusa medusa  
 ./medusa
 
 ### Credit
