@@ -281,7 +281,7 @@ void cGtkmmTrackList::AddTrack(trackid_t id, const cTrack& track)
 
   Gtk::TreeModel::Row row = *(playlistTreeModelRef->append());
   row[columns.id] = id;
-  row[columns.pixbuf] = Gdk::Pixbuf::create_from_file("empty.xpm");
+  row[columns.pixbuf] = Gdk::Pixbuf::create_from_file("data/empty.xpm");
   row[columns.artist] = spitfire::string::ToUTF8(track.metaData.sArtist);
   row[columns.title] = spitfire::string::ToUTF8(track.metaData.sTitle);
   row[columns.album] = spitfire::string::ToUTF8(track.metaData.sAlbum);
@@ -332,7 +332,7 @@ void cGtkmmTrackList::SetStatePlaying(trackid_t id)
     Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
     while (iter) {
       Gtk::TreeModel::Row row = *iter;
-      row[columns.pixbuf] = Gdk::Pixbuf::create_from_file((row[columns.id] == id) ? "playing.xpm" : "empty.xpm");
+      row[columns.pixbuf] = Gdk::Pixbuf::create_from_file((row[columns.id] == id) ? "data/playing.xpm" : "data/empty.xpm");
 
       iter++;
     }
@@ -346,7 +346,7 @@ void cGtkmmTrackList::SetStatePaused(trackid_t id)
     Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
     while (iter) {
       Gtk::TreeModel::Row row = *iter;
-      row[columns.pixbuf] = Gdk::Pixbuf::create_from_file((row[columns.id] == id) ? "paused.xpm" : "empty.xpm");
+      row[columns.pixbuf] = Gdk::Pixbuf::create_from_file((row[columns.id] == id) ? "data/paused.xpm" : "data/empty.xpm");
 
       iter++;
     }

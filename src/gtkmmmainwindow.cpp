@@ -41,15 +41,26 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   std::cout<<"cGtkmmMainWindow::cGtkmmMainWindow"<<std::endl;
 
   set_title("Medusa");
-  set_icon_from_file("application.xpm");
   set_border_width(5);
   //set_skip_taskbar_hint(true); // Minimise to status icon
   set_size_request(400, 300);
   set_default_size(800, 400);
   resize(400, 300);
 
+  // Set icon list
+  std::vector<Glib::RefPtr<Gdk::Pixbuf> > icons;
+  icons.push_back(Gdk::Pixbuf::create_from_file("data/application_16x16.png"));
+  icons.push_back(Gdk::Pixbuf::create_from_file("data/application_32x32.png"));
+  icons.push_back(Gdk::Pixbuf::create_from_file("data/application_48x48.png"));
+  icons.push_back(Gdk::Pixbuf::create_from_file("data/application_64x64.png"));
+  icons.push_back(Gdk::Pixbuf::create_from_file("data/application_128x128.png"));
+  icons.push_back(Gdk::Pixbuf::create_from_file("data/application_256x256.png"));
+  // GTK complains if we pass icons larger than 256x256
+  //icons.push_back(Gdk::Pixbuf::create_from_file("data/application_512x512.png"));
+  set_icon_list(icons);
+
   // Status icon
-  pStatusIcon = Gtk::StatusIcon::create_from_file("application.xpm");
+  pStatusIcon = Gtk::StatusIcon::create_from_file("data/application_64x64.png");
   pStatusIcon->signal_activate().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnStatusIconActivate));
   pStatusIcon->signal_popup_menu().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnStatusIconPopupMenu));
 

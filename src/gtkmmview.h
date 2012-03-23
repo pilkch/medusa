@@ -96,11 +96,15 @@ protected:
   virtual void OnPlaylistLoaded() override;
 
 private:
+  void InstallDesktopFile();
+
   void OnNotify();
 
   void _Run();
 
   Gtk::Main kit;
+
+  string_t sExecutableFolder;
 
   cGtkmmMainWindow* pMainWindow;
 

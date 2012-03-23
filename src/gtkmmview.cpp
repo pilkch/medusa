@@ -1,6 +1,9 @@
 // Standard headers
 #include <iostream>
 
+// Spitfire headers
+#include <spitfire/storage/filesystem.h>
+
 // Medusa headers
 #include "controller.h"
 #include "gtkmmview.h"
@@ -50,6 +53,10 @@ cGtkmmView::cGtkmmView(int argc, char** argv) :
   eventQueue(soAction),
   mutexSettings("settings")
 {
+  if (argc >= 1) sExecutableFolder = spitfire::filesystem::GetPath(spitfire::string::ToString_t(argv[0]));
+
+  InstallDesktopFile();
+
   settings.Load();
 
   pMainWindow = new cGtkmmMainWindow(*this, settings);
@@ -74,6 +81,36 @@ cGtkmmView::~cGtkmmView()
 
   settings.Save();
 }
+
+  void cGtkmmView::InstallDesktopFile()
+  {
+    const string_t sDesktopFilePath = spitfire::filesystem::GetHomeDirectory() + TEXT("/.local/share/applications/medusa.desktop");
+    std::wcout<<"cGtkmmView::InstallDesktopFile \""<<sDesktopFilePath<<"\""<<std::endl;
+    std::ofstream o(spitfire::string::ToUTF8(sDesktopFilePath));
+
+    const string_t sApplicationFolder = sExecutableFolder;
+
+    o<<"#!/usr/bin/env xdg-open"<<std::endl;
+    o<<"[Desktop Entry]"<<std::endl;
+    o<<"Name=Medusa"<<std::endl;
+    o<<"GenericName=Music Player"<<std::endl;
+    o<<"X-GNOME-FullName=Medusa Music Player"<<std::endl;
+    o<<"Comment=Play and organize your music collection"<<std::endl;
+    o<<"Version=1.0"<<std::endl;
+    o<<"Type=Application"<<std::endl;
+    //o<<"Exec="<<spitfire::string::ToUTF8(sApplicationFolder)<<"/medusa %U"<<std::endl;
+    //o<<"Exec=medusa %U"<<std::endl;
+    //o<<"TryExec="<<spitfire::string::ToUTF8(sApplicationFolder)<<"/medusa"<<std::endl;
+    o<<"Terminal=false"<<std::endl;
+    o<<"Path="<<spitfire::string::ToUTF8(sApplicationFolder)<<std::endl;
+    //o<<"Icon=medusa"<<std::endl;
+    o<<"Icon="<<spitfire::string::ToUTF8(sApplicationFolder)<<"data/application_256x256.png"<<std::endl;
+    o<<"Categories=GNOME;GTK;AudioVideo;"<<std::endl;
+    //o<<"MimeType=application/x-ogg;application/ogg;audio/x-vorbis+ogg;audio/x-scpls;audio/x-mp3;audio/x-mpeg;audio/mpeg;audio/x-mpegurl;audio/x-flac;"<<std::endl;
+    //o<<"MimeType=audio/x-scpls;audio/x-mp3;audio/x-mpeg;audio/mpeg;audio/x-wav;"<<std::endl;
+    o<<"StartupNotify=true"<<std::endl;
+    o<<"X-Ubuntu-Gettext-Domain=medusa"<<std::endl;
+  }
 
 void cGtkmmView::OnActionMainWindowCreated()
 {
