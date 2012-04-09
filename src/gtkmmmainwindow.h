@@ -31,6 +31,8 @@ public:
   void OnActionBrowseFiles();
   void OnActionBrowseFolder();
   void OnActionRemoveTrack();
+  void OnActionTrackMoveToRubbishBin();
+  void OnActionTrackShowInFileManager();
   void OnActionTrackProperties();
   void OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
   void OnActionPlayPreviousTrack();

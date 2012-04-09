@@ -96,7 +96,7 @@ cGtkmmTrackList::cGtkmmTrackList(cGtkmmMainWindow& _mainWindow) :
   set_model(playlistTreeModelRef);
 
   // All the items to be reordered with drag-and-drop:
-  set_reorderable();
+  set_reorderable(true);
   set_rules_hint();
   set_headers_clickable(true);
   set_headers_visible(true);

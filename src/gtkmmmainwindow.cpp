@@ -79,6 +79,10 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFolder));
   m_refActionGroup->add(Gtk::Action::create("FileRemove", "Remove"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRemoveTrack));
+  m_refActionGroup->add(Gtk::Action::create("FileMoveToRubbishBin", "Move to the Rubbish Bin"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackMoveToRubbishBin));
+  m_refActionGroup->add(Gtk::Action::create("FileShowInFileManager", "Show in the File Manager"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackShowInFileManager));
   m_refActionGroup->add(Gtk::Action::create("FileProperties", "Properties"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackProperties));
   m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
@@ -122,6 +126,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "      <menuitem action='FileAddFiles'/>"
       "      <menuitem action='FileAddFolder'/>"
       "      <menuitem action='FileRemove'/>"
+      "      <menuitem action='FileMoveToRubbishBin'/>"
+      "      <menuitem action='FileShowInFileManager'/>"
       "      <menuitem action='FileProperties'/>"
       "      <separator/>"
       "      <menuitem action='FileQuit'/>"
@@ -231,6 +237,12 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   popupActionGroupRef->add(Gtk::Action::create("ContextRemove", "Remove"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRemoveTrack));
 
+  popupActionGroupRef->add(Gtk::Action::create("ContextTrackMoveToRubbishBin", "Move to the Rubbish Bin"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackMoveToRubbishBin));
+
+  popupActionGroupRef->add(Gtk::Action::create("ContextShowInFileManager", "Show in the File Manager"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackShowInFileManager));
+
   popupActionGroupRef->add(Gtk::Action::create("ContextProperties", "Properties"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackProperties));
 
@@ -247,6 +259,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "    <menuitem action='ContextAddFiles'/>"
       "    <menuitem action='ContextAddFolder'/>"
       "    <menuitem action='ContextRemove'/>"
+      "    <menuitem action='ContextTrackMoveToRubbishBin'/>"
+      "    <menuitem action='ContextShowInFileManager'/>"
       "    <menuitem action='ContextProperties'/>"
       "  </popup>"
       "</ui>";
@@ -566,6 +580,50 @@ void cGtkmmMainWindow::OnActionRemoveTrack()
 
   // Remove the selected tracks
   pTrackList->DeleteAllSelected();
+}
+
+void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
+{
+  std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToRubbishBin A popup menu item was selected"<<std::endl;
+
+  // Tell the view that we are removing these tracks
+  cGtkmmTrackListSelectedIterator iter(*pTrackList);
+  while (iter.IsValid()) {
+    std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToRubbishBin Item was selected"<<std::endl;
+    const Gtk::TreeModel::Row& row = iter.GetRow();
+    trackid_t id = pTrackList->GetTrackIDForRow(row);
+    view.OnActionRemoveTrack(id);
+
+    // Move the file to the rubbish bin
+    string_t sFilePath;
+    spitfire::audio::cMetaData metaData;
+    pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+    spitfire::filesystem::MoveFileToTrash(sFilePath);
+
+    iter.Next();
+  }
+
+  // Remove the selected tracks
+  pTrackList->DeleteAllSelected();
+}
+
+void cGtkmmMainWindow::OnActionTrackShowInFileManager()
+{
+  std::cout<<"cGtkmmMainWindow::OnActionTrackShowInFileManager A popup menu item was selected"<<std::endl;
+  cGtkmmTrackListSelectedIterator iter(*pTrackList);
+  while (iter.IsValid()) {
+    std::cout<<"cGtkmmMainWindow::OnActionTrackShowInFileManager Item was selected"<<std::endl;
+    const Gtk::TreeModel::Row& row = iter.GetRow();
+    trackid_t id = pTrackList->GetTrackIDForRow(row);
+
+    // Show the file in the file manager
+    string_t sFilePath;
+    spitfire::audio::cMetaData metaData;
+    pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+    spitfire::filesystem::ShowFile(sFilePath);
+
+    break;
+  }
 }
 
 void cGtkmmMainWindow::OnActionTrackProperties()
