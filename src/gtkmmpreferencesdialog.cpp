@@ -18,6 +18,8 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Wind
   lastfmSignUpForAnAccount("http://www.last.fm/join", "Sign up for an account"),
   pOkButton(nullptr)
 {
+  set_border_width(5);
+
   set_resizable();
 
   signal_response().connect(sigc::mem_fun(*this, &cGtkmmPreferencesDialog::OnResponse));
