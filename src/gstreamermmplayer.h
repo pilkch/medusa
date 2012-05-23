@@ -11,6 +11,8 @@
 #include "medusa.h"
 #include "track.h"
 
+//#define BUILD_MEDUSA_PLAYBIN2
+
 namespace medusa
 {
   typedef uint64_t timepositionms_t;
@@ -57,7 +59,11 @@ private:
 
   STATE state;
 
+  #ifdef BUILD_MEDUSA_PLAYBIN2
   Glib::RefPtr<Gst::PlayBin2> playbin;
+  #else
+  Glib::RefPtr<Gst::PlayBin> playbin;
+  #endif
   Glib::RefPtr<Gst::Bus> bus;
   guint uiWatchID;
   mutable uint64_t positionMS;

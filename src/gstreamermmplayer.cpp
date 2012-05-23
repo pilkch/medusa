@@ -29,7 +29,11 @@ void cGStreamermmPlayer::Create(int argc, char** argv)
 
   Gst::init(argc, argv);
 
+  #ifdef BUILD_MEDUSA_PLAYBIN2
   playbin = Gst::PlayBin2::create("playbin");
+  #else
+  playbin = Gst::PlayBin::create();
+  #endif
 
   ASSERT(playbin);
 
@@ -38,13 +42,15 @@ void cGStreamermmPlayer::Create(int argc, char** argv)
   // Register our bus message handler
   uiWatchID = bus->add_watch(sigc::mem_fun(*this, &cGStreamermmPlayer::_OnBusMessage));
 
+  #ifdef BUILD_MEDUSA_PLAYBIN2
   // Handle about to finish (We want to tell the listener so that it can queue another track for example)
   playbin->signal_about_to_finish().connect(sigc::mem_fun(*this, &cGStreamermmPlayer::OnAboutToFinish));
+  #endif
 }
 
 void cGStreamermmPlayer::Destroy()
 {
-  std::cout<<"cGStreamermmPlayer::Destroy\n";
+  std::cout<<"cGStreamermmPlayer::Destroy"<<std::endl;
 
   bus->remove_watch(uiWatchID);
   Stop();
@@ -82,8 +88,15 @@ void cGStreamermmPlayer::SetTrack(const string_t& sFilePath, uint64_t uiDuration
 
   Stop();
 
-  if (!sFilePath.empty()) playbin->property_uri() = Glib::filename_to_uri(spitfire::string::ToUTF8(sFilePath).c_str());
-  else playbin->set_property("uri", Glib::ustring(""));
+  if (!sFilePath.empty()) {
+    #ifdef BUILD_MEDUSA_PLAYBIN2
+    playbin->property_uri() = Glib::filename_to_uri(spitfire::string::ToUTF8(sFilePath).c_str());
+    #else
+    const Glib::ustring sPath = spitfire::string::ToUTF8(sFilePath).c_str();
+    const Glib::ustring sURL = "file://" + sPath;
+    playbin->set_property("uri", sURL);
+    #endif
+  } else playbin->set_property("uri", Glib::ustring(""));
 
   sActiveTrackFilePath = sFilePath;
   uiActiveTrackDurationMilliseconds = uiDurationMilliseconds;
