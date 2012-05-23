@@ -33,7 +33,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   pVolumeSlider(nullptr),
   textVolumeMinus("-"),
   dummyCategories("Categories"),
-  dummyStatusBar("StatusBar"),
+  statusBar("0 tracks"),
   pTrackList(nullptr),
   bIsTogglingPlayPause(false),
   bIsTogglingRepeat(false)
@@ -41,7 +41,6 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   std::cout<<"cGtkmmMainWindow::cGtkmmMainWindow"<<std::endl;
 
   set_title("Medusa");
-  set_border_width(5);
   //set_skip_taskbar_hint(true); // Minimise to status icon
   set_size_request(400, 300);
   set_default_size(800, 400);
@@ -379,7 +378,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxControlsAndToolbar.pack_start(boxToolbarAndVolume, Gtk::PACK_SHRINK);
 
   boxMainWindow.pack_start(boxControlsAndToolbar, Gtk::PACK_EXPAND_WIDGET);
-  boxMainWindow.pack_start(dummyStatusBar, Gtk::PACK_SHRINK);
+  boxMainWindow.pack_start(statusBar, Gtk::PACK_SHRINK);
 
   // Add the box layout to the main window
   add(boxMainWindow);
@@ -664,6 +663,11 @@ void cGtkmmMainWindow::OnActionPlaylistDoubleClick(trackid_t id)
   }
 }
 
+void cGtkmmMainWindow::OnActionPlaylistSelectionChanged()
+{
+  UpdateStatusBar();
+}
+
 void cGtkmmMainWindow::OnActionPlaybackPositionValueChanged(uint64_t uiValue)
 {
   view.OnActionPlaybackPositionChanged(uiValue);
@@ -935,10 +939,24 @@ void cGtkmmMainWindow::ApplySettings()
   std::cout<<"cGtkmmMainWindow::ApplySettings returning"<<std::endl;
 }
 
+  void cGtkmmMainWindow::UpdateStatusBar()
+  {
+    std::ostringstream o;
+    const size_t nSelectedCount = pTrackList->GetSelectedTrackCount();
+    if (nSelectedCount != 0) {
+      o<<nSelectedCount;
+      o<<" selected of ";
+    }
+    o<<pTrackList->GetTrackCount();
+    o<<" tracks";
+    statusBar.set_text(o.str());
+  }
+
 void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
 {
   std::wcout<<"cGtkmmMainWindow::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
   pTrackList->AddTrack(id, track);
+  UpdateStatusBar();
 }
 
   void cGtkmmMainWindow::OnPlaylistLoaded(trackid_t idLastPlayed)

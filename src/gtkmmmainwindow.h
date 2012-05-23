@@ -40,6 +40,7 @@ public:
   void OnActionJumpToPlaying();
   void OnActionPlaylistRightClick(GdkEventButton* event);
   void OnActionPlaylistDoubleClick(trackid_t id);
+  void OnActionPlaylistSelectionChanged();
   void OnActionPlaybackPositionValueChanged(uint64_t uiValue);
   void OnActionVolumeValueChanged(unsigned int uiVolume0To100);
 
@@ -55,6 +56,8 @@ private:
   trackid_t GetNextTrack() const;
 
   std::string TimeToString(uint64_t milliseconds) const;
+
+  void UpdateStatusBar();
 
   void SetPlaybackButtonIcons();
 
@@ -135,7 +138,7 @@ private:
 
   Gtk::Button dummyCategories;
 
-  Gtk::Label dummyStatusBar;
+  Gtk::Label statusBar;
 
   cGtkmmTrackList* pTrackList;
 

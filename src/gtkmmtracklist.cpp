@@ -83,7 +83,8 @@ const Gtk::TreeRow& cGtkmmTrackListSelectedIterator::GetRow()
 // ** cGtkmmTrackList
 
 cGtkmmTrackList::cGtkmmTrackList(cGtkmmMainWindow& _mainWindow) :
-  mainWindow(_mainWindow)
+  mainWindow(_mainWindow),
+  nTracks(0)
 {
   // Add the TreeView, inside a ScrolledWindow, with the button underneath
   playlistScrolledWindow.add(*this);
@@ -219,8 +220,8 @@ bool cGtkmmTrackList::OnSelectFunction(const Glib::RefPtr<Gtk::TreeModel>& model
 
 void cGtkmmTrackList::OnListSelectionChanged()
 {
-  std::cout<<"cGtkmmTrackList::OnListSelectionChanged\n";
-  //m_Button_Delete.set_sensitive(playlistTreeSelectionRef->count_selected_rows() > 0);
+  std::cout<<"cGtkmmTrackList::OnListSelectionChanged"<<std::endl;
+  mainWindow.OnActionPlaylistSelectionChanged();
 }
 
 // Handle right click properly
@@ -231,7 +232,7 @@ void cGtkmmTrackList::OnListSelectionChanged()
 // 3) Handle other events as normal
 bool cGtkmmTrackList::OnListButtonPressEvent(GdkEventButton* event)
 {
-  std::cout<<"cGtkmmTrackList::OnListButtonPressEvent\n";
+  std::cout<<"cGtkmmTrackList::OnListButtonPressEvent"<<std::endl;
 
   bool bReturnValue = false;
 
@@ -295,12 +296,18 @@ void cGtkmmTrackList::AddTrack(trackid_t id, const cTrack& track)
   cUserDataPtr pUserData(new cUserData);
   pUserData->sFilePath = track.sFilePath;
   pUserData->metaData = track.metaData;
-  row[columns.userdata]  = pUserData;
+  row[columns.userdata] = pUserData;
+
+  nTracks++;
 }
 
 void cGtkmmTrackList::DeleteAll()
 {
   playlistTreeModelRef.clear();
+
+  nTracks = 0;
+
+  OnListSelectionChanged();
 }
 
 void cGtkmmTrackList::DeleteAllSelected()
@@ -320,9 +327,12 @@ void cGtkmmTrackList::DeleteAllSelected()
       for (std::list<Gtk::TreeModel::RowReference>::iterator iter = rows.begin(); iter != rows.end(); iter++) {
         Gtk::TreeModel::iterator treeiter = playlistTreeModelRef->get_iter(iter->get_path());
         playlistTreeModelRef->erase(treeiter);
+        nTracks--;
       }
     }
   }
+
+  OnListSelectionChanged();
 }
 
 void cGtkmmTrackList::SetStatePlaying(trackid_t id)
@@ -352,6 +362,19 @@ void cGtkmmTrackList::SetStatePaused(trackid_t id)
     }
   }
 }
+
+  size_t cGtkmmTrackList::GetTrackCount() const
+  {
+    return nTracks;
+  }
+
+  size_t cGtkmmTrackList::GetSelectedTrackCount() const
+  {
+    Glib::RefPtr<const Gtk::TreeView::Selection> selectionRef(get_selection());
+    if (selectionRef) return selectionRef->count_selected_rows();
+
+    return 0;
+  }
 
   void cGtkmmTrackList::EnsureRowIsVisible(trackid_t id)
   {

@@ -84,6 +84,9 @@ public:
 
   void EnsureRowIsVisible(trackid_t id);
 
+  size_t GetTrackCount() const;
+  size_t GetSelectedTrackCount() const;
+
 protected:
   Gtk::Widget& GetWidget() { return playlistScrolledWindow; }
 
@@ -132,6 +135,8 @@ private:
   Gtk::ScrolledWindow playlistScrolledWindow;
   Glib::RefPtr<Gtk::ListStore> playlistTreeModelRef;
   Glib::RefPtr<Gtk::TreeSelection> playlistTreeSelectionRef;
+
+  size_t nTracks;
 };
 }
 
