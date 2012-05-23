@@ -19,6 +19,7 @@ namespace medusa
     cController(cModel& model, cView& view);
 
     void OnActionCreated();
+    void OnActionPlayTrack(trackid_t id);
     void OnActionQuitSoon();
     void OnActionQuitNow();
 
@@ -29,7 +30,7 @@ namespace medusa
 
     void OnTrackAdded(trackid_t id, const cTrack& track);
     void OnTracksAdded(const std::vector<cTrack*>& tracks);
-    void OnPlaylistLoaded();
+    void OnPlaylistLoaded(trackid_t idLastPlayed);
 
   private:
     cModel& model;

@@ -52,12 +52,23 @@ namespace medusa
     trackid_t id;
   };
 
+  class cModelEventPlayingTrack : public cModelEvent
+  {
+  public:
+    explicit cModelEventPlayingTrack(trackid_t id);
+
+    virtual void EventFunction(cModel& model) override;
+
+    trackid_t id;
+  };
+
   class cController;
 
   class cModel : public spitfire::util::cThread
   {
   public:
     cModel();
+    ~cModel();
 
     void SetController(cController* pController);
 
@@ -70,11 +81,16 @@ namespace medusa
     void AddTracksFromFolder(const string_t& sFolderPath);
     void RemoveTrack(trackid_t id);
 
+    void SetPlayingTrack(trackid_t id);
+
   private:
     virtual void ThreadFunction();
 
     void LoadPlaylist();
     void SavePlaylist() const;
+
+    trackid_t LoadLastPlayed();
+    void SaveLastPlayed(trackid_t idLastPlayed) const;
 
     cController* pController;
 
@@ -85,14 +101,6 @@ namespace medusa
   };
 
   // ** cModel
-
-  inline cModel::cModel() :
-    spitfire::util::cThread(soAction, "cModel"),
-    pController(nullptr),
-    soAction("cModel_soAction"),
-    eventQueue(soAction)
-  {
-  }
 
   inline void cModel::SetController(cController* _pController)
   {

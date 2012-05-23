@@ -13,6 +13,8 @@
 
 namespace medusa
 {
+  const size_t INVALID_TRACK_INDEX = std::numeric_limits<size_t>::max();
+
   bool IsFileTypeSupported(const string_t& sFileExtension)
   {
     return ((sFileExtension == TEXT("mp3")) || (sFileExtension == TEXT(".wav")));
@@ -48,7 +50,33 @@ namespace medusa
     model.RemoveTrack(id);
   }
 
+  cModelEventPlayingTrack::cModelEventPlayingTrack(trackid_t _id) :
+    id(_id)
+  {
+  }
+
+  void cModelEventPlayingTrack::EventFunction(cModel& model)
+  {
+    model.SetPlayingTrack(id);
+  }
+
+
   // ** cModel
+
+  cModel::cModel() :
+    spitfire::util::cThread(soAction, "cModel"),
+    pController(nullptr),
+    soAction("cModel_soAction"),
+    eventQueue(soAction)
+  {
+  }
+
+  cModel::~cModel()
+  {
+    const size_t n = tracks.size();
+    for (size_t i = 0; i < n; i++) spitfire::SAFE_DELETE(tracks[i]);
+    tracks.clear();
+  }
 
   void cModel::AddTrack(const string_t& sFilePath)
   {
@@ -117,43 +145,84 @@ namespace medusa
     }
   }
 
+  void cModel::SetPlayingTrack(trackid_t id)
+  {
+    if (spitfire::util::IsMainThread()) {
+      cModelEventPlayingTrack* pEvent = new cModelEventPlayingTrack(id);
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      SaveLastPlayed(id);
+    }
+  }
+
   void cModel::LoadPlaylist()
   {
     std::cout<<"cModel::LoadPlaylist"<<std::endl;
 
-    // Save the playlist
-    std::vector<cTrack*> playlist;
-    util::LoadPlaylistFromCSV(util::GetPlayListFilePath(), playlist);
-
-    const size_t n = playlist.size();
-    for (size_t i = 0; i < n; i++) {
-      const cTrack* pPlaylistTrack = playlist[i];
-
-      cTrack* pTrack = new cTrack;
-      *pTrack = *pPlaylistTrack;
-
-      tracks.push_back(pTrack);
-    }
+    // Load the playlist
+    util::LoadPlaylistFromCSV(util::GetPlayListFilePath(), tracks);
 
     pController->OnTracksAdded(tracks);
   }
 
   void cModel::SavePlaylist() const
   {
+    std::cout<<"cModel::SavePlaylist"<<std::endl;
+
     // Save the playlist
-    std::vector<cTrack*> playlist;
+    util::SavePlaylistToCSV(util::GetPlayListFilePath(), tracks);
+  }
+
+  trackid_t cModel::LoadLastPlayed()
+  {
+    std::cout<<"cModel::LoadLastPlayed"<<std::endl;
+
+    trackid_t idLastPlayed = INVALID_TRACK;
+
+    // Load the last played track index
+    size_t index = INVALID_TRACK_INDEX;
+
+    spitfire::storage::cReadTextFile file(util::GetLastPlayedFilePath());
+    if (file.IsOpen()) {
+      // Read the index from the file
+      string_t sLine;
+      if (file.ReadLine(sLine)) {
+        index = spitfire::string::ToUnsignedInt(sLine);
+      }
+    }
+
+    // Get the last played track
+    if (index < tracks.size()) idLastPlayed = tracks[index];
+
+    return idLastPlayed;
+  }
+
+  void cModel::SaveLastPlayed(trackid_t idLastPlayed) const
+  {
+    std::cout<<"cModel::SaveLastPlayed"<<std::endl;
+
+    // Get the last played track index
+    size_t index = INVALID_TRACK_INDEX;
 
     const size_t n = tracks.size();
     for (size_t i = 0; i < n; i++) {
-      const cTrack* pTrack = tracks[i];
-
-      cTrack* pPlaylistTrack = new cTrack;
-      *pPlaylistTrack = *pTrack;
-
-      playlist.push_back(pPlaylistTrack);
+      if (tracks[i] == idLastPlayed) {
+        index = i;
+        break;
+      }
     }
 
-    util::SavePlaylistToCSV(util::GetPlayListFilePath(), playlist);
+    // Save the last played track index
+    if (index != INVALID_TRACK_INDEX) {
+      spitfire::storage::cWriteTextFile file(util::GetLastPlayedFilePath());
+      if (file.IsOpen()) {
+        // Write the index to the file
+        file.WriteLine(spitfire::string::ToString(index));
+      }
+    } else {
+      // Otherwise delete the file
+      spitfire::filesystem::DeleteFile(util::GetLastPlayedFilePath());
+    }
   }
 
   void cModel::ThreadFunction()
@@ -175,13 +244,8 @@ namespace medusa
       Yield();
     }
 
+    // Save the playlist on the background thread so that we can still process events on the main thread
     SavePlaylist();
-
-    {
-      const size_t n = tracks.size();
-      for (size_t i = 0; i < n; i++) spitfire::SAFE_DELETE(tracks[i]);
-      tracks.clear();
-    }
 
     // Remove any further events because we don't care any more
     while (true) {
@@ -197,8 +261,12 @@ namespace medusa
     // Load the playlist on the main thread so that we can populate the track list and start playing as soon as possible
     LoadPlaylist();
 
-    pController->OnPlaylistLoaded();
+    // Load the last played setting
+    trackid_t idLastPlayed = LoadLastPlayed();
 
+    pController->OnPlaylistLoaded(idLastPlayed);
+
+    // Start
     Run();
   }
 

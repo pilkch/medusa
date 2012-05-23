@@ -48,7 +48,7 @@ public:
   void OnThemeChanged();
 
   void OnTrackAdded(trackid_t id, const cTrack& track);
-  void OnPlaylistLoaded();
+  void OnPlaylistLoaded(trackid_t idLastPlayed);
 
 private:
   trackid_t GetPreviousTrack() const;

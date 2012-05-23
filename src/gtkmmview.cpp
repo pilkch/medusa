@@ -37,9 +37,14 @@ namespace medusa
     view.OnTracksAdded(tracks);
   }
 
+  cGtkmmViewEventPlaylistLoaded::cGtkmmViewEventPlaylistLoaded(trackid_t _idLastPlayed) :
+    idLastPlayed(_idLastPlayed)
+  {
+  }
+
   void cGtkmmViewEventPlaylistLoaded::EventFunction(cGtkmmView& view)
   {
-    view.OnPlaylistLoaded();
+    view.OnPlaylistLoaded(idLastPlayed);
   }
 
 
@@ -151,6 +156,8 @@ void cGtkmmView::OnActionRemoveTrack(trackid_t id)
 
 void cGtkmmView::OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
 {
+  pController->OnActionPlayTrack(id);
+
   player.SetTrack(sFilePath, metaData.uiDurationMilliSeconds);
 
   pCurrentTrack = id;
@@ -247,14 +254,14 @@ void cGtkmmView::OnTracksAdded(const std::vector<cTrack*>& tracks)
   }
 }
 
-  void cGtkmmView::OnPlaylistLoaded()
+  void cGtkmmView::OnPlaylistLoaded(trackid_t idLastPlayed)
   {
     if (!spitfire::util::IsMainThread()) {
-      cGtkmmViewEventPlaylistLoaded* pEvent = new cGtkmmViewEventPlaylistLoaded;
+      cGtkmmViewEventPlaylistLoaded* pEvent = new cGtkmmViewEventPlaylistLoaded(idLastPlayed);
       eventQueue.AddItemToBack(pEvent);
       notifyMainThread.Notify();
     } else {
-      pMainWindow->OnPlaylistLoaded();
+      pMainWindow->OnPlaylistLoaded(idLastPlayed);
     }
   }
 

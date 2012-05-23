@@ -46,7 +46,7 @@ namespace medusa
   class cGtkmmViewEventTracksAdded : public cGtkmmViewEvent
   {
   public:
-    cGtkmmViewEventTracksAdded(const std::vector<cTrack*>& tracks);
+    explicit cGtkmmViewEventTracksAdded(const std::vector<cTrack*>& tracks);
 
     virtual void EventFunction(cGtkmmView& view) override;
 
@@ -56,7 +56,11 @@ namespace medusa
   class cGtkmmViewEventPlaylistLoaded : public cGtkmmViewEvent
   {
   public:
+    explicit cGtkmmViewEventPlaylistLoaded(trackid_t idLastPlayed);
+
     virtual void EventFunction(cGtkmmView& view) override;
+
+    trackid_t idLastPlayed;
   };
 
 class cGtkmmView : public cView
@@ -93,7 +97,7 @@ protected:
 
   virtual void OnTrackAdded(trackid_t id, const cTrack& track) override;
   virtual void OnTracksAdded(const std::vector<cTrack*>& tracks) override;
-  virtual void OnPlaylistLoaded() override;
+  virtual void OnPlaylistLoaded(trackid_t idLastPlayed) override;
 
 private:
   void InstallDesktopFile();

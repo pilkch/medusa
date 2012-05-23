@@ -941,10 +941,24 @@ void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
   pTrackList->AddTrack(id, track);
 }
 
-  void cGtkmmMainWindow::OnPlaylistLoaded()
+  void cGtkmmMainWindow::OnPlaylistLoaded(trackid_t idLastPlayed)
   {
     std::wcout<<"cGtkmmMainWindow::OnPlaylistLoaded"<<std::endl;
     if (!settings.IsShowMainWindow()) HideWindow();
-    //if (settings.IsPlayAtStart()) OnActionPlayTrack();
+
+    // Get the index of last played file to settings
+    if (idLastPlayed != INVALID_TRACK) {
+      pTrackList->EnsureRowIsVisible(idLastPlayed);
+
+      // Start playing the track if we were playing when we quit last
+      if (settings.IsPlaying()) {
+        string_t sFilePath;
+        spitfire::audio::cMetaData metaData;
+        if (pTrackList->GetPropertiesForRow(idLastPlayed, sFilePath, metaData)) {
+          std::wcout<<"cGtkmmTrackList::OnPlaylistLoaded Track: "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
+          OnActionPlayTrack(idLastPlayed, sFilePath, metaData);
+        }
+      }
+    }
   }
 }

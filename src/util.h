@@ -24,6 +24,7 @@ namespace medusa
     void ClearPassword(std::wstring& sPassword);
 
     string_t GetPlayListFilePath();
+    string_t GetLastPlayedFilePath();
 
     bool LoadPlaylistFromCSV(const string_t& sFilePath, std::vector<cTrack*>& playlist);
     bool SavePlaylistToCSV(const string_t& sFilePath, const std::vector<cTrack*>& playlist);

@@ -143,6 +143,16 @@ void cSettings::SetShowMainWindow(bool bShowMainWindow)
   SetXMLValue(TEXT("settings"), TEXT("window"), TEXT("showMainWindow"), bShowMainWindow);
 }
 
+bool cSettings::IsPlaying() const
+{
+  return GetXMLValue(TEXT("settings"), TEXT("playback"), TEXT("playing"), true);
+}
+
+void cSettings::SetPlaying(bool bPlaying)
+{
+  SetXMLValue(TEXT("settings"), TEXT("playback"), TEXT("playing"), bPlaying);
+}
+
 uint32_t cSettings::GetVolume0To100() const
 {
   return GetXMLValue(TEXT("settings"), TEXT("playback"), TEXT("volume"), 100);

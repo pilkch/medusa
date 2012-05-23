@@ -33,6 +33,11 @@ namespace medusa
     model.StopNow();
   }
 
+  void cController::OnActionPlayTrack(trackid_t id)
+  {
+    model.SetPlayingTrack(id);
+  }
+
   void cController::AddTrack(const string_t& sFilePath)
   {
     model.AddTrack(sFilePath);
@@ -65,9 +70,9 @@ namespace medusa
     view.OnTracksAdded(tracks);
   }
 
-  void cController::OnPlaylistLoaded()
+  void cController::OnPlaylistLoaded(trackid_t idLastPlayed)
   {
     std::cout<<"cController::OnPlaylistLoaded"<<std::endl;
-    view.OnPlaylistLoaded();
+    view.OnPlaylistLoaded(idLastPlayed);
   }
 }

@@ -166,6 +166,11 @@ namespace medusa
       return spitfire::filesystem::GetThisApplicationSettingsDirectory() + TEXT("playlist.csv");
     }
 
+    string_t GetLastPlayedFilePath()
+    {
+      return spitfire::filesystem::GetThisApplicationSettingsDirectory() + TEXT("lastplayed.txt");
+    }
+
     bool LoadPlaylistFromCSV(const string_t& sFilePath, std::vector<cTrack*>& playlist)
     {
       const size_t n = playlist.size();

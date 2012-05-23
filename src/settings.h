@@ -20,6 +20,9 @@ public:
   bool IsShowMainWindow() const;
   void SetShowMainWindow(bool bShowMainWindow);
 
+  bool IsPlaying() const;
+  void SetPlaying(bool bPlaying);
+
   uint32_t GetVolume0To100() const;
   void SetVolume0To100(uint32_t uiVolume);
 
