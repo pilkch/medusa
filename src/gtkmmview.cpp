@@ -90,7 +90,7 @@ cGtkmmView::~cGtkmmView()
   void cGtkmmView::InstallDesktopFile()
   {
     const string_t sDesktopFilePath = spitfire::filesystem::GetHomeDirectory() + TEXT("/.local/share/applications/medusa.desktop");
-    std::wcout<<"cGtkmmView::InstallDesktopFile \""<<sDesktopFilePath<<"\""<<std::endl;
+    std::cout<<"cGtkmmView::InstallDesktopFile \""<<sDesktopFilePath<<"\""<<std::endl;
     std::ofstream o(spitfire::string::ToUTF8(sDesktopFilePath));
 
     const string_t sApplicationFolder = sExecutableFolder;
@@ -230,7 +230,7 @@ void cGtkmmView::OnPlayerAboutToFinish()
 
 void cGtkmmView::OnTrackAdded(trackid_t id, const cTrack& track)
 {
-  std::wcout<<"cGtkmmView::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
+  std::cout<<"cGtkmmView::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
 
   if (!spitfire::util::IsMainThread()) {
     cGtkmmViewEventTrackAdded* pEvent = new cGtkmmViewEventTrackAdded(id, track);

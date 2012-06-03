@@ -278,7 +278,7 @@ void cGtkmmTrackList::OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::T
 
 void cGtkmmTrackList::AddTrack(trackid_t id, const cTrack& track)
 {
-  std::wcout<<"cGtkmmTrackList::AddTrack \""<<track.sFilePath<<"\""<<std::endl;
+  std::cout<<"cGtkmmTrackList::AddTrack \""<<track.sFilePath<<"\""<<std::endl;
 
   Gtk::TreeModel::Row row = *(playlistTreeModelRef->append());
   row[columns.id] = id;

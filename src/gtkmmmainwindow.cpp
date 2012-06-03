@@ -879,7 +879,7 @@ void cGtkmmMainWindow::OnActionTrackProperties()
     string_t sFilePath;
     spitfire::audio::cMetaData metaData;
     pTrackList->GetPropertiesForRow(row, sFilePath, metaData);
-    std::wcout<<"cGtkmmMainWindow::OnActionTrackProperties Properties selected for track "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
+    std::cout<<"cGtkmmMainWindow::OnActionTrackProperties Properties selected for track "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
 
     iter.Next();
   }
@@ -932,7 +932,7 @@ void cGtkmmMainWindow::OnActionPlaylistDoubleClick(trackid_t id)
   string_t sFilePath;
   spitfire::audio::cMetaData metaData;
   if (pTrackList->GetPropertiesForRow(id, sFilePath, metaData)) {
-    std::wcout<<"cGtkmmTrackList::OnActionPlaylistDoubleClick Track: "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
+    std::cout<<"cGtkmmTrackList::OnActionPlaylistDoubleClick Track: "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
     OnActionPlayTrack(id, sFilePath, metaData);
   }
 }
@@ -1234,14 +1234,14 @@ void cGtkmmMainWindow::ApplySettings()
 
 void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
 {
-  std::wcout<<"cGtkmmMainWindow::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
+  std::cout<<"cGtkmmMainWindow::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
   pTrackList->AddTrack(id, track);
   UpdateStatusBar();
 }
 
   void cGtkmmMainWindow::OnPlaylistLoaded(trackid_t idLastPlayed)
   {
-    std::wcout<<"cGtkmmMainWindow::OnPlaylistLoaded"<<std::endl;
+    std::cout<<"cGtkmmMainWindow::OnPlaylistLoaded"<<std::endl;
     if (!settings.IsShowMainWindow()) HideWindow();
 
     // Get the index of last played file to settings
@@ -1253,7 +1253,7 @@ void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
         string_t sFilePath;
         spitfire::audio::cMetaData metaData;
         if (pTrackList->GetPropertiesForRow(idLastPlayed, sFilePath, metaData)) {
-          std::wcout<<"cGtkmmTrackList::OnPlaylistLoaded Track: "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
+          std::cout<<"cGtkmmTrackList::OnPlaylistLoaded Track: "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
           OnActionPlayTrack(idLastPlayed, sFilePath, metaData);
         }
       }

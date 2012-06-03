@@ -82,7 +82,7 @@ void cGStreamermmPlayer::OnAboutToFinish()
 
 void cGStreamermmPlayer::SetTrack(const string_t& sFilePath, uint64_t uiDurationMilliseconds)
 {
-  std::wcout<<"cGStreamermmPlayer::SetTrack \""<<sFilePath<<"\""<<std::endl;
+  std::cout<<"cGStreamermmPlayer::SetTrack \""<<sFilePath<<"\""<<std::endl;
 
   ASSERT(playbin);
 

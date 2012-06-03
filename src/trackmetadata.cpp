@@ -404,7 +404,7 @@ bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const strin
 
   // If we don't have title and artist return false
   if (metaData.sTitle.empty() && metaData.sArtist.empty()) {
-    std::wcerr<<"cLibID3Tag::ReadTrackTags FAILED to read metadata from \""<<sFilePath<<"\"\n";
+    std::cerr<<"cLibID3Tag::ReadTrackTags FAILED to read metadata from \""<<sFilePath<<"\"\n";
     return false;
   }
 
@@ -481,7 +481,7 @@ string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* szLabel, const string_t& 
 
 bool cLibID3Tag::WriteTrackTags(const spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const
 {
-  std::wcout<<"cLibID3Tag::WriteTrackTags \""<<sFilePath<<"\""<<std::endl;
+  std::cout<<"cLibID3Tag::WriteTrackTags \""<<sFilePath<<"\""<<std::endl;
 
   if (!spitfire::filesystem::FileExists(sFilePath)) {
     std::cerr<<"cLibID3Tag::WriteTrackTags File does not exist, returning false"<<std::endl;
@@ -526,7 +526,7 @@ bool cLibID3Tag::WriteTrackTags(const spitfire::audio::cMetaData& metaData, cons
   std::cout<<"Removing album"<<std::endl;
   RemoveTag(tag, ID3_FRAME_ALBUM);
   if (!metaData.sAlbum.empty()) {
-    std::wcout<<"Setting album \""<<metaData.sAlbum<<"\""<<std::endl;
+    std::cout<<"Setting album \""<<metaData.sAlbum<<"\""<<std::endl;
     SetTag(tag, ID3_FRAME_ALBUM, metaData.sAlbum);
   }
 

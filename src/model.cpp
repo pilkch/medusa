@@ -103,7 +103,7 @@ namespace medusa
 
       cTrack* pTrack = new cTrack;
       pTrack->sFilePath = sFilePath;
-      std::wcout<<"cModel::AddTrack Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
+      std::cout<<"cModel::AddTrack Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
       propertiesReader.ReadTrackProperties(pTrack->metaData, pTrack->sFilePath);
 
       tracks.push_back(pTrack);
@@ -172,7 +172,7 @@ namespace medusa
       const std::vector<cTrack*>::iterator iterEnd = tracks.end();
       while (iter != iterEnd) {
         if (*iter == id) {
-          std::wcout<<"cModel::RemoveTrack Removing track \""<<(*iter)->sFilePath<<"\""<<std::endl;
+          std::cout<<"cModel::RemoveTrack Removing track \""<<(*iter)->sFilePath<<"\""<<std::endl;
           tracks.erase(iter);
           break;
         }

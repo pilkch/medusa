@@ -180,7 +180,7 @@ namespace medusa
 
       spitfire::csv::cReader reader;
       if (!reader.Open(sFilePath)) {
-        std::wcerr<<"LoadPlaylistFromCSV Error opening \""<<sFilePath<<"\", returning false"<<std::endl;
+        std::cerr<<"LoadPlaylistFromCSV Error opening \""<<sFilePath<<"\", returning false"<<std::endl;
         return false;
       }
 
@@ -189,10 +189,10 @@ namespace medusa
       reader.ReadLine(values);
 
       while (reader.ReadLine(values)) {
-        std::wcerr<<"LoadPlaylistFromCSV Reading "<<values.size()<<" values"<<std::endl;
+        std::cerr<<"LoadPlaylistFromCSV Reading "<<values.size()<<" values"<<std::endl;
         if (values.size() != 11) break;
 
-        std::wcerr<<"LoadPlaylistFromCSV Adding track \""<<values[0]<<"\", \""<<values[1]<<"\", \""<<values[2]<<std::endl;
+        std::cerr<<"LoadPlaylistFromCSV Adding track \""<<values[0]<<"\", \""<<values[1]<<"\", \""<<values[2]<<std::endl;
         cTrack* pTrack = new cTrack;
         pTrack->sFilePath = values[0];
         ParseDateTime(pTrack->dateAdded, values[1]);
@@ -216,7 +216,7 @@ namespace medusa
     {
       spitfire::csv::cWriter writer;
       if (!writer.Open(sFilePath)) {
-        std::wcerr<<"SavePlaylistToCSV Error opening \""<<sFilePath<<"\", returning false"<<std::endl;
+        std::cerr<<"SavePlaylistToCSV Error opening \""<<sFilePath<<"\", returning false"<<std::endl;
         return false;
       }
 
