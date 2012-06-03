@@ -1,6 +1,9 @@
 #ifndef gtkmmmainwindow_h
 #define gtkmmmainwindow_h
 
+// Standard headers
+#include <set>
+
 // gtkmm headers
 #include <gtkmm.h>
 
