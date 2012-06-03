@@ -15,6 +15,7 @@
 // Spitfire headers
 #include <spitfire/spitfire.h>
 
+#include <spitfire/util/thread.h>
 #include <spitfire/storage/filesystem.h>
 #include <spitfire/storage/xml.h>
 
@@ -25,6 +26,8 @@ namespace medusa
 {
 void cSettings::Load()
 {
+  assert(spitfire::util::IsMainThread());
+
   // Read the xml document
   spitfire::xml::reader reader;
 
@@ -37,6 +40,8 @@ void cSettings::Load()
 
 void cSettings::Save()
 {
+  assert(spitfire::util::IsMainThread());
+
   // Create the directory
   const string_t sFolder = spitfire::filesystem::GetThisApplicationSettingsDirectory();
   spitfire::filesystem::CreateDirectory(sFolder);
@@ -54,6 +59,8 @@ void cSettings::Save()
 template <class T>
 T cSettings::GetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& valueDefault) const
 {
+  assert(spitfire::util::IsMainThread());
+
   T value = valueDefault;
 
   spitfire::document::cNode::const_iterator iterConfig(document);
@@ -81,6 +88,8 @@ T cSettings::GetXMLValue(const string_t& sSection, const string_t& sItem, const 
 template <class T>
 void cSettings::SetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& value)
 {
+  assert(spitfire::util::IsMainThread());
+
   // Get or create the config element
   spitfire::document::cNode::iterator iterConfig(document);
   if (!iterConfig.IsValid()) {
