@@ -41,7 +41,7 @@ public:
   string_t GetLastFMPassword() const;
   void SetLastFMPassword(const string_t& sPassword);
 
-  string_t GetLastAddLocation();
+  string_t GetLastAddLocation() const;
   void SetLastAddLocation(const string_t& sLastAddLocation);
 
   string_t GetLastMoveToFolderLocation() const;

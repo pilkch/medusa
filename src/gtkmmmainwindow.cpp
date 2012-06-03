@@ -339,6 +339,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   pVolumeSlider = new cGtkmmSlider(*this, true);
   pVolumeSlider->SetRange(0, 100);
+  pVolumeSlider->SetValue(100);
   pVolumeSlider->SetValue(settings.GetVolume0To100());
 
   pVolumeSlider->set_size_request(-1, 100);
@@ -646,6 +647,9 @@ void cGtkmmMainWindow::OnMenuFileQuit()
   // Save volume settings
   settings.SetVolume0To100(pVolumeSlider->GetValue());
 
+  // Save playback settings
+  settings.SetPlaying(view.IsPlaying());
+
   // Tell the lastfm thread to stop now
   if (lastfm.IsRunning()) lastfm.Stop();
 
@@ -732,6 +736,7 @@ void cGtkmmMainWindow::OnActionBrowseFiles()
   if (dialog.Run(*this)) {
     std::cout<<"cGtkmmMainWindow::OnActionBrowseFiles Selected files"<<std::endl;
     settings.SetLastAddLocation(dialog.GetSelectedFolder());
+    settings.Save();
     const std::vector<string_t>& vSelectedFiles = dialog.GetSelectedFiles();
     view.OnActionAddTracks(vSelectedFiles);
   }
@@ -746,6 +751,7 @@ void cGtkmmMainWindow::OnActionBrowseFolder()
   if (dialog.Run(*this)) {
     std::cout<<"cGtkmmMainWindow::OnActionBrowseFolder Selected folder"<<std::endl;
     settings.SetLastAddLocation(dialog.GetSelectedFolder());
+    settings.Save();
     const string_t sSelectedFolder = dialog.GetSelectedFolder();
     view.OnActionAddTracksFromFolder(sSelectedFolder);
   }
@@ -1044,6 +1050,7 @@ void cGtkmmMainWindow::OnPlaybackRepeatMenuToggled()
 
     // Update the settings
     settings.SetRepeat(bIsRepeat);
+    settings.Save();
   }
 }
 
@@ -1061,6 +1068,7 @@ void cGtkmmMainWindow::OnPlaybackRepeatButtonToggled()
 
     // Update the settings
     settings.SetRepeat(bIsRepeat);
+    settings.Save();
   }
 }
 
@@ -1282,6 +1290,10 @@ void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
   {
     std::cout<<"cGtkmmMainWindow::OnPlaylistLoaded"<<std::endl;
     if (!settings.IsShowMainWindow()) HideWindow();
+
+    const unsigned int uiVolume0To100 = settings.GetVolume0To100();
+    pVolumeSlider->SetValue(uiVolume0To100);
+    view.OnActionVolumeChanged(uiVolume0To100);
 
     // Get the index of last played file to settings
     if (idLastPlayed != INVALID_TRACK) {

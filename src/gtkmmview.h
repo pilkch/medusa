@@ -77,6 +77,7 @@ public:
   ~cGtkmmView();
 
   trackid_t GetCurrentTrackID() const { return pCurrentTrack; }
+  bool IsPlaying() const;
 
 protected:
   void OnActionMainWindowCreated();
