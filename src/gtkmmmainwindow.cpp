@@ -190,6 +190,17 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   SetStatusIconText(TEXT("Medusa"));
 
+
+  // Drag and drop from Nautilus
+  std::vector<Gtk::TargetEntry> listTargets;
+  listTargets.push_back(Gtk::TargetEntry("text/uri-list"));
+
+  // Set the whole window to be a drag target (We could also just make the listview a drag target instead)
+  drag_dest_set(listTargets, Gtk::DEST_DEFAULT_MOTION | Gtk::DEST_DEFAULT_DROP, Gdk::ACTION_COPY | Gdk::ACTION_MOVE);
+  // Install our drag target event handler
+  signal_drag_data_received().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnFileDroppedFromNautilus));
+
+
   // Menu and toolbar
 
   // Create actions for menus and toolbars
@@ -652,6 +663,34 @@ void cGtkmmMainWindow::OnMenuEditPreferences()
     // Update our state from the settings
     ApplySettings();
   }
+}
+
+void cGtkmmMainWindow::OnFileDroppedFromNautilus(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time)
+{
+  std::cout<<"cGtkmmMainWindow::OnFileDroppedFromNautilus "<<selection_data.get_length()<<", "<<selection_data.get_format()<<std::endl;
+
+  bool bIsHandled = false;
+
+  if ((selection_data.get_length() >= 0) && (selection_data.get_format() == 8)) {
+    std::cout<<"cGtkmmMainWindow::OnFileDroppedFromNautilus 1"<<std::endl;
+    std::vector<Glib::ustring> file_list = selection_data.get_uris();
+    if (!file_list.empty()) {
+      std::cout<<"cGtkmmMainWindow::OnFileDroppedFromNautilus 2"<<std::endl;
+      const size_t n = file_list.size();
+      for (size_t i = 0; i < n; i++) {
+        std::cout<<"cGtkmmMainWindow::OnFileDroppedFromNautilus 3"<<std::endl;
+        const string_t sPath = spitfire::string::ToString_t(Glib::filename_from_uri(file_list[i]));
+        std::cout<<"cGtkmmMainWindow::OnFileDroppedFromNautilus \""<<sPath<<"\""<<std::endl;
+
+        if (spitfire::filesystem::IsFolder(sPath)) view.OnActionAddTracksFromFolder(sPath);
+        else view.OnActionAddTrack(sPath);
+      }
+
+      bIsHandled = true;
+    }
+  }
+
+  context->drag_finish(bIsHandled, false, time);
 }
 
 void cGtkmmMainWindow::OnActionBrowseFiles()

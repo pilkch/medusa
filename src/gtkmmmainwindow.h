@@ -52,6 +52,8 @@ public:
   void SetPlaybackPositionMS(uint64_t milliseconds);
   void SetPlaybackLengthMS(uint64_t milliseconds);
 
+  void OnFileDroppedFromNautilus(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time);
+
   void OnActionBrowseFiles();
   void OnActionBrowseFolder();
   void OnActionRemoveTrack();
