@@ -222,4 +222,41 @@ void cSettings::SetLastFMPassword(const string_t& sPassword)
   {
     SetXMLValue(TEXT("settings"), TEXT("path"), TEXT("lastAddLocation"), sLastAddLocation);
   }
+
+  string_t cSettings::GetLastMoveToFolderLocation() const
+  {
+    return GetXMLValue<string_t>(TEXT("settings"), TEXT("path"), TEXT("lastMoveToFolderLocation"), spitfire::filesystem::GetHomeMusicDirectory());
+  }
+
+  void cSettings::SetLastMoveToFolderLocation(const string_t& sLastMoveToFolderLocation)
+  {
+    SetXMLValue(TEXT("settings"), TEXT("path"), TEXT("lastMoveToFolderLocation"), sLastMoveToFolderLocation);
+  }
+
+  void cSettings::GetRecentMoveToFolders(std::vector<string_t>& folders) const
+  {
+    folders.clear();
+
+    // Get the count
+    const size_t n = GetXMLValue(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocationCount"), 0);
+
+    // Get each path
+    string_t sValue;
+    for (size_t i = 0; i < n; i++) {
+      sValue = GetXMLValue<string_t>(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocation") + spitfire::string::ToString(i), TEXT(""));
+      if (!sValue.empty()) folders.push_back(sValue);
+    }
+  }
+
+  void cSettings::SetRecentMoveToFolders(const std::vector<string_t>& folders)
+  {
+    // Set the count
+    const size_t n = folders.size();
+    SetXMLValue(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocationCount"), n);
+
+    // Add each path
+    for (size_t i = 0; i < n; i++) {
+      SetXMLValue(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocation") + spitfire::string::ToString(i), folders[i]);
+    }
+  }
 }

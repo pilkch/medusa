@@ -40,6 +40,19 @@ namespace medusa
     model.AddTracksFromFolder(sFolderPath);
   }
 
+
+  cModelEventTrackUpdatedFilePath::cModelEventTrackUpdatedFilePath(trackid_t _id, const string_t& _sFilePath) :
+    id(_id),
+    sFilePath(_sFilePath)
+  {
+  }
+
+  void cModelEventTrackUpdatedFilePath::EventFunction(cModel& model)
+  {
+    model.UpdateTrackFilePath(id, sFilePath);
+  }
+
+
   cModelEventRemoveTrack::cModelEventRemoveTrack(trackid_t _id) :
     id(_id)
   {
@@ -121,6 +134,30 @@ namespace medusa
         } else AddTrack(iter.GetFullPath());
 
         iter.Next();
+      }
+    }
+  }
+
+  void cModel::UpdateTrackFilePath(trackid_t id, const string_t& sFilePath)
+  {
+    if (spitfire::util::IsMainThread()) {
+      cModelEventTrackUpdatedFilePath* pEvent = new cModelEventTrackUpdatedFilePath(id, sFilePath);
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      std::vector<cTrack*>::iterator iter = tracks.begin();
+      const std::vector<cTrack*>::iterator iterEnd = tracks.end();
+      while (iter != iterEnd) {
+        if (*iter == id) {
+          std::cout<<"cModel::UpdateTrackFilePath Found track \""<<(*iter)->sFilePath<<"\""<<std::endl;
+
+          // NOTE: The view has already moved the file, we just have to update our model
+          cTrack* pTrack = *iter;
+          pTrack->sFilePath = sFilePath;
+
+          break;
+        }
+
+        iter++;
       }
     }
   }

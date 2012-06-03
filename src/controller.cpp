@@ -53,6 +53,11 @@ namespace medusa
     model.AddTracksFromFolder(sFolderPath);
   }
 
+  void cController::UpdateTrackFilePath(trackid_t id, const string_t& sFilePath)
+  {
+    model.UpdateTrackFilePath(id, sFilePath);
+  }
+
   void cController::RemoveTrack(trackid_t id)
   {
     model.RemoveTrack(id);

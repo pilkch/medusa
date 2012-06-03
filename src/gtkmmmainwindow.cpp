@@ -7,6 +7,7 @@
 // Medusa headers
 #include "gtkmmabout.h"
 #include "gtkmmview.h"
+#include "gtkmmalertdialog.h"
 #include "gtkmmslider.h"
 #include "gtkmmmainwindow.h"
 #include "gtkmmtracklist.h"
@@ -17,6 +18,128 @@
 
 namespace medusa
 {
+  // ** cFolderList
+
+  bool cFolderList::AreFullPathsUnique() const
+  {
+    const size_t n = folders.size();
+    for (size_t i = 0; i < n; i++) {
+      const string_t& sFullPath = folders[i].sFullPath;
+      std::cout<<"cFolderList::AreFullPathsUnique Looking at "<<sFullPath<<std::endl;
+      for (size_t j = i + 1; j < n; j++) {
+        std::cout<<"cFolderList::AreFullPathsUnique Checking "<<folders[j].sFullPath<<std::endl;
+        if (sFullPath == folders[j].sFullPath) return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool cFolderList::AreShortPathsUnique() const
+  {
+    const size_t n = folders.size();
+    for (size_t i = 0; i < n; i++) {
+      const string_t& sShortPath = folders[i].sShortPath;
+      for (size_t j = i + 1; j < n; j++) {
+        if (sShortPath == folders[j].sShortPath) return false;
+      }
+    }
+
+    return true;
+  }
+
+  std::set<size_t> cFolderList::GetNonUniqueShortPaths() const
+  {
+    std::set<size_t> nonUniquePaths;
+
+    const size_t n = folders.size();
+    for (size_t i = 0; i < n; i++) {
+      const string_t& sShortPath = folders[i].sShortPath;
+      std::cout<<"cFolderList::GetNonUniqueShortPaths Looking at "<<sShortPath<<std::endl;
+      for (size_t j = i + 1; j < n; j++) {
+        std::cout<<"cFolderList::GetNonUniqueShortPaths Checking "<<folders[j].sShortPath<<std::endl;
+        if (sShortPath == folders[j].sShortPath) {
+          nonUniquePaths.insert(i);
+          nonUniquePaths.insert(j);
+        }
+      }
+    }
+
+    return nonUniquePaths;
+  }
+
+  void cFolderList::AddPath(const string_t& sFullPath)
+  {
+    {
+      // Return if we have already added this path
+      const size_t n = folders.size();
+      for (size_t i = 0; i < n; i++) {
+        if (folders[i].sFullPath == sFullPath) return;
+      }
+    }
+
+    // Add a new entry on the end if we have less than the maximum number of entries
+    if (folders.size() < 5) folders.push_back(cFolder());
+
+    // Shuffle the entries
+    ASSERT(!folders.empty());
+    const size_t n = folders.size() - 1;
+    for (size_t i = 0; i < n; i++) folders[n - i] = folders[n - i - 1];
+
+    // Set the first entry to the new path
+    folders[0].sFullPath = sFullPath;
+    folders[0].sShortPath = TEXT("");
+  }
+
+  const std::vector<cFolder>& cFolderList::GetPaths() const
+  {
+    return folders;
+  }
+
+  std::vector<string_t> cFolderList::GetFullPaths() const
+  {
+    std::vector<string_t> paths;
+    const size_t n = folders.size();
+    for (size_t i = 0; i < n; i++) paths.push_back(folders[i].sFullPath);
+    return paths;
+  }
+
+  void cFolderList::UpdatePaths()
+  {
+    // Ensure full paths are unique
+    ASSERT(AreFullPathsUnique());
+
+    // Set all short paths to the lowest
+    const size_t n = folders.size();
+    for (size_t i = 0; i < n; i++) {
+      folders[i].sShortPath = spitfire::filesystem::GetFile(folders[i].sFullPath);
+    }
+
+    // Keep track of how many parts each short folder is using
+    std::vector<size_t> parts;
+    parts.insert(parts.begin(), n, 1);
+
+    // Ensure short paths are unique
+    while (!AreShortPathsUnique()) {
+      // Find all non unique paths
+      std::set<size_t> nonUniquePaths = GetNonUniqueShortPaths();
+
+      // Expand all non unique paths by one folder
+      std::set<size_t>::const_iterator iter = nonUniquePaths.begin();
+      const std::set<size_t>::const_iterator iterEnd = nonUniquePaths.end();
+      while (iter != iterEnd) {
+        const size_t i = *iter;
+        spitfire::filesystem::cFilePathParser parser(folders[i].sFullPath);
+        parts[i]++;
+        ASSERT(parts[i] < parser.GetFolderCount());
+        folders[i].sShortPath = parser.GetFolder(parser.GetFolderCount() - parts[i]) + spitfire::filesystem::sFilePathSeparator + folders[i].sShortPath;
+
+        iter++;
+      }
+    }
+  }
+
+
 // ** cGtkmmMainWindow
 
 cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
@@ -24,6 +147,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   settings(_settings),
   bIsIconified(false),
   pMenuPopup(nullptr),
+  pMenuPopupRecentMoveToFolder(nullptr),
+  bIsRecentMoveToFolderSeparatorAdded(false),
   pStatusIconPopupMenu(nullptr),
   boxToolbarAndVolume(Gtk::ORIENTATION_VERTICAL),
   textPosition("0:00"),
@@ -78,6 +203,9 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFolder));
   m_refActionGroup->add(Gtk::Action::create("FileRemove", "Remove"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRemoveTrack));
+  m_refActionGroup->add(Gtk::Action::create("FileMoveToFolderMenu", "Move to Folder"));
+  m_refActionGroup->add(Gtk::Action::create("FileMoveToFolderBrowse", "Browse..."),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackMoveToFolderBrowse));
   m_refActionGroup->add(Gtk::Action::create("FileMoveToRubbishBin", "Move to the Rubbish Bin"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackMoveToRubbishBin));
   m_refActionGroup->add(Gtk::Action::create("FileShowInFileManager", "Show in the File Manager"),
@@ -125,6 +253,9 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "      <menuitem action='FileAddFiles'/>"
       "      <menuitem action='FileAddFolder'/>"
       "      <menuitem action='FileRemove'/>"
+      "      <menu action='FileMoveToFolderMenu'>"
+      "        <menuitem action='FileMoveToFolderBrowse'/>"
+      "      </menu>"
       "      <menuitem action='FileMoveToRubbishBin'/>"
       "      <menuitem action='FileShowInFileManager'/>"
       "      <menuitem action='FileProperties'/>"
@@ -236,6 +367,11 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   popupActionGroupRef->add(Gtk::Action::create("ContextRemove", "Remove"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRemoveTrack));
 
+  popupActionGroupRef->add(Gtk::Action::create("ContextMoveToFolderMenu", "Move to Folder"));
+
+  popupActionGroupRef->add(Gtk::Action::create("ContextTrackMoveToFolderBrowse", "Browse..."),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackMoveToFolderBrowse));
+
   popupActionGroupRef->add(Gtk::Action::create("ContextTrackMoveToRubbishBin", "Move to the Rubbish Bin"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackMoveToRubbishBin));
 
@@ -258,6 +394,9 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "    <menuitem action='ContextAddFiles'/>"
       "    <menuitem action='ContextAddFolder'/>"
       "    <menuitem action='ContextRemove'/>"
+      "    <menu action='ContextMoveToFolderMenu'>"
+      "      <menuitem action='ContextTrackMoveToFolderBrowse'/>"
+      "    </menu>"
       "    <menuitem action='ContextTrackMoveToRubbishBin'/>"
       "    <menuitem action='ContextShowInFileManager'/>"
       "    <menuitem action='ContextProperties'/>"
@@ -276,8 +415,18 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   // Get the menu
   pMenuPopup = dynamic_cast<Gtk::Menu*>(popupUIManagerRef->get_widget("/PopupMenu"));
-  if (pMenuPopup == nullptr) g_warning("menu not found");
+  if (pMenuPopup == nullptr) g_warning("Popup menu not found");
+  assert(pMenuPopup != nullptr);
 
+  // Get the move to folder menu
+  Gtk::MenuItem* pMenuPopupMoveToFolder = dynamic_cast<Gtk::MenuItem*>(popupUIManagerRef->get_widget("/PopupMenu/ContextMoveToFolderMenu"));
+  if (pMenuPopupMoveToFolder == nullptr) g_warning("Move to menu not found");
+  assert(pMenuPopupMoveToFolder != nullptr);
+
+  // Get the move to folder sub menu
+  pMenuPopupRecentMoveToFolder = pMenuPopupMoveToFolder->get_submenu();
+  if (pMenuPopupRecentMoveToFolder == nullptr) g_warning("Recent move to menu not found");
+  assert(pMenuPopupRecentMoveToFolder != nullptr);
 
 
   // Status icon right click menu
@@ -581,6 +730,101 @@ void cGtkmmMainWindow::OnActionRemoveTrack()
   pTrackList->DeleteAllSelected();
 }
 
+void cGtkmmMainWindow::OnActionTrackMoveToFolder(const string_t& sDestinationFolder)
+{
+  std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToFolder Destination \""<<sDestinationFolder<<"\""<<std::endl;
+
+  bool bOverwriteAll = false;
+  bool bDontOverwriteAll = false;
+
+  // Tell the view that we are removing these tracks
+  for (cGtkmmTrackListSelectedIterator iter(*pTrackList); iter.IsValid(); iter.Next()) {
+    std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToFolder Item was selected"<<std::endl;
+    const Gtk::TreeModel::Row& row = iter.GetRow();
+    trackid_t id = pTrackList->GetTrackIDForRow(row);
+
+    // Move the file to the specified folder
+    string_t sFilePath;
+    spitfire::audio::cMetaData metaData;
+    pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+    if (spitfire::filesystem::FileExists(sFilePath)) { // Only try to move tracks that exist
+      // Build the destination path
+      const string_t sFileName = spitfire::filesystem::GetFile(sFilePath);
+      const string_t sDestinationPath = spitfire::filesystem::MakeFilePath(sDestinationFolder, sFileName);
+      if (sDestinationPath != sFilePath) {
+        // If we aren't overwriting all files then we need to check if the file already exists
+        if (!bOverwriteAll && spitfire::filesystem::FileExists(sDestinationPath)) {
+          if (bDontOverwriteAll) continue;
+
+          cGtkmmAlertDialog dialog(*this);
+          dialog.SetTitle(TEXT("File already exists. Do you want to replace it?"));
+          dialog.SetDescription(TEXT("The file \"") + sDestinationPath + TEXT("\" already exists. Replacing it will overwrite its contents."));
+          dialog.SetOk(TEXT("Replace"));
+          dialog.SetOther(TEXT("No"));
+          dialog.SetCancel();
+          dialog.SetCheckBox(TEXT("Replace All"), false);
+          ALERT_RESULT result = dialog.Run();
+          if (result == ALERT_RESULT::CANCEL) {
+            break;
+          } else if (result == ALERT_RESULT::NO) {
+            bDontOverwriteAll = dialog.IsCheckBoxTicked();
+            continue;
+          }
+          bOverwriteAll = dialog.IsCheckBoxTicked();
+        }
+        if (spitfire::filesystem::MoveFile(sFilePath, sDestinationPath)) {
+          // Update our playlist
+          pTrackList->SetPropertiesForRow(row, sFilePath, metaData);
+
+          // Notify the model that the file has been moved
+          view.OnActionTrackMoveToFolder(id, sDestinationPath);
+        }
+      }
+    }
+  }
+}
+
+void cGtkmmMainWindow::OnActionTrackMoveToFolderIndex(int i)
+{
+  std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToFolderIndex "<<i<<std::endl;
+
+  const std::vector<string_t> paths = recentMovedToFolders.GetFullPaths();
+  const size_t n = paths.size();
+  if ((i >= 0) && (i < int(n))) {
+    const string_t sFullPath = paths[static_cast<size_t>(i)];
+    std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToFolderIndex Moving to folder \""<<sFullPath<<"\""<<std::endl;
+    OnActionTrackMoveToFolder(sFullPath);
+  } else std::cerr<<"cGtkmmMainWindow::OnActionTrackMoveToFolderIndex Invalid move to folder "<<i<<std::endl;
+}
+
+void cGtkmmMainWindow::OnActionTrackMoveToFolderBrowse()
+{
+  std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToFolderBrowse A popup menu item was selected"<<std::endl;
+
+  // Browse for the folder to move to
+  cGtkmmFolderDialog dialog;
+  dialog.SetType(cGtkmmFolderDialog::TYPE::SELECT);
+  dialog.SetCaption(TEXT("Move tracks to folder"));
+  dialog.SetDefaultFolder(settings.GetLastMoveToFolderLocation());
+  if (dialog.Run(*this)) {
+    std::cout<<"cGtkmmMainWindow::OnActionBrowseFolder Selected folder"<<std::endl;
+    settings.SetLastMoveToFolderLocation(dialog.GetSelectedFolder());
+    settings.Save();
+    const string_t sSelectedFolder = dialog.GetSelectedFolder();
+
+    // Add this folder to the list of recent move to folders
+    recentMovedToFolders.AddPath(sSelectedFolder);
+
+    // Save the recent moved to folder paths to the settings
+    const std::vector<string_t> paths = recentMovedToFolders.GetFullPaths();
+    settings.SetRecentMoveToFolders(paths);
+    settings.Save();
+
+    // Move the selected tracks to the destination folder
+    OnActionTrackMoveToFolder(sSelectedFolder);
+  }
+}
+
 void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
 {
   std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToRubbishBin A popup menu item was selected"<<std::endl;
@@ -649,7 +893,37 @@ void cGtkmmMainWindow::OnActionJumpToPlaying()
 
 void cGtkmmMainWindow::OnActionPlaylistRightClick(GdkEventButton* event)
 {
+  assert(pMenuPopupRecentMoveToFolder != nullptr);
+
+  // Update our recent move to folder paths
+  recentMovedToFolders.UpdatePaths();
+
+  const std::vector<cFolder>& paths = recentMovedToFolders.GetPaths();
+  const size_t n = paths.size();
+  if (n != 0) {
+    // Add a separator if we haven't already
+    if (!bIsRecentMoveToFolderSeparatorAdded) {
+      Gtk::SeparatorMenuItem* pMenuItem = Gtk::manage(new Gtk::SeparatorMenuItem());
+      pMenuPopupRecentMoveToFolder->insert(*pMenuItem, 0);
+      bIsRecentMoveToFolderSeparatorAdded = true;
+    }
+
+    for (size_t i = recentMoveToFoldersMenuItems.size(); i < n; i++) {
+      Gtk::MenuItem* pMenuItem = Gtk::manage(new Gtk::MenuItem(spitfire::string::ToUTF8(paths[i].sShortPath).c_str()));
+      pMenuPopupRecentMoveToFolder->insert(*pMenuItem, i);
+      pMenuItem->show_all_children();
+      pMenuItem->show_all();
+      pMenuItem->signal_activate().connect(sigc::bind<int>(sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackMoveToFolderIndex), int(i)));
+      recentMoveToFoldersMenuItems.push_back(pMenuItem);
+    }
+    for (size_t i = 0; i < n; i++) {
+      recentMoveToFoldersMenuItems[i]->set_label(spitfire::string::ToUTF8(paths[i].sShortPath).c_str());
+    }
+  }
+
   assert(pMenuPopup != nullptr);
+  pMenuPopup->show_all_children();
+  pMenuPopup->show_all();
   pMenuPopup->popup(event->button, event->time);
 }
 
@@ -935,6 +1209,12 @@ void cGtkmmMainWindow::ApplySettings()
     std::cout<<"cGtkmmMainWindow::ApplySettings Starting lastfm"<<std::endl;
     lastfm.Start(settings.GetLastFMUserName(), settings.GetLastFMPassword());
   }
+
+  // Load the recent moved folders settings
+  std::vector<string_t> paths;
+  settings.GetRecentMoveToFolders(paths);
+  const size_t n = paths.size();
+  for (size_t i = 0; i < n; i++) recentMovedToFolders.AddPath(paths[i]);
 
   std::cout<<"cGtkmmMainWindow::ApplySettings returning"<<std::endl;
 }

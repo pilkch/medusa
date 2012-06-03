@@ -42,6 +42,17 @@ namespace medusa
     string_t sFolderPath;
   };
 
+  class cModelEventTrackUpdatedFilePath : public cModelEvent
+  {
+  public:
+    explicit cModelEventTrackUpdatedFilePath(trackid_t id, const string_t& sFilePath);
+
+    virtual void EventFunction(cModel& model) override;
+
+    trackid_t id;
+    string_t sFilePath;
+  };
+
   class cModelEventRemoveTrack : public cModelEvent
   {
   public:
@@ -79,6 +90,7 @@ namespace medusa
     void AddTrack(const string_t& sFilePath);
     void AddTracks(const std::vector<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
+    void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
     void RemoveTrack(trackid_t id);
 
     void SetPlayingTrack(trackid_t id);

@@ -44,6 +44,12 @@ public:
   string_t GetLastAddLocation();
   void SetLastAddLocation(const string_t& sLastAddLocation);
 
+  string_t GetLastMoveToFolderLocation() const;
+  void SetLastMoveToFolderLocation(const string_t& sLastMoveToFolderLocation);
+
+  void GetRecentMoveToFolders(std::vector<string_t>& folders) const;
+  void SetRecentMoveToFolders(const std::vector<string_t>& folders);
+
 private:
   template <class T>
   T GetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& valueDefault) const;

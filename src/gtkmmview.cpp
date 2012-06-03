@@ -149,6 +149,11 @@ void cGtkmmView::OnActionAddTracksFromFolder(const string_t& sFolderPath)
   pController->AddTracksFromFolder(sFolderPath);
 }
 
+  void cGtkmmView::OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath)
+  {
+    pController->UpdateTrackFilePath(id, sFilePath);
+  }
+
 void cGtkmmView::OnActionRemoveTrack(trackid_t id)
 {
   pController->RemoveTrack(id);

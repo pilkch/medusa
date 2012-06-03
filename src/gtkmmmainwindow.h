@@ -14,6 +14,30 @@
 
 namespace medusa
 {
+  class cFolder
+  {
+  public:
+    string_t sFullPath;
+    string_t sShortPath;
+  };
+
+  class cFolderList
+  {
+  public:
+    void AddPath(const string_t& sFullPath);
+    void UpdatePaths();
+
+    const std::vector<cFolder>& GetPaths() const;
+    std::vector<string_t> GetFullPaths() const;
+
+  private:
+    bool AreFullPathsUnique() const;
+    bool AreShortPathsUnique() const;
+    std::set<size_t> GetNonUniqueShortPaths() const;
+
+    std::vector<cFolder> folders;
+  };
+
   class cGtkmmView;
   class cGtkmmSlider;
   class cGtkmmTrackList;
@@ -31,6 +55,9 @@ public:
   void OnActionBrowseFiles();
   void OnActionBrowseFolder();
   void OnActionRemoveTrack();
+  void OnActionTrackMoveToFolder(const string_t& sDestinationFolder);
+  void OnActionTrackMoveToFolderIndex(int i);
+  void OnActionTrackMoveToFolderBrowse();
   void OnActionTrackMoveToRubbishBin();
   void OnActionTrackShowInFileManager();
   void OnActionTrackProperties();
@@ -91,6 +118,8 @@ private:
 
   spitfire::audio::lastfm::cLastFM lastfm;
 
+  cFolderList recentMovedToFolders;
+
   cGtkmmIconTheme iconTheme;
 
   // Status icon
@@ -105,6 +134,10 @@ private:
   Glib::RefPtr<Gtk::UIManager> popupUIManagerRef;
   Glib::RefPtr<Gtk::ActionGroup> popupActionGroupRef;
   Gtk::Menu* pMenuPopup;
+  Gtk::Menu* pMenuPopupRecentMoveToFolder;
+
+  std::vector<Gtk::MenuItem*> recentMoveToFoldersMenuItems;
+  bool bIsRecentMoveToFolderSeparatorAdded;
 
   // Status icon right click menu
   Glib::RefPtr<Gtk::UIManager> statusIconPopupUIManagerRef;
