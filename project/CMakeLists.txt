@@ -13,8 +13,15 @@ CMAKE_POLICY(SET CMP0005 OLD)
 # If you don't want the full compiler output, remove the following line
 SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 SET(CMAKE_VERBOSE_MAKEFILE ON)
-#SET(CMAKE_BUILD_TYPE Release)
+
+# Debug build
 SET(CMAKE_BUILD_TYPE Debug)
+ADD_DEFINITIONS("-DDEBUG")
+
+# Release build
+#SET(CMAKE_BUILD_TYPE Release)
+#ADD_DEFINITIONS("-DNDEBUG")
+
 SET(CMAKE_SOURCE_DIR ./../../library/)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
@@ -24,8 +31,6 @@ SET(LIBRARY_SRC "${CMAKE_SOURCE_DIR}/src/")
 # Add definitions, compiler switches, etc.
 ADD_DEFINITIONS("-Wall -W -Wextra -Werror -Wformat -Wformat-y2k -Winit-self -Wstack-protector -Wunknown-pragmas -Wundef -Wcast-qual -Wwrite-strings -Wno-unused-parameter -Wpointer-arith -Wno-switch -Woverloaded-virtual -Wmissing-include-dirs -Wuninitialized -Wc++0x-compat -std=c++0x -ffor-scope -O2")
 ADD_DEFINITIONS("-DBUILD_PHYSICS_3D")
-#ADD_DEFINITIONS("-DNDEBUG")
-ADD_DEFINITIONS("-DDEBUG")
 ADD_DEFINITIONS("-DdSINGLE")
 ADD_DEFINITIONS("-DOPAL_USE_DOUBLE")
 #ADD_DEFINITIONS("-DBUILD_EDITOR")
