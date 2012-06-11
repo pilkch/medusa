@@ -190,21 +190,22 @@ namespace medusa
 
       while (reader.ReadLine(values)) {
         std::cerr<<"LoadPlaylistFromCSV Reading "<<values.size()<<" values"<<std::endl;
-        if (values.size() != 11) break;
+        if (values.size() != 12) break;
 
-        std::cerr<<"LoadPlaylistFromCSV Adding track \""<<values[0]<<"\", \""<<values[1]<<"\", \""<<values[2]<<std::endl;
+        std::cerr<<"LoadPlaylistFromCSV Adding track \""<<values[0]<<"\", \""<<values[1]<<"\", \""<<values[2]<<"\", \""<<values[3]<<std::endl;
         cTrack* pTrack = new cTrack;
         pTrack->sFilePath = values[0];
         ParseDateTime(pTrack->dateAdded, values[1]);
-        pTrack->metaData.sArtist = values[2];
-        pTrack->metaData.sTitle = values[3];
-        pTrack->metaData.sAlbum = values[4];
-        pTrack->metaData.sAlbumArtist = values[5];
-        pTrack->metaData.sGenre = values[6];
-        pTrack->metaData.sComment = values[7];
-        pTrack->metaData.uiYear = spitfire::string::ToUnsignedInt(values[8]);
-        pTrack->metaData.uiTracknum = spitfire::string::ToUnsignedInt(values[9]);
-        pTrack->metaData.uiDurationMilliSeconds = spitfire::string::ToUnsignedInt(values[10]);
+        ParseDateTime(pTrack->dateLastPlayed, values[2]);
+        pTrack->metaData.sArtist = values[3];
+        pTrack->metaData.sTitle = values[4];
+        pTrack->metaData.sAlbum = values[5];
+        pTrack->metaData.sAlbumArtist = values[6];
+        pTrack->metaData.sGenre = values[7];
+        pTrack->metaData.sComment = values[8];
+        pTrack->metaData.uiYear = spitfire::string::ToUnsignedInt(values[9]);
+        pTrack->metaData.uiTracknum = spitfire::string::ToUnsignedInt(values[10]);
+        pTrack->metaData.uiDurationMilliSeconds = spitfire::string::ToUnsignedInt(values[11]);
 
         playlist.push_back(pTrack);
       }
@@ -223,6 +224,7 @@ namespace medusa
       // Write titles
       writer.AddValue(TEXT("Full Path"));
       writer.AddValue(TEXT("Date Added"));
+      writer.AddValue(TEXT("Date Last Played"));
       writer.AddValue(TEXT("Artist"));
       writer.AddValue(TEXT("Title"));
       writer.AddValue(TEXT("Album"));
@@ -242,6 +244,7 @@ namespace medusa
         const cTrack& track = *pTrack;
         writer.AddValue(track.sFilePath);
         writer.AddValue(FormatDateTime(track.dateAdded));
+        writer.AddValue(FormatDateTime(track.dateLastPlayed));
         writer.AddValue(track.metaData.sArtist);
         writer.AddValue(track.metaData.sTitle);
         writer.AddValue(track.metaData.sAlbum);

@@ -116,7 +116,22 @@ private:
   {
   public:
     cModelColumns()
-    { add(id); add(pixbuf); add(artist); add(title); add(album); add(track); add(year); add(time); add(dateAdded); add(filePath); add(userdata); }
+    {
+      add(id);
+      add(pixbuf);
+      add(artist);
+      add(title);
+      add(album);
+      add(track);
+      add(year);
+      add(time);
+      add(genre);
+      add(comment);
+      add(dateAdded);
+      add(dateLastPlayed);
+      add(filePath);
+      add(userdata);
+    }
 
     Gtk::TreeModelColumn<trackid_t> id;
     Gtk::TreeModelColumn<cPixbufPtr> pixbuf;
@@ -126,7 +141,10 @@ private:
     Gtk::TreeModelColumn<Glib::ustring> track;
     Gtk::TreeModelColumn<Glib::ustring> year;
     Gtk::TreeModelColumn<Glib::ustring> time;
+    Gtk::TreeModelColumn<Glib::ustring> genre;
+    Gtk::TreeModelColumn<Glib::ustring> comment;
     Gtk::TreeModelColumn<Glib::ustring> dateAdded;
+    Gtk::TreeModelColumn<Glib::ustring> dateLastPlayed;
     Gtk::TreeModelColumn<Glib::ustring> filePath;
     Gtk::TreeModelColumn<cUserDataPtr> userdata;
   };

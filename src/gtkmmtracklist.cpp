@@ -119,39 +119,65 @@ cGtkmmTrackList::cGtkmmTrackList(cGtkmmMainWindow& _mainWindow) :
   append_column("Track", columns.track);
   append_column("Year", columns.year);
   append_column("Time", columns.time);
+  append_column("Genre", columns.genre);
+  append_column("Comment", columns.comment);
+  append_column("Date Last Played", columns.dateLastPlayed);
   append_column("Date Added", columns.dateAdded);
   append_column("Path", columns.filePath);
 
   // Set initial sorting column
   playlistTreeModelRef->set_sort_column(columns.artist, Gtk::SORT_ASCENDING);
 
+  size_t index = 0;
+
   // Set sorting for each column added
-  Gtk::TreeView::Column* pColumn = get_column(0);
+  Gtk::TreeView::Column* pColumn = get_column(index);
   pColumn->set_sort_column(columns.pixbuf);
+  index++;
 
-  pColumn = get_column(1);
+  pColumn = get_column(index);
   pColumn->set_sort_column(columns.artist);
+  index++;
 
-  pColumn = get_column(2);
+  pColumn = get_column(index);
   pColumn->set_sort_column(columns.title);
+  index++;
 
-  pColumn = get_column(3);
+  pColumn = get_column(index);
   pColumn->set_sort_column(columns.album);
+  index++;
 
-  pColumn = get_column(4);
+  pColumn = get_column(index);
   pColumn->set_sort_column(columns.track);
+  index++;
 
-  pColumn = get_column(5);
+  pColumn = get_column(index);
   pColumn->set_sort_column(columns.year);
+  index++;
 
-  pColumn = get_column(6);
+  pColumn = get_column(index);
   pColumn->set_sort_column(columns.time);
+  index++;
 
-  pColumn = get_column(7);
+  pColumn = get_column(index);
+  pColumn->set_sort_column(columns.genre);
+  index++;
+
+  pColumn = get_column(index);
+  pColumn->set_sort_column(columns.comment);
+  index++;
+
+  pColumn = get_column(index);
   pColumn->set_sort_column(columns.dateAdded);
+  index++;
 
-  pColumn = get_column(8);
+  pColumn = get_column(index);
+  pColumn->set_sort_column(columns.dateLastPlayed);
+  index++;
+
+  pColumn = get_column(index);
   pColumn->set_sort_column(columns.filePath);
+  index++;
 }
 
 trackid_t cGtkmmTrackList::GetTrackIDForRow(const Gtk::TreeModel::Row& row) const
@@ -288,8 +314,12 @@ void cGtkmmTrackList::AddTrack(trackid_t id, const cTrack& track)
   row[columns.album] = spitfire::string::ToUTF8(track.metaData.sAlbum);
   row[columns.track] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiTracknum));
   row[columns.year] = spitfire::string::ToUTF8(medusa::util::FormatNumber(track.metaData.uiYear));
+  row[columns.genre] = spitfire::string::ToUTF8(track.metaData.sGenre);
+  row[columns.comment] = spitfire::string::ToUTF8(track.metaData.sComment);
   row[columns.time] = spitfire::string::ToUTF8(medusa::util::FormatTime(track.metaData.uiDurationMilliSeconds));
   row[columns.dateAdded] = spitfire::string::ToUTF8(medusa::util::FormatDateTime(track.dateAdded));
+  if (!track.dateLastPlayed.IsUnixEpoch()) row[columns.dateLastPlayed] = spitfire::string::ToUTF8(medusa::util::FormatDateTime(track.dateLastPlayed));
+  else row[columns.dateLastPlayed] = "";
   row[columns.filePath] = spitfire::string::ToUTF8(track.sFilePath);
 
   // Custom data
