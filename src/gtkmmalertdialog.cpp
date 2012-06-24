@@ -72,15 +72,17 @@ namespace medusa
     // Add the ok button
     dialog.add_button(spitfire::string::ToUTF8(sOk).c_str(), Gtk::RESPONSE_OK);
 
-    Gtk::Box* vbox = dialog.get_vbox();
+    if (!sCheckBox.empty()) {
+      Gtk::Box* vbox = dialog.get_vbox();
 
-    // This is some filler text, needs to change before release
-    pCheckBox = new Gtk::CheckButton(spitfire::string::ToUTF8(sCheckBox).c_str());
-    vbox->pack_end(*pCheckBox, true, true);
-    pCheckBox->show();
-    pCheckBox->set_active(bCheckBoxValue);
+      // This is some filler text, needs to change before release
+      pCheckBox = new Gtk::CheckButton(spitfire::string::ToUTF8(sCheckBox).c_str());
+      vbox->pack_end(*pCheckBox, true, true);
+      pCheckBox->show();
+      pCheckBox->set_active(bCheckBoxValue);
 
-    pCheckBox->signal_toggled().connect(sigc::mem_fun(this, &cGtkmmAlertDialog::OnCheckBoxToggle));
+      pCheckBox->signal_toggled().connect(sigc::mem_fun(this, &cGtkmmAlertDialog::OnCheckBoxToggle));
+    }
 
     dialog.set_resizable(true);
 
