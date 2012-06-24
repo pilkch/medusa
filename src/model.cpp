@@ -128,13 +128,30 @@ namespace medusa
       spitfire::filesystem::cFolderIterator iter(sFolderPath);
       iter.SetIgnoreHiddenFilesAndFolders();
       while (iter.IsValid()) {
-        if (iter.IsFolder()) {
-          // Add an event to iterate into this folder later
-          cModelEventAddFolder* pEvent = new cModelEventAddFolder(iter.GetFullPath());
-          eventQueue.AddItemToBack(pEvent);
-        } else AddTrack(iter.GetFullPath());
+        if (iter.IsFolder()) AddTracksFromFolder(iter.GetFullPath());
+        else AddTrack(iter.GetFullPath());
 
         iter.Next();
+      }
+    }
+  }
+
+  void cModel::RemoveTrack(trackid_t id)
+  {
+    if (spitfire::util::IsMainThread()) {
+      cModelEventRemoveTrack* pEvent = new cModelEventRemoveTrack(id);
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      std::vector<cTrack*>::iterator iter = tracks.begin();
+      const std::vector<cTrack*>::iterator iterEnd = tracks.end();
+      while (iter != iterEnd) {
+        if (*iter == id) {
+          std::cout<<"cModel::RemoveTrack Removing track \""<<(*iter)->sFilePath<<"\""<<std::endl;
+          tracks.erase(iter);
+          break;
+        }
+
+        iter++;
       }
     }
   }
@@ -155,26 +172,6 @@ namespace medusa
           cTrack* pTrack = *iter;
           pTrack->sFilePath = sFilePath;
 
-          break;
-        }
-
-        iter++;
-      }
-    }
-  }
-
-  void cModel::RemoveTrack(trackid_t id)
-  {
-    if (spitfire::util::IsMainThread()) {
-      cModelEventRemoveTrack* pEvent = new cModelEventRemoveTrack(id);
-      eventQueue.AddItemToBack(pEvent);
-    } else {
-      std::vector<cTrack*>::iterator iter = tracks.begin();
-      const std::vector<cTrack*>::iterator iterEnd = tracks.end();
-      while (iter != iterEnd) {
-        if (*iter == id) {
-          std::cout<<"cModel::RemoveTrack Removing track \""<<(*iter)->sFilePath<<"\""<<std::endl;
-          tracks.erase(iter);
           break;
         }
 
