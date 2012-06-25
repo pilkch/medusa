@@ -53,14 +53,26 @@ namespace medusa
     model.AddTracksFromFolder(sFolderPath);
   }
 
+  void cController::RemoveTrack(trackid_t id)
+  {
+    model.RemoveTrack(id);
+  }
+
   void cController::UpdateTrackFilePath(trackid_t id, const string_t& sFilePath)
   {
     model.UpdateTrackFilePath(id, sFilePath);
   }
 
-  void cController::RemoveTrack(trackid_t id)
+  void cController::OnPlaylistLoading()
   {
-    model.RemoveTrack(id);
+    std::cout<<"cController::OnPlaylistLoading"<<std::endl;
+    view.OnPlaylistLoading();
+  }
+
+  void cController::OnPlaylistLoaded(trackid_t idLastPlayed)
+  {
+    std::cout<<"cController::OnPlaylistLoaded"<<std::endl;
+    view.OnPlaylistLoaded(idLastPlayed);
   }
 
   void cController::OnTrackAdded(trackid_t id, const cTrack& track)
@@ -73,11 +85,5 @@ namespace medusa
   {
     std::cout<<"cController::OnTracksAdded"<<std::endl;
     view.OnTracksAdded(tracks);
-  }
-
-  void cController::OnPlaylistLoaded(trackid_t idLastPlayed)
-  {
-    std::cout<<"cController::OnPlaylistLoaded"<<std::endl;
-    view.OnPlaylistLoaded(idLastPlayed);
   }
 }

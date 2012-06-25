@@ -194,10 +194,19 @@ namespace medusa
   {
     std::cout<<"cModel::LoadPlaylist"<<std::endl;
 
+    // Tell the main thread that we are about to load the playlist
+    pController->OnPlaylistLoading();
+
     // Load the playlist
     util::LoadPlaylistFromCSV(util::GetPlayListFilePath(), tracks);
 
     pController->OnTracksAdded(tracks);
+
+    // Load the last played setting
+    trackid_t idLastPlayed = LoadLastPlayed();
+
+    // Tell the main thread that we have finished loading the playlist
+    pController->OnPlaylistLoaded(idLastPlayed);
   }
 
   void cModel::SavePlaylist() const
@@ -264,6 +273,9 @@ namespace medusa
   {
     std::cout<<"cModel::ThreadFunction"<<std::endl;
 
+    // Load the playlist
+    LoadPlaylist();
+
     while (true) {
       //std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
       soAction.WaitTimeoutMS(1000);
@@ -293,14 +305,6 @@ namespace medusa
 
   void cModel::Start()
   {
-    // Load the playlist on the main thread so that we can populate the track list and start playing as soon as possible
-    LoadPlaylist();
-
-    // Load the last played setting
-    trackid_t idLastPlayed = LoadLastPlayed();
-
-    pController->OnPlaylistLoaded(idLastPlayed);
-
     // Start
     Run();
   }

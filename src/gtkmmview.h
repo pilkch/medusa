@@ -32,6 +32,22 @@ namespace medusa
     virtual void EventFunction(cGtkmmView& view) override;
   };
 
+  class cGtkmmViewEventPlaylistLoaded : public cGtkmmViewEvent
+  {
+  public:
+    explicit cGtkmmViewEventPlaylistLoaded(trackid_t idLastPlayed);
+
+    virtual void EventFunction(cGtkmmView& view) override;
+
+    trackid_t idLastPlayed;
+  };
+
+  class cGtkmmViewEventPlaylistLoading : public cGtkmmViewEvent
+  {
+  public:
+    virtual void EventFunction(cGtkmmView& view) override;
+  };
+
   class cGtkmmViewEventTrackAdded : public cGtkmmViewEvent
   {
   public:
@@ -53,25 +69,16 @@ namespace medusa
     std::vector<cTrack*> tracks;
   };
 
-  class cGtkmmViewEventPlaylistLoaded : public cGtkmmViewEvent
-  {
-  public:
-    explicit cGtkmmViewEventPlaylistLoaded(trackid_t idLastPlayed);
-
-    virtual void EventFunction(cGtkmmView& view) override;
-
-    trackid_t idLastPlayed;
-  };
-
 class cGtkmmView : public cView
 {
 public:
   friend class cGtkmmMainWindow;
   friend class cGStreamermmPlayer;
   friend class cGtkmmViewEventPlayerAboutToFinish;
+  friend class cGtkmmViewEventPlaylistLoading;
+  friend class cGtkmmViewEventPlaylistLoaded;
   friend class cGtkmmViewEventTrackAdded;
   friend class cGtkmmViewEventTracksAdded;
-  friend class cGtkmmViewEventPlaylistLoaded;
 
   cGtkmmView(int argc, char** argv);
   ~cGtkmmView();
@@ -87,8 +94,8 @@ protected:
   void OnActionAddTrack(const string_t& sFilePath);
   void OnActionAddTracks(const std::vector<string_t>& files);
   void OnActionAddTracksFromFolder(const string_t& sFolderPath);
-  void OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath);
   void OnActionRemoveTrack(trackid_t id);
+  void OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath);
   void OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
   void OnActionPlaybackPositionChanged(uint64_t seconds);
   void OnActionVolumeChanged(unsigned int uiVolume0To100);
@@ -97,9 +104,10 @@ protected:
   void OnPlayerUpdatePlaybackPosition();
   void OnPlayerAboutToFinish();
 
+  virtual void OnPlaylistLoading() override;
+  virtual void OnPlaylistLoaded(trackid_t idLastPlayed) override;
   virtual void OnTrackAdded(trackid_t id, const cTrack& track) override;
   virtual void OnTracksAdded(const std::vector<cTrack*>& tracks) override;
-  virtual void OnPlaylistLoaded(trackid_t idLastPlayed) override;
 
 private:
   void InstallDesktopFile();

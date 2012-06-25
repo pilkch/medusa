@@ -26,12 +26,13 @@ namespace medusa
     void AddTrack(const string_t& sFilePath);
     void AddTracks(const std::vector<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
-    void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
     void RemoveTrack(trackid_t id);
+    void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
 
+    void OnPlaylistLoading();
+    void OnPlaylistLoaded(trackid_t idLastPlayed);
     void OnTrackAdded(trackid_t id, const cTrack& track);
     void OnTracksAdded(const std::vector<cTrack*>& tracks);
-    void OnPlaylistLoaded(trackid_t idLastPlayed);
 
   private:
     cModel& model;

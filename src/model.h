@@ -90,8 +90,8 @@ namespace medusa
     void AddTrack(const string_t& sFilePath);
     void AddTracks(const std::vector<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
-    void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
     void RemoveTrack(trackid_t id);
+    void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
 
     void SetPlayingTrack(trackid_t id);
 

@@ -16,6 +16,21 @@ namespace medusa
     view.OnPlayerAboutToFinish();
   }
 
+  void cGtkmmViewEventPlaylistLoading::EventFunction(cGtkmmView& view)
+  {
+    view.OnPlaylistLoading();
+  }
+
+  cGtkmmViewEventPlaylistLoaded::cGtkmmViewEventPlaylistLoaded(trackid_t _idLastPlayed) :
+    idLastPlayed(_idLastPlayed)
+  {
+  }
+
+  void cGtkmmViewEventPlaylistLoaded::EventFunction(cGtkmmView& view)
+  {
+    view.OnPlaylistLoaded(idLastPlayed);
+  }
+
   cGtkmmViewEventTrackAdded::cGtkmmViewEventTrackAdded(trackid_t _id, const cTrack& _track) :
     id(_id),
     track(_track)
@@ -35,16 +50,6 @@ namespace medusa
   void cGtkmmViewEventTracksAdded::EventFunction(cGtkmmView& view)
   {
     view.OnTracksAdded(tracks);
-  }
-
-  cGtkmmViewEventPlaylistLoaded::cGtkmmViewEventPlaylistLoaded(trackid_t _idLastPlayed) :
-    idLastPlayed(_idLastPlayed)
-  {
-  }
-
-  void cGtkmmViewEventPlaylistLoaded::EventFunction(cGtkmmView& view)
-  {
-    view.OnPlaylistLoaded(idLastPlayed);
   }
 
 
@@ -154,15 +159,15 @@ void cGtkmmView::OnActionAddTracksFromFolder(const string_t& sFolderPath)
   pController->AddTracksFromFolder(sFolderPath);
 }
 
-  void cGtkmmView::OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath)
-  {
-    pController->UpdateTrackFilePath(id, sFilePath);
-  }
-
 void cGtkmmView::OnActionRemoveTrack(trackid_t id)
 {
   pController->RemoveTrack(id);
 }
+
+  void cGtkmmView::OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath)
+  {
+    pController->UpdateTrackFilePath(id, sFilePath);
+  }
 
 void cGtkmmView::OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
 {
@@ -233,6 +238,28 @@ void cGtkmmView::OnPlayerAboutToFinish()
   }
 }
 
+  void cGtkmmView::OnPlaylistLoading()
+  {
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventPlaylistLoading* pEvent = new cGtkmmViewEventPlaylistLoading;
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnPlaylistLoading();
+    }
+  }
+
+  void cGtkmmView::OnPlaylistLoaded(trackid_t idLastPlayed)
+  {
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventPlaylistLoaded* pEvent = new cGtkmmViewEventPlaylistLoaded(idLastPlayed);
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnPlaylistLoaded(idLastPlayed);
+    }
+  }
+
 void cGtkmmView::OnTrackAdded(trackid_t id, const cTrack& track)
 {
   std::cout<<"cGtkmmView::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
@@ -263,17 +290,6 @@ void cGtkmmView::OnTracksAdded(const std::vector<cTrack*>& tracks)
     }
   }
 }
-
-  void cGtkmmView::OnPlaylistLoaded(trackid_t idLastPlayed)
-  {
-    if (!spitfire::util::IsMainThread()) {
-      cGtkmmViewEventPlaylistLoaded* pEvent = new cGtkmmViewEventPlaylistLoaded(idLastPlayed);
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
-    } else {
-      pMainWindow->OnPlaylistLoaded(idLastPlayed);
-    }
-  }
 
 void cGtkmmView::_Run()
 {

@@ -1286,7 +1286,7 @@ void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
   UpdateStatusBar();
 }
 
-  void cGtkmmMainWindow::OnPlaylistLoaded(trackid_t idLastPlayed)
+  void cGtkmmMainWindow::OnPlaylistLoading()
   {
     std::cout<<"cGtkmmMainWindow::OnPlaylistLoaded"<<std::endl;
     if (!settings.IsShowMainWindow()) HideWindow();
@@ -1294,6 +1294,13 @@ void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
     const unsigned int uiVolume0To100 = settings.GetVolume0To100();
     pVolumeSlider->SetValue(uiVolume0To100);
     view.OnActionVolumeChanged(uiVolume0To100);
+
+    // TODO: disable controls
+  }
+
+  void cGtkmmMainWindow::OnPlaylistLoaded(trackid_t idLastPlayed)
+  {
+    // TODO: enable controls
 
     // Get the index of last played file to settings
     if (idLastPlayed != INVALID_TRACK) {

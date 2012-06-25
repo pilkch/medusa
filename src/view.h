@@ -17,9 +17,10 @@ namespace medusa
 
     void SetController(cController* pController);
 
+    virtual void OnPlaylistLoading() = 0;
+    virtual void OnPlaylistLoaded(trackid_t idLastPlayed) = 0;
     virtual void OnTrackAdded(trackid_t id, const cTrack& track) = 0;
     virtual void OnTracksAdded(const std::vector<cTrack*>& tracks) = 0;
-    virtual void OnPlaylistLoaded(trackid_t idLastPlayed) = 0;
 
     void Run() { _Run(); }
 
