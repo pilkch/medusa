@@ -48,7 +48,9 @@ public:
 private:
   bool _OnBusMessage(const Glib::RefPtr<Gst::Bus>& bus, const Glib::RefPtr<Gst::Message>& message);
   bool OnTimerPlaybackPosition();
+  #ifdef BUILD_MEDUSA_PLAYBIN2
   void OnAboutToFinish();
+  #endif
 
   cGtkmmView* pView;
 

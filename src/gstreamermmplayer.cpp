@@ -61,6 +61,10 @@ bool cGStreamermmPlayer::_OnBusMessage(const Glib::RefPtr<Gst::Bus>& bus, const 
   switch (message->get_message_type()) {
     case Gst::MESSAGE_EOS: {
       Stop();
+      #ifndef BUILD_MEDUSA_PLAYBIN2
+      // Call OnPlayerAboutToFinish here because OnAboutToFinish is only called on playbin2
+      pView->OnPlayerAboutToFinish();
+      #endif
       break;
     }
   }
@@ -75,10 +79,12 @@ bool cGStreamermmPlayer::OnTimerPlaybackPosition()
   return true;
 }
 
+#ifdef BUILD_MEDUSA_PLAYBIN2
 void cGStreamermmPlayer::OnAboutToFinish()
 {
   pView->OnPlayerAboutToFinish();
 }
+#endif
 
 void cGStreamermmPlayer::SetTrack(const string_t& sFilePath, uint64_t uiDurationMilliseconds)
 {
