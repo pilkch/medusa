@@ -239,9 +239,9 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   pPlayPauseAction = Gtk::ToggleAction::create("PlaybackPlayPause", Gtk::Stock::MEDIA_PLAY, "Play/Pause");
   m_refActionGroup->add(pPlayPauseAction, sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackPlayPauseMenuToggled));
   m_refActionGroup->add(Gtk::Action::create("PlaybackNext", Gtk::Stock::MEDIA_NEXT),
-          Gtk::AccelKey("<control><alt>S"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackNextClicked));
   m_refActionGroup->add(Gtk::Action::create("JumpToPlaying", "Jump to Playing"),
+          Gtk::AccelKey("<control>J"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionJumpToPlaying));
   pRepeatAction = Gtk::ToggleAction::create("PlaybackRepeatToggle", Gtk::Stock::GOTO_TOP, "Repeat");
   m_refActionGroup->add(pRepeatAction, sigc::mem_fun(*this, &cGtkmmMainWindow::OnPlaybackRepeatMenuToggled));
