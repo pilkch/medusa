@@ -18,7 +18,7 @@ namespace medusa
   bool IsFileTypeSupported(const string_t& sFileExtension)
   {
     const string_t sFileExtensionLower = spitfire::string::ToLower(sFileExtension);
-    return ((sFileExtensionLower == TEXT("mp3")) || (sFileExtensionLower == TEXT("wav")));
+    return ((sFileExtensionLower == TEXT(".mp3")) || (sFileExtensionLower == TEXT(".wav")));
   }
 
   cModelEventAddFiles::cModelEventAddFiles(const std::vector<string_t>& _files) :
