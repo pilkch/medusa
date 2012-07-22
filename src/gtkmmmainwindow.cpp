@@ -905,25 +905,37 @@ void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
 {
   std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToRubbishBin A popup menu item was selected"<<std::endl;
 
-  // Tell the view that we are removing these tracks
-  cGtkmmTrackListSelectedIterator iter(*pTrackList);
-  while (iter.IsValid()) {
-    std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToRubbishBin Item was selected"<<std::endl;
-    const Gtk::TreeModel::Row& row = iter.GetRow();
-    trackid_t id = pTrackList->GetTrackIDForRow(row);
-    view.OnActionRemoveTrack(id);
+  // Ask if the user is sure about this
+  cGtkmmAlertDialog dialog(*this);
+  dialog.SetTitle(TEXT("Move files to rubbish bin. Are you sure you want to do this?"));
+  dialog.SetOk(TEXT("Move to rubbish bin"));
+  dialog.SetCancel();
+  ALERT_RESULT result = dialog.Run();
+  if (result == ALERT_RESULT::OK) {
+    // Collect the tracks to remove and move them to the rubbish bin
+    std::vector<trackid_t> tracks;
+    cGtkmmTrackListSelectedIterator iter(*pTrackList);
+    while (iter.IsValid()) {
+      std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToRubbishBin Item was selected"<<std::endl;
+      const Gtk::TreeModel::Row& row = iter.GetRow();
+      trackid_t id = pTrackList->GetTrackIDForRow(row);
+      tracks.push_back(pTrackList->GetTrackIDForRow(row));
 
-    // Move the file to the rubbish bin
-    string_t sFilePath;
-    spitfire::audio::cMetaData metaData;
-    pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
-    spitfire::filesystem::MoveFileToTrash(sFilePath);
+      // Move the file to the rubbish bin
+      string_t sFilePath;
+      spitfire::audio::cMetaData metaData;
+      pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+      spitfire::filesystem::MoveFileToTrash(sFilePath);
 
-    iter.Next();
+      iter.Next();
+    }
+
+    // Tell the view that we are removing these tracks
+    view.OnActionRemoveTracks(tracks);
+
+    // Remove the selected tracks
+    pTrackList->DeleteAllSelected();
   }
-
-  // Remove the selected tracks
-  pTrackList->DeleteAllSelected();
 }
 
 void cGtkmmMainWindow::OnActionTrackShowInFileManager()
