@@ -699,8 +699,16 @@ bool cTrackPropertiesReader::ReadTrackLength(spitfire::audio::cMetaData& metaDat
 
   mad_timer_t timer = mad_timer_zero;
 
+  size_t iterations = 0;
+
   bool bContinue = true;
   while (bContinue) {
+    // If for some reason we can't progress through this file then we break
+    if (iterations > 500) break;
+
+    // Increment our safety counter
+    iterations++;
+
     if (buflen < sizeof(buffer)) {
       int bytes = fread(buffer + buflen, 1, sizeof(buffer) - buflen, file);
       if (bytes <= 0) break;
