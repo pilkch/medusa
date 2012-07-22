@@ -114,6 +114,8 @@ namespace medusa
       }
 
       if (!supportedFiles.empty()) {
+        // Tell the controller that we are about to load this many files
+        pController->OnLoadingFilesToLoadIncrement(supportedFiles.size());
 
         cTrackPropertiesReader propertiesReader;
 
@@ -218,6 +220,9 @@ namespace medusa
 
     // Load the playlist
     util::LoadPlaylistFromCSV(util::GetPlayListFilePath(), tracks);
+
+    // Tell the controller that we are about to load this many files
+    pController->OnLoadingFilesToLoadIncrement(tracks.size());
 
     // Tell the controller that we added these tracks
     pController->OnTracksAdded(tracks);

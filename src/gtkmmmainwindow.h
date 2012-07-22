@@ -80,6 +80,8 @@ public:
 
   void OnThemeChanged();
 
+  void OnLoadingFilesToLoadIncrement(size_t nFiles);
+  void OnLoadingFilesToLoadDecrement(size_t nFiles);
   void OnPlaylistLoading();
   void OnPlaylistLoaded(trackid_t idLastPlayed);
   void OnTrackAdded(trackid_t id, const cTrack& track);
@@ -179,6 +181,7 @@ private:
 
   Gtk::Label statusBar;
 
+  size_t nTracksLoading;
   cGtkmmTrackList* pTrackList;
 
   Glib::RefPtr<Gtk::ToggleAction> pPlayPauseAction;

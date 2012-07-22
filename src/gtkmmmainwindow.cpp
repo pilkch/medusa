@@ -159,6 +159,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   textVolumeMinus("-"),
   dummyCategories("Categories"),
   statusBar("0 tracks"),
+  nTracksLoading(0),
   pTrackList(nullptr),
   bIsTogglingPlayPause(false),
   bIsTogglingRepeat(false)
@@ -680,6 +681,8 @@ void cGtkmmMainWindow::OnFileDroppedFromNautilus(const Glib::RefPtr<Gdk::DragCon
     std::vector<Glib::ustring> file_list = selection_data.get_uris();
     if (!file_list.empty()) {
       std::cout<<"cGtkmmMainWindow::OnFileDroppedFromNautilus 2"<<std::endl;
+      std::vector<string_t> files;
+
       const size_t n = file_list.size();
       for (size_t i = 0; i < n; i++) {
         std::cout<<"cGtkmmMainWindow::OnFileDroppedFromNautilus 3"<<std::endl;
@@ -687,8 +690,14 @@ void cGtkmmMainWindow::OnFileDroppedFromNautilus(const Glib::RefPtr<Gdk::DragCon
         std::cout<<"cGtkmmMainWindow::OnFileDroppedFromNautilus \""<<sPath<<"\""<<std::endl;
 
         if (spitfire::filesystem::IsFolder(sPath)) view.OnActionAddTracksFromFolder(sPath);
-        else view.OnActionAddTrack(sPath);
+        else {
+          // Group files for adding all at once later on
+          files.push_back(sPath);
+        }
       }
+
+      // Now add all the files that were added all at once
+      view.OnActionAddTracks(files);
 
       bIsHandled = true;
     }
@@ -1275,6 +1284,8 @@ void cGtkmmMainWindow::ApplySettings()
       o<<" selected of ";
     }
     o<<pTrackList->GetTrackCount();
+    o<<" tracks, loading ";
+    o<<nTracksLoading;
     o<<" tracks";
     statusBar.set_text(o.str());
   }
@@ -1283,8 +1294,22 @@ void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
 {
   std::cout<<"cGtkmmMainWindow::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
   pTrackList->AddTrack(id, track);
-  UpdateStatusBar();
+  OnLoadingFilesToLoadDecrement(1);
 }
+
+  void cGtkmmMainWindow::OnLoadingFilesToLoadIncrement(size_t nFiles)
+  {
+    nTracksLoading += nFiles;
+    UpdateStatusBar();
+  }
+
+  void cGtkmmMainWindow::OnLoadingFilesToLoadDecrement(size_t nFiles)
+  {
+    // Check that there are enough files to subtract
+    ASSERT(nTracksLoading + nFiles >= nFiles);
+    nTracksLoading -= nFiles;
+    UpdateStatusBar();
+  }
 
   void cGtkmmMainWindow::OnPlaylistLoading()
   {

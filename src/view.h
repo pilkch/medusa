@@ -17,6 +17,8 @@ namespace medusa
 
     void SetController(cController* pController);
 
+    virtual void OnLoadingFilesToLoadIncrement(size_t nFiles) = 0;
+    virtual void OnLoadingFilesToLoadDecrement(size_t nFiles) = 0;
     virtual void OnPlaylistLoading() = 0;
     virtual void OnPlaylistLoaded(trackid_t idLastPlayed) = 0;
     virtual void OnTrackAdded(trackid_t id, const cTrack& track) = 0;

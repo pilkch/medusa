@@ -16,6 +16,26 @@ namespace medusa
     view.OnPlayerAboutToFinish();
   }
 
+  cGtkmmViewEventLoadingFilesToLoadIncrement::cGtkmmViewEventLoadingFilesToLoadIncrement(size_t _nFiles) :
+    nFiles(_nFiles)
+  {
+  }
+
+  void cGtkmmViewEventLoadingFilesToLoadIncrement::EventFunction(cGtkmmView& view)
+  {
+    view.OnLoadingFilesToLoadIncrement(nFiles);
+  }
+
+  cGtkmmViewEventLoadingFilesToLoadDecrement::cGtkmmViewEventLoadingFilesToLoadDecrement(size_t _nFiles) :
+    nFiles(_nFiles)
+  {
+  }
+
+  void cGtkmmViewEventLoadingFilesToLoadDecrement::EventFunction(cGtkmmView& view)
+  {
+    view.OnLoadingFilesToLoadDecrement(nFiles);
+  }
+
   void cGtkmmViewEventPlaylistLoading::EventFunction(cGtkmmView& view)
   {
     view.OnPlaylistLoading();
@@ -232,6 +252,28 @@ void cGtkmmView::OnPlayerAboutToFinish()
     pMainWindow->OnActionPlayNextTrack();
   }
 }
+
+  void cGtkmmView::OnLoadingFilesToLoadIncrement(size_t nFiles)
+  {
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventLoadingFilesToLoadIncrement* pEvent = new cGtkmmViewEventLoadingFilesToLoadIncrement(nFiles);
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnLoadingFilesToLoadIncrement(nFiles);
+    }
+  }
+
+  void cGtkmmView::OnLoadingFilesToLoadDecrement(size_t nFiles)
+  {
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventLoadingFilesToLoadDecrement* pEvent = new cGtkmmViewEventLoadingFilesToLoadDecrement(nFiles);
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnLoadingFilesToLoadDecrement(nFiles);
+    }
+  }
 
   void cGtkmmView::OnPlaylistLoading()
   {

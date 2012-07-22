@@ -32,6 +32,26 @@ namespace medusa
     virtual void EventFunction(cGtkmmView& view) override;
   };
 
+  class cGtkmmViewEventLoadingFilesToLoadIncrement : public cGtkmmViewEvent
+  {
+  public:
+    explicit cGtkmmViewEventLoadingFilesToLoadIncrement(size_t nFiles);
+
+    virtual void EventFunction(cGtkmmView& view) override;
+
+    size_t nFiles;
+  };
+
+  class cGtkmmViewEventLoadingFilesToLoadDecrement : public cGtkmmViewEvent
+  {
+  public:
+    explicit cGtkmmViewEventLoadingFilesToLoadDecrement(size_t nFiles);
+
+    virtual void EventFunction(cGtkmmView& view) override;
+
+    size_t nFiles;
+  };
+
   class cGtkmmViewEventPlaylistLoaded : public cGtkmmViewEvent
   {
   public:
@@ -74,6 +94,8 @@ class cGtkmmView : public cView
 public:
   friend class cGtkmmMainWindow;
   friend class cGStreamermmPlayer;
+  friend class cGtkmmViewEventLoadingFilesToLoadIncrement;
+  friend class cGtkmmViewEventLoadingFilesToLoadDecrement;
   friend class cGtkmmViewEventPlayerAboutToFinish;
   friend class cGtkmmViewEventPlaylistLoading;
   friend class cGtkmmViewEventPlaylistLoaded;
@@ -103,6 +125,8 @@ protected:
   void OnPlayerUpdatePlaybackPosition();
   void OnPlayerAboutToFinish();
 
+  virtual void OnLoadingFilesToLoadIncrement(size_t nFiles) override;
+  virtual void OnLoadingFilesToLoadDecrement(size_t nFiles) override;
   virtual void OnPlaylistLoading() override;
   virtual void OnPlaylistLoaded(trackid_t idLastPlayed) override;
   virtual void OnTrackAdded(trackid_t id, const cTrack& track) override;

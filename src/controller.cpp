@@ -58,6 +58,18 @@ namespace medusa
     model.UpdateTrackFilePath(id, sFilePath);
   }
 
+  void cController::OnLoadingFilesToLoadIncrement(size_t nFiles)
+  {
+    std::cout<<"cController::OnLoadingFilesToLoadIncrement"<<std::endl;
+    view.OnLoadingFilesToLoadIncrement(nFiles);
+  }
+
+  void cController::OnLoadingFilesToLoadDecrement(size_t nFiles)
+  {
+    std::cout<<"cController::OnLoadingFilesToLoadDecrement"<<std::endl;
+    view.OnLoadingFilesToLoadDecrement(nFiles);
+  }
+
   void cController::OnPlaylistLoading()
   {
     std::cout<<"cController::OnPlaylistLoading"<<std::endl;

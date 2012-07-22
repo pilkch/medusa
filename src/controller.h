@@ -28,6 +28,8 @@ namespace medusa
     void RemoveTrack(trackid_t id);
     void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
 
+    void OnLoadingFilesToLoadIncrement(size_t nFiles);
+    void OnLoadingFilesToLoadDecrement(size_t nFiles);
     void OnPlaylistLoading();
     void OnPlaylistLoaded(trackid_t idLastPlayed);
     void OnTrackAdded(trackid_t id, const cTrack& track);
