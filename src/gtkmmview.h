@@ -115,7 +115,8 @@ protected:
 
   void OnActionAddTracks(const std::vector<string_t>& files);
   void OnActionAddTracksFromFolder(const string_t& sFolderPath);
-  void OnActionRemoveTrack(trackid_t id);
+  void OnActionStopLoading();
+  void OnActionRemoveTracks(const std::vector<trackid_t>& tracks);
   void OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath);
   void OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
   void OnActionPlaybackPositionChanged(uint64_t seconds);

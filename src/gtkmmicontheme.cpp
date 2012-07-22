@@ -17,6 +17,12 @@ namespace medusa
     icon_theme = Gtk::IconTheme::get_default();
   }
 
+  void cGtkmmIconTheme::LoadStockIconWithSizePixels(const std::string& sStockIconName, size_t sizePixels, Gtk::Image& image)
+  {
+    std::cout<<"cGtkmmIconTheme::LoadStockIcon"<<std::endl;
+    image.set(icon_theme->load_icon(sStockIconName.c_str(), sizePixels, Gtk::ICON_LOOKUP_USE_BUILTIN));
+  }
+
   void cGtkmmIconTheme::LoadStockIcon(const std::string& sStockIconName, Gtk::Image& image)
   {
     std::cout<<"cGtkmmIconTheme::LoadStockIcon"<<std::endl;

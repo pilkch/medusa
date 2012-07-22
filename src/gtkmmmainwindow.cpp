@@ -525,6 +525,9 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   pTrackList = new cGtkmmTrackList(*this);
 
 
+  buttonStopLoading.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionStopLoading));
+
+
   //boxCategoriesAndPlaylist.pack_start(dummyCategories, Gtk::PACK_SHRINK); // Hidden for the moment until it is actually functional
   boxCategoriesAndPlaylist.pack_start(pTrackList->GetWidget(), Gtk::PACK_EXPAND_WIDGET);
 
@@ -539,13 +542,19 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxControlsAndToolbar.pack_start(boxControls, Gtk::PACK_EXPAND_WIDGET);
   boxControlsAndToolbar.pack_start(boxToolbarAndVolume, Gtk::PACK_SHRINK);
 
+  boxStatusBar.pack_start(statusBar, Gtk::PACK_SHRINK);
+  boxStatusBar.pack_start(buttonStopLoading, Gtk::PACK_SHRINK);
+
   boxMainWindow.pack_start(boxControlsAndToolbar, Gtk::PACK_EXPAND_WIDGET);
-  boxMainWindow.pack_start(statusBar, Gtk::PACK_SHRINK);
+  boxMainWindow.pack_start(boxStatusBar, Gtk::PACK_SHRINK);
 
   // Add the box layout to the main window
   add(boxMainWindow);
 
   show_all_children();
+
+  // Hide the stop button until we start loading some files
+  buttonStopLoading.hide();
 
   ApplySettings();
 }
@@ -561,6 +570,7 @@ const char* sICON_MEDIA_PREVIOUS = "gtk-media-previous-ltr";
 const char* sICON_MEDIA_PLAY = "gtk-media-play-ltr";
 const char* sICON_MEDIA_NEXT = "gtk-media-next-ltr";
 const char* sICON_REPEAT_TOGGLE = "gtk-goto-top";
+const char* sICON_STOP = "gtk-stop";
 
 void cGtkmmMainWindow::SetPlaybackButtonIcons()
 {
@@ -584,6 +594,10 @@ void cGtkmmMainWindow::SetPlaybackButtonIcons()
   Gtk::Image* pImageRepeatToggle = new Gtk::Image;
   iconTheme.LoadStockIconRotatedClockwise(sICON_REPEAT_TOGGLE, *pImageRepeatToggle);
   buttonRepeat.set_image(*pImageRepeatToggle);
+
+  Gtk::Image* pImageStop = new Gtk::Image;
+  iconTheme.LoadStockIconWithSizePixels(sICON_STOP, 16, *pImageStop);
+  buttonStopLoading.set_image(*pImageStop);
 }
 
 void cGtkmmMainWindow::SetStatusIconText(const string_t& sText)
@@ -766,19 +780,27 @@ void cGtkmmMainWindow::OnActionBrowseFolder()
   }
 }
 
+  void cGtkmmMainWindow::OnActionStopLoading()
+  {
+    view.OnActionStopLoading();
+  }
+
 void cGtkmmMainWindow::OnActionRemoveTrack()
 {
   std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack A popup menu item was selected"<<std::endl;
-  // Tell the view that we are removing these tracks
+
+  // Collect the tracks to remove
+  std::vector<trackid_t> tracks;
   cGtkmmTrackListSelectedIterator iter(*pTrackList);
   while (iter.IsValid()) {
-    std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack Item was selected"<<std::endl;
     const Gtk::TreeModel::Row& row = iter.GetRow();
-    trackid_t id = pTrackList->GetTrackIDForRow(row);
-    view.OnActionRemoveTrack(id);
+    tracks.push_back(pTrackList->GetTrackIDForRow(row));
 
     iter.Next();
   }
+
+  // Tell the view that we are removing these tracks
+  view.OnActionRemoveTracks(tracks);
 
   // Remove the selected tracks
   pTrackList->DeleteAllSelected();
@@ -1284,10 +1306,17 @@ void cGtkmmMainWindow::ApplySettings()
       o<<" selected of ";
     }
     o<<pTrackList->GetTrackCount();
-    o<<" tracks, loading ";
-    o<<nTracksLoading;
     o<<" tracks";
+    if (nTracksLoading != 0) {
+      o<<", loading ";
+      o<<nTracksLoading;
+      o<<" tracks";
+    }
     statusBar.set_text(o.str());
+
+    // Show the stop button if we are currently loading tracks
+    if (nTracksLoading != 0) buttonStopLoading.show();
+    else buttonStopLoading.hide();
   }
 
 void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)

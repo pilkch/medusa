@@ -54,14 +54,14 @@ namespace medusa
   }
 
 
-  cModelEventRemoveTrack::cModelEventRemoveTrack(trackid_t _id) :
-    id(_id)
+  cModelEventRemoveTracks::cModelEventRemoveTracks(const std::vector<trackid_t>& _tracks) :
+    tracks(_tracks)
   {
   }
 
-  void cModelEventRemoveTrack::EventFunction(cModel& model)
+  void cModelEventRemoveTracks::EventFunction(cModel& model)
   {
-    model.RemoveTrack(id);
+    model.RemoveTracks(tracks);
   }
 
   cModelEventPlayingTrack::cModelEventPlayingTrack(trackid_t _id) :
@@ -81,7 +81,8 @@ namespace medusa
     spitfire::util::cThread(soAction, "cModel"),
     pController(nullptr),
     soAction("cModel_soAction"),
-    eventQueue(soAction)
+    eventQueue(soAction),
+    soStopLoading("cModel_soStopLoading")
   {
   }
 
@@ -121,16 +122,30 @@ namespace medusa
 
         const size_t n = supportedFiles.size();
         for (size_t i = 0; i < n; i++) {
+          // Check if we have to stop loading
+          if (IsToStop() || soStopLoading.IsSignalled()) {
+            pController->OnLoadingFilesToLoadDecrement(n - i);
+            break;
+          }
+
           cTrack* pTrack = new cTrack;
           pTrack->sFilePath = supportedFiles[i];
           std::cout<<"cModel::AddTracks Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
           propertiesReader.ReadTrackProperties(pTrack->metaData, pTrack->sFilePath);
+          std::cout<<"cModel::AddTracks After ReadTrackProperties"<<std::endl;
 
           tracks.push_back(pTrack);
 
           pController->OnTrackAdded(pTrack, *pTrack);
         }
+
+        // Keep the saved playlist up to date in case we crash
+        SavePlaylist();
+
+        std::cout<<"cModel::AddTracks cTrackPropertiesReader is falling out of scope"<<std::endl;
       }
+
+      std::cout<<"cModel::AddTracks cTrackPropertiesReader has fallen out of scope"<<std::endl;
     }
   }
 
@@ -163,23 +178,33 @@ namespace medusa
     }
   }
 
-  void cModel::RemoveTrack(trackid_t id)
+  void cModel::RemoveTracks(const std::vector<trackid_t>& tracksToRemove)
   {
     if (spitfire::util::IsMainThread()) {
-      cModelEventRemoveTrack* pEvent = new cModelEventRemoveTrack(id);
+      cModelEventRemoveTracks* pEvent = new cModelEventRemoveTracks(tracksToRemove);
       eventQueue.AddItemToBack(pEvent);
     } else {
-      std::vector<cTrack*>::iterator iter = tracks.begin();
-      const std::vector<cTrack*>::iterator iterEnd = tracks.end();
-      while (iter != iterEnd) {
-        if (*iter == id) {
-          std::cout<<"cModel::RemoveTrack Removing track \""<<(*iter)->sFilePath<<"\""<<std::endl;
-          tracks.erase(iter);
-          break;
+      // For each track to remove
+      std::vector<const cTrack*>::const_iterator iterRemove = tracksToRemove.begin();
+      const std::vector<const cTrack*>::const_iterator iterRemoveEnd = tracksToRemove.end();
+      while (iterRemove != iterRemoveEnd) {
+        // Find the track in the list and remove it
+        std::vector<cTrack*>::iterator iter = tracks.begin();
+        const std::vector<cTrack*>::iterator iterEnd = tracks.end();
+        while (iter != iterEnd) {
+          if (*iter == *iterRemove) {
+            tracks.erase(iter);
+            break;
+          }
+
+          iter++;
         }
 
-        iter++;
+        iterRemove++;
       }
+
+      // Keep the saved playlist up to date in case we crash
+      SavePlaylist();
     }
   }
 
@@ -300,6 +325,11 @@ namespace medusa
     }
   }
 
+  void cModel::StopLoading()
+  {
+    soStopLoading.Signal();
+  }
+
   void cModel::ThreadFunction()
   {
     std::cout<<"cModel::ThreadFunction"<<std::endl;
@@ -317,6 +347,9 @@ namespace medusa
       if (pEvent != nullptr) {
         pEvent->EventFunction(*this);
         spitfire::SAFE_DELETE(pEvent);
+      } else {
+        // If the queue is empty then we know that there are no more actions and it is safe to reset our stop loading signal object
+        soStopLoading.Reset();
       }
 
       Yield();

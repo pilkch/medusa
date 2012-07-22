@@ -17,6 +17,7 @@ namespace medusa
     template <class T>
     void RegisterThemeChangedListener(T& listener);
 
+    void LoadStockIconWithSizePixels(const std::string& sStockIconName, size_t sizePixels, Gtk::Image& image);
     void LoadStockIcon(const std::string& sStockIconName, Gtk::Image& image);
     void LoadStockIconRotatedClockwise(const std::string& sStockIconName, Gtk::Image& image);
 

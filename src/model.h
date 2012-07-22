@@ -53,14 +53,14 @@ namespace medusa
     string_t sFilePath;
   };
 
-  class cModelEventRemoveTrack : public cModelEvent
+  class cModelEventRemoveTracks : public cModelEvent
   {
   public:
-    explicit cModelEventRemoveTrack(trackid_t id);
+    explicit cModelEventRemoveTracks(const std::vector<trackid_t>& tracks);
 
     virtual void EventFunction(cModel& model) override;
 
-    trackid_t id;
+    std::vector<trackid_t> tracks;
   };
 
   class cModelEventPlayingTrack : public cModelEvent
@@ -89,7 +89,8 @@ namespace medusa
 
     void AddTracks(const std::vector<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
-    void RemoveTrack(trackid_t id);
+    void StopLoading();
+    void RemoveTracks(const std::vector<trackid_t>& tracks);
     void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
 
     void SetPlayingTrack(trackid_t id);
@@ -111,6 +112,8 @@ namespace medusa
     spitfire::util::cThreadSafeQueue<cModelEvent> eventQueue;
 
     std::vector<cTrack*> tracks;
+
+    spitfire::util::cSignalObject soStopLoading; // Signalled by the controller when the the model thread should stop loading files
   };
 
   // ** cModel

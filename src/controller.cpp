@@ -48,14 +48,19 @@ namespace medusa
     model.AddTracksFromFolder(sFolderPath);
   }
 
-  void cController::RemoveTrack(trackid_t id)
+  void cController::RemoveTracks(const std::vector<trackid_t>& tracks)
   {
-    model.RemoveTrack(id);
+    model.RemoveTracks(tracks);
   }
 
   void cController::UpdateTrackFilePath(trackid_t id, const string_t& sFilePath)
   {
     model.UpdateTrackFilePath(id, sFilePath);
+  }
+
+  void cController::StopLoading()
+  {
+    model.StopLoading();
   }
 
   void cController::OnLoadingFilesToLoadIncrement(size_t nFiles)

@@ -174,10 +174,15 @@ void cGtkmmView::OnActionAddTracksFromFolder(const string_t& sFolderPath)
   pController->AddTracksFromFolder(sFolderPath);
 }
 
-void cGtkmmView::OnActionRemoveTrack(trackid_t id)
-{
-  pController->RemoveTrack(id);
-}
+  void cGtkmmView::OnActionStopLoading()
+  {
+    pController->StopLoading();
+  }
+
+  void cGtkmmView::OnActionRemoveTracks(const std::vector<trackid_t>& tracks)
+  {
+    pController->RemoveTracks(tracks);
+  }
 
   void cGtkmmView::OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath)
   {

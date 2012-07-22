@@ -25,7 +25,8 @@ namespace medusa
 
     void AddTracks(const std::vector<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
-    void RemoveTrack(trackid_t id);
+    void StopLoading();
+    void RemoveTracks(const std::vector<trackid_t>& tracks);
     void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
 
     void OnLoadingFilesToLoadIncrement(size_t nFiles);

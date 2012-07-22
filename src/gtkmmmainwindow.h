@@ -59,6 +59,7 @@ public:
 
   void OnActionBrowseFiles();
   void OnActionBrowseFolder();
+  void OnActionStopLoading();
   void OnActionRemoveTrack();
   void OnActionTrackMoveToFolder(const string_t& sDestinationFolder);
   void OnActionTrackMoveToFolderIndex(int i);
@@ -160,6 +161,7 @@ private:
   Gtk::HBox boxCategoriesAndPlaylist;
   Gtk::HBox boxControlsAndToolbar;
   Gtk::VBox boxControls;
+  Gtk::HBox boxStatusBar;
 
   // Controls
   Gtk::Label textCurrentlyPlaying;
@@ -180,6 +182,7 @@ private:
   Gtk::Button dummyCategories;
 
   Gtk::Label statusBar;
+  Gtk::Button buttonStopLoading;
 
   size_t nTracksLoading;
   cGtkmmTrackList* pTrackList;
