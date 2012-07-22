@@ -56,9 +56,9 @@ const string_t& cGtkmmFileDialog::GetSelectedFile() const
   return sSelectedFile;
 }
 
-const std::vector<string_t>& cGtkmmFileDialog::GetSelectedFiles() const
+const std::list<string_t>& cGtkmmFileDialog::GetSelectedFiles() const
 {
-  return vSelectedFiles;
+  return selectedFiles;
 }
 
 bool cGtkmmFileDialog::Run(Gtk::Window& parent)
@@ -67,7 +67,7 @@ bool cGtkmmFileDialog::Run(Gtk::Window& parent)
 
   sSelectedFolder.clear();
   sSelectedFile.clear();
-  vSelectedFiles.clear();
+  selectedFiles.clear();
 
   // Create our dialog
   Gtk::FileChooserDialog
@@ -111,7 +111,7 @@ bool cGtkmmFileDialog::Run(Gtk::Window& parent)
     sSelectedFile = spitfire::string::ToString_t(dialog.get_filename());
     const std::vector<std::string>& files = dialog.get_filenames();
     const size_t n = files.size();
-    for (size_t i = 0; i < n; i++) vSelectedFiles.push_back(spitfire::string::ToString_t(files[i]));
+    for (size_t i = 0; i < n; i++) selectedFiles.push_back(spitfire::string::ToString_t(files[i]));
   }
 
   return bResult;

@@ -22,57 +22,6 @@ namespace medusa
     virtual void EventFunction(cModel& model) = 0;
   };
 
-  class cModelEventAddFiles : public cModelEvent
-  {
-  public:
-    explicit cModelEventAddFiles(const std::vector<string_t>& files);
-
-    virtual void EventFunction(cModel& model) override;
-
-    std::vector<string_t> files;
-  };
-
-  class cModelEventAddFolder : public cModelEvent
-  {
-  public:
-    explicit cModelEventAddFolder(const string_t& sFolderPath);
-
-    virtual void EventFunction(cModel& model) override;
-
-    string_t sFolderPath;
-  };
-
-  class cModelEventTrackUpdatedFilePath : public cModelEvent
-  {
-  public:
-    explicit cModelEventTrackUpdatedFilePath(trackid_t id, const string_t& sFilePath);
-
-    virtual void EventFunction(cModel& model) override;
-
-    trackid_t id;
-    string_t sFilePath;
-  };
-
-  class cModelEventRemoveTracks : public cModelEvent
-  {
-  public:
-    explicit cModelEventRemoveTracks(const std::vector<trackid_t>& tracks);
-
-    virtual void EventFunction(cModel& model) override;
-
-    std::vector<trackid_t> tracks;
-  };
-
-  class cModelEventPlayingTrack : public cModelEvent
-  {
-  public:
-    explicit cModelEventPlayingTrack(trackid_t id);
-
-    virtual void EventFunction(cModel& model) override;
-
-    trackid_t id;
-  };
-
   class cController;
 
   class cModel : public spitfire::util::cThread
@@ -87,10 +36,10 @@ namespace medusa
     void StopSoon();
     void StopNow();
 
-    void AddTracks(const std::vector<string_t>& files);
+    void AddTracks(const std::list<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
     void StopLoading();
-    void RemoveTracks(const std::vector<trackid_t>& tracks);
+    void RemoveTracks(const std::list<trackid_t>& tracks);
     void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
 
     void SetPlayingTrack(trackid_t id);
@@ -104,14 +53,14 @@ namespace medusa
     trackid_t LoadLastPlayed();
     void SaveLastPlayed(trackid_t idLastPlayed) const;
 
-    void CollectFilesInFolder(const string_t& sFolderPath, std::vector<string_t>& files) const;
+    void CollectFilesInFolder(const string_t& sFolderPath, std::list<string_t>& files) const;
 
     cController* pController;
 
     spitfire::util::cSignalObject soAction;
     spitfire::util::cThreadSafeQueue<cModelEvent> eventQueue;
 
-    std::vector<cTrack*> tracks;
+    std::list<cTrack*> tracks;
 
     spitfire::util::cSignalObject soStopLoading; // Signalled by the controller when the the model thread should stop loading files
   };

@@ -171,10 +171,15 @@ namespace medusa
       return spitfire::filesystem::GetThisApplicationSettingsDirectory() + TEXT("lastplayed.txt");
     }
 
-    bool LoadPlaylistFromCSV(const string_t& sFilePath, std::vector<cTrack*>& playlist)
+    bool LoadPlaylistFromCSV(const string_t& sFilePath, std::list<cTrack*>& playlist)
     {
-      const size_t n = playlist.size();
-      for (size_t i = 0; i < n; i++) spitfire::SAFE_DELETE(playlist[i]);
+      std::list<cTrack*>::iterator iter = playlist.begin();
+      const std::list<cTrack*>::iterator iterEnd = playlist.end();
+      while (iter != iterEnd) {
+        spitfire::SAFE_DELETE(*iter);
+
+        iter++;
+      }
 
       playlist.clear();
 
@@ -213,7 +218,7 @@ namespace medusa
       return true;
     }
 
-    bool SavePlaylistToCSV(const string_t& sFilePath, const std::vector<cTrack*>& playlist)
+    bool SavePlaylistToCSV(const string_t& sFilePath, const std::list<cTrack*>& playlist)
     {
       spitfire::csv::cWriter writer;
       if (!writer.Open(sFilePath)) {
@@ -236,10 +241,10 @@ namespace medusa
       writer.AddValue(TEXT("Duration MS"));
       writer.EndRow();
 
-      const std::vector<cTrack*>& tracks = playlist;
-      const size_t n = tracks.size();
-      for (size_t i = 0; i < n; i++) {
-        const cTrack* pTrack = tracks[i];
+      std::list<cTrack*>::const_iterator iter = playlist.begin();
+      const std::list<cTrack*>::const_iterator iterEnd = playlist.end();
+      while (iter != iterEnd) {
+        const cTrack* pTrack = *iter;
         assert(pTrack != nullptr);
         const cTrack& track = *pTrack;
         writer.AddValue(track.sFilePath);
@@ -255,6 +260,8 @@ namespace medusa
         writer.AddValue(spitfire::string::ToString(track.metaData.uiTracknum));
         writer.AddValue(spitfire::string::ToString(track.metaData.uiDurationMilliSeconds));
         writer.EndRow();
+
+        iter++;
       }
 
       return true;

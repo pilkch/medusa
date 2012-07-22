@@ -51,25 +51,15 @@ namespace medusa
     view.OnPlaylistLoaded(idLastPlayed);
   }
 
-  cGtkmmViewEventTrackAdded::cGtkmmViewEventTrackAdded(trackid_t _id, const cTrack& _track) :
-    id(_id),
-    track(_track)
-  {
-  }
-
-  void cGtkmmViewEventTrackAdded::EventFunction(cGtkmmView& view)
-  {
-    view.OnTrackAdded(id, track);
-  }
-
-  cGtkmmViewEventTracksAdded::cGtkmmViewEventTracksAdded(const std::vector<cTrack*>& _tracks) :
+  cGtkmmViewEventTracksAdded::cGtkmmViewEventTracksAdded(const std::list<trackid_t>& _ids, const std::list<cTrack*>& _tracks) :
+    ids(_ids),
     tracks(_tracks)
   {
   }
 
   void cGtkmmViewEventTracksAdded::EventFunction(cGtkmmView& view)
   {
-    view.OnTracksAdded(tracks);
+    view.OnTracksAdded(ids, tracks);
   }
 
 
@@ -164,7 +154,7 @@ void cGtkmmView::OnActionMainWindowQuitNow()
     return player.IsPlaying();
   }
 
-void cGtkmmView::OnActionAddTracks(const std::vector<string_t>& files)
+void cGtkmmView::OnActionAddTracks(const std::list<string_t>& files)
 {
   pController->AddTracks(files);
 }
@@ -179,7 +169,7 @@ void cGtkmmView::OnActionAddTracksFromFolder(const string_t& sFolderPath)
     pController->StopLoading();
   }
 
-  void cGtkmmView::OnActionRemoveTracks(const std::vector<trackid_t>& tracks)
+  void cGtkmmView::OnActionRemoveTracks(const std::list<trackid_t>& tracks)
   {
     pController->RemoveTracks(tracks);
   }
@@ -302,34 +292,16 @@ void cGtkmmView::OnPlayerAboutToFinish()
     }
   }
 
-void cGtkmmView::OnTrackAdded(trackid_t id, const cTrack& track)
-{
-  std::cout<<"cGtkmmView::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
-
-  if (!spitfire::util::IsMainThread()) {
-    cGtkmmViewEventTrackAdded* pEvent = new cGtkmmViewEventTrackAdded(id, track);
-    eventQueue.AddItemToBack(pEvent);
-    notifyMainThread.Notify();
-  } else {
-    pMainWindow->OnTrackAdded(id, track);
-  }
-}
-
-void cGtkmmView::OnTracksAdded(const std::vector<cTrack*>& tracks)
+void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<cTrack*>& tracks)
 {
   std::cout<<"cGtkmmView::OnTracksAdded"<<std::endl;
 
   if (!spitfire::util::IsMainThread()) {
-    cGtkmmViewEventTracksAdded* pEvent = new cGtkmmViewEventTracksAdded(tracks);
+    cGtkmmViewEventTracksAdded* pEvent = new cGtkmmViewEventTracksAdded(ids, tracks);
     eventQueue.AddItemToBack(pEvent);
     notifyMainThread.Notify();
   } else {
-    const size_t n = tracks.size();
-    for (size_t i = 0; i < n; i++) {
-      const cTrack* pTrack = tracks[i];
-      ASSERT(pTrack != nullptr);
-      pMainWindow->OnTrackAdded(pTrack, *pTrack);
-    }
+    pMainWindow->OnTracksAdded(ids, tracks);
   }
 }
 

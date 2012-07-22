@@ -1,6 +1,9 @@
 #ifndef MEDUSA_UTIL_H
 #define MEDUSA_UTIL_H
 
+// Standard headers
+#include <list>
+
 // Spitfire headers
 #include <spitfire/audio/metadata.h>
 #include <spitfire/util/datetime.h>
@@ -26,8 +29,8 @@ namespace medusa
     string_t GetPlayListFilePath();
     string_t GetLastPlayedFilePath();
 
-    bool LoadPlaylistFromCSV(const string_t& sFilePath, std::vector<cTrack*>& playlist);
-    bool SavePlaylistToCSV(const string_t& sFilePath, const std::vector<cTrack*>& playlist);
+    bool LoadPlaylistFromCSV(const string_t& sFilePath, std::list<cTrack*>& playlist);
+    bool SavePlaylistToCSV(const string_t& sFilePath, const std::list<cTrack*>& playlist);
   }
 }
 

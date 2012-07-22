@@ -21,8 +21,7 @@ namespace medusa
     virtual void OnLoadingFilesToLoadDecrement(size_t nFiles) = 0;
     virtual void OnPlaylistLoading() = 0;
     virtual void OnPlaylistLoaded(trackid_t idLastPlayed) = 0;
-    virtual void OnTrackAdded(trackid_t id, const cTrack& track) = 0;
-    virtual void OnTracksAdded(const std::vector<cTrack*>& tracks) = 0;
+    virtual void OnTracksAdded(const std::list<trackid_t>& ids, const std::list<cTrack*>& tracks) = 0;
 
     void Run() { _Run(); }
 

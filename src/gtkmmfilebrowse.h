@@ -3,7 +3,7 @@
 
 // Standard headers
 #include <string>
-#include <vector>
+#include <list>
 
 // gtkmm headers
 #include <gtkmm.h>
@@ -49,10 +49,13 @@ namespace medusa
 // dialog.SetCaption(TEXT("Please choose some files"));
 // dialog.SetDefaultFolder(TEXT("/folder"));
 // if (dialog.Run(*this)) {
-//   const std::vector<string_t>& vSelectedFiles = dialog.GetSelectedFiles();
-//   const size_t n = vSelectedFiles.size();
-//   for (size_t i = 0; i < n; i++) {
-//     ... add file (vSelectedFiles[i])
+//   const std::list<string_t>& selectedFiles = dialog.GetSelectedFiles();
+//   std::list<string_t>::const_iterator iter = selectedFiles.begin();
+//   const std::list<string_t>::const_iterator iterEnd = selectedFiles.end();
+//   while (iter != iterEnd) {
+//     ... add file (*iter)
+//
+//     iter++;
 //   }
 // }
 
@@ -100,7 +103,7 @@ public:
 
   const string_t& GetSelectedFolder() const;
   const string_t& GetSelectedFile() const;
-  const std::vector<string_t>& GetSelectedFiles() const;
+  const std::list<string_t>& GetSelectedFiles() const;
 
   bool Run(Gtk::Window& parent);
 
@@ -113,7 +116,7 @@ private:
 
   string_t sSelectedFolder;
   string_t sSelectedFile;
-  std::vector<string_t> vSelectedFiles;
+  std::list<string_t> selectedFiles;
 };
 
 class cGtkmmFolderDialog

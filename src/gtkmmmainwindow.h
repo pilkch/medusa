@@ -85,7 +85,7 @@ public:
   void OnLoadingFilesToLoadDecrement(size_t nFiles);
   void OnPlaylistLoading();
   void OnPlaylistLoaded(trackid_t idLastPlayed);
-  void OnTrackAdded(trackid_t id, const cTrack& track);
+  void OnTracksAdded(const std::list<trackid_t>& ids, const std::list<cTrack*>& tracks);
 
 private:
   trackid_t GetPreviousTrack() const;

@@ -68,25 +68,15 @@ namespace medusa
     virtual void EventFunction(cGtkmmView& view) override;
   };
 
-  class cGtkmmViewEventTrackAdded : public cGtkmmViewEvent
-  {
-  public:
-    cGtkmmViewEventTrackAdded(trackid_t id, const cTrack& track);
-
-    virtual void EventFunction(cGtkmmView& view) override;
-
-    trackid_t id;
-    cTrack track;
-  };
-
   class cGtkmmViewEventTracksAdded : public cGtkmmViewEvent
   {
   public:
-    explicit cGtkmmViewEventTracksAdded(const std::vector<cTrack*>& tracks);
+    explicit cGtkmmViewEventTracksAdded(const std::list<trackid_t>& ids, const std::list<cTrack*>& tracks);
 
     virtual void EventFunction(cGtkmmView& view) override;
 
-    std::vector<cTrack*> tracks;
+    std::list<trackid_t> ids;
+    std::list<cTrack*> tracks;
   };
 
 class cGtkmmView : public cView
@@ -99,7 +89,6 @@ public:
   friend class cGtkmmViewEventPlayerAboutToFinish;
   friend class cGtkmmViewEventPlaylistLoading;
   friend class cGtkmmViewEventPlaylistLoaded;
-  friend class cGtkmmViewEventTrackAdded;
   friend class cGtkmmViewEventTracksAdded;
 
   cGtkmmView(int argc, char** argv);
@@ -113,10 +102,10 @@ protected:
   void OnActionMainWindowQuitSoon();
   void OnActionMainWindowQuitNow();
 
-  void OnActionAddTracks(const std::vector<string_t>& files);
+  void OnActionAddTracks(const std::list<string_t>& files);
   void OnActionAddTracksFromFolder(const string_t& sFolderPath);
   void OnActionStopLoading();
-  void OnActionRemoveTracks(const std::vector<trackid_t>& tracks);
+  void OnActionRemoveTracks(const std::list<trackid_t>& tracks);
   void OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath);
   void OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
   void OnActionPlaybackPositionChanged(uint64_t seconds);
@@ -130,8 +119,7 @@ protected:
   virtual void OnLoadingFilesToLoadDecrement(size_t nFiles) override;
   virtual void OnPlaylistLoading() override;
   virtual void OnPlaylistLoaded(trackid_t idLastPlayed) override;
-  virtual void OnTrackAdded(trackid_t id, const cTrack& track) override;
-  virtual void OnTracksAdded(const std::vector<cTrack*>& tracks) override;
+  virtual void OnTracksAdded(const std::list<trackid_t>& ids, const std::list<cTrack*>& tracks) override;
 
 private:
   void InstallDesktopFile();

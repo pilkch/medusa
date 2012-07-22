@@ -695,7 +695,7 @@ void cGtkmmMainWindow::OnFileDroppedFromNautilus(const Glib::RefPtr<Gdk::DragCon
     std::vector<Glib::ustring> file_list = selection_data.get_uris();
     if (!file_list.empty()) {
       std::cout<<"cGtkmmMainWindow::OnFileDroppedFromNautilus 2"<<std::endl;
-      std::vector<string_t> files;
+      std::list<string_t> files;
 
       const size_t n = file_list.size();
       for (size_t i = 0; i < n; i++) {
@@ -760,8 +760,7 @@ void cGtkmmMainWindow::OnActionBrowseFiles()
     std::cout<<"cGtkmmMainWindow::OnActionBrowseFiles Selected files"<<std::endl;
     settings.SetLastAddLocation(dialog.GetSelectedFolder());
     settings.Save();
-    const std::vector<string_t>& vSelectedFiles = dialog.GetSelectedFiles();
-    view.OnActionAddTracks(vSelectedFiles);
+    view.OnActionAddTracks(dialog.GetSelectedFiles());
   }
 }
 
@@ -790,7 +789,7 @@ void cGtkmmMainWindow::OnActionRemoveTrack()
   std::cout<<"cGtkmmMainWindow::OnActionRemoveTrack A popup menu item was selected"<<std::endl;
 
   // Collect the tracks to remove
-  std::vector<trackid_t> tracks;
+  std::list<trackid_t> tracks;
   cGtkmmTrackListSelectedIterator iter(*pTrackList);
   while (iter.IsValid()) {
     const Gtk::TreeModel::Row& row = iter.GetRow();
@@ -913,7 +912,7 @@ void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
   ALERT_RESULT result = dialog.Run();
   if (result == ALERT_RESULT::OK) {
     // Collect the tracks to remove and move them to the rubbish bin
-    std::vector<trackid_t> tracks;
+    std::list<trackid_t> tracks;
     cGtkmmTrackListSelectedIterator iter(*pTrackList);
     while (iter.IsValid()) {
       std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToRubbishBin Item was selected"<<std::endl;
@@ -1331,15 +1330,34 @@ void cGtkmmMainWindow::ApplySettings()
     else buttonStopLoading.hide();
   }
 
-void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
+void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<cTrack*>& tracks)
 {
-  std::cout<<"cGtkmmMainWindow::OnTrackAdded \""<<track.sFilePath<<"\""<<std::endl;
-  pTrackList->AddTrack(id, track);
-  OnLoadingFilesToLoadDecrement(1);
+  std::cout<<"cGtkmmMainWindow::OnTracksAdded"<<std::endl;
+  ASSERT(ids.size() == tracks.size());
+  size_t i = 0;
+  std::list<trackid_t>::const_iterator iterID = ids.begin();
+  const std::list<trackid_t>::const_iterator iterIDEnd = ids.end();
+  std::list<cTrack*>::const_iterator iterTrack = tracks.begin();
+  const std::list<cTrack*>::const_iterator iterTrackEnd = tracks.end();
+  while ((iterID != iterIDEnd) && (iterTrack != iterTrackEnd)) {
+    pTrackList->AddTrack(*iterID, *(*iterTrack));
+
+    i++;
+
+    iterID++;
+    iterTrack++;
+  }
+
+  ASSERT(i == ids.size());
+  ASSERT(i == tracks.size());
+
+  // Now that the tracks have been added we can decrement our loading counter
+  OnLoadingFilesToLoadDecrement(ids.size());
 }
 
   void cGtkmmMainWindow::OnLoadingFilesToLoadIncrement(size_t nFiles)
   {
+    std::cout<<"cGtkmmMainWindow::OnLoadingFilesToLoadIncrement "<<nTracksLoading<<" adding "<<nFiles<<std::endl;
     nTracksLoading += nFiles;
     UpdateStatusBar();
   }
@@ -1347,6 +1365,7 @@ void cGtkmmMainWindow::OnTrackAdded(trackid_t id, const cTrack& track)
   void cGtkmmMainWindow::OnLoadingFilesToLoadDecrement(size_t nFiles)
   {
     // Check that there are enough files to subtract
+    std::cout<<"cGtkmmMainWindow::OnLoadingFilesToLoadDecrement "<<nTracksLoading<<" subtracting "<<nFiles<<std::endl;
     ASSERT(nTracksLoading + nFiles >= nFiles);
     nTracksLoading -= nFiles;
     UpdateStatusBar();

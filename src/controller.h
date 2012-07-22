@@ -1,6 +1,9 @@
 #ifndef MEDUSA_CONTROLLER_H
 #define MEDUSA_CONTROLLER_H
 
+// Standard headers
+#include <list>
+
 // Spitfire headers
 #include <spitfire/util/string.h>
 #include <spitfire/audio/metadata.h>
@@ -23,18 +26,17 @@ namespace medusa
     void OnActionQuitSoon();
     void OnActionQuitNow();
 
-    void AddTracks(const std::vector<string_t>& files);
+    void AddTracks(const std::list<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
     void StopLoading();
-    void RemoveTracks(const std::vector<trackid_t>& tracks);
+    void RemoveTracks(const std::list<trackid_t>& tracks);
     void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
 
     void OnLoadingFilesToLoadIncrement(size_t nFiles);
     void OnLoadingFilesToLoadDecrement(size_t nFiles);
     void OnPlaylistLoading();
     void OnPlaylistLoaded(trackid_t idLastPlayed);
-    void OnTrackAdded(trackid_t id, const cTrack& track);
-    void OnTracksAdded(const std::vector<cTrack*>& tracks);
+    void OnTracksAdded(const std::list<trackid_t>& ids, const std::list<cTrack*>& tracks);
 
   private:
     cModel& model;
