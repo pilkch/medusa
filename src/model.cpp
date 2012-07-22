@@ -134,6 +134,18 @@ namespace medusa
     }
   }
 
+  void cModel::CollectFilesInFolder(const string_t& sFolderPath, std::vector<string_t>& files) const
+  {
+    spitfire::filesystem::cFolderIterator iter(sFolderPath);
+    iter.SetIgnoreHiddenFilesAndFolders();
+    while (iter.IsValid()) {
+      if (iter.IsFolder()) CollectFilesInFolder(iter.GetFullPath(), files);
+      else files.push_back(iter.GetFullPath());
+
+      iter.Next();
+    }
+  }
+
   void cModel::AddTracksFromFolder(const string_t& sFolderPath)
   {
     if (spitfire::util::IsMainThread()) {
@@ -141,18 +153,12 @@ namespace medusa
       eventQueue.AddItemToBack(pEvent);
     } else {
       std::cout<<"cModel::AddTracksFromFolder 0"<<std::endl;
+
+      // Collect all files this folder and sub directories
       std::vector<string_t> files;
-      spitfire::filesystem::cFolderIterator iter(sFolderPath);
-      iter.SetIgnoreHiddenFilesAndFolders();
-      while (iter.IsValid()) {
-        std::cout<<"cModel::AddTracksFromFolder 1 "<<(iter.IsFolder() ? "folder" : "file")<<" \""<<iter.GetFullPath()<<"\""<<std::endl;
-        if (iter.IsFolder()) AddTracksFromFolder(iter.GetFullPath());
-        else files.push_back(iter.GetFullPath());
+      CollectFilesInFolder(sFolderPath, files);
 
-        iter.Next();
-      }
-
-      // Now add any files
+      // Now add any found files
       AddTracks(files);
     }
   }

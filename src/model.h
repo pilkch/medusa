@@ -103,6 +103,8 @@ namespace medusa
     trackid_t LoadLastPlayed();
     void SaveLastPlayed(trackid_t idLastPlayed) const;
 
+    void CollectFilesInFolder(const string_t& sFolderPath, std::vector<string_t>& files) const;
+
     cController* pController;
 
     spitfire::util::cSignalObject soAction;
