@@ -22,14 +22,14 @@ namespace medusa
     virtual void EventFunction(cModel& model) = 0;
   };
 
-  class cModelEventAddFile : public cModelEvent
+  class cModelEventAddFiles : public cModelEvent
   {
   public:
-    explicit cModelEventAddFile(const string_t& sFilePath);
+    explicit cModelEventAddFiles(const std::vector<string_t>& files);
 
     virtual void EventFunction(cModel& model) override;
 
-    string_t sFilePath;
+    std::vector<string_t> files;
   };
 
   class cModelEventAddFolder : public cModelEvent
@@ -87,7 +87,6 @@ namespace medusa
     void StopSoon();
     void StopNow();
 
-    void AddTrack(const string_t& sFilePath);
     void AddTracks(const std::vector<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
     void RemoveTrack(trackid_t id);

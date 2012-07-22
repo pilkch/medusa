@@ -38,11 +38,6 @@ namespace medusa
     model.SetPlayingTrack(id);
   }
 
-  void cController::AddTrack(const string_t& sFilePath)
-  {
-    model.AddTrack(sFilePath);
-  }
-
   void cController::AddTracks(const std::vector<string_t>& files)
   {
     model.AddTracks(files);

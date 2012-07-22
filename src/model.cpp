@@ -21,14 +21,14 @@ namespace medusa
     return ((sFileExtensionLower == TEXT("mp3")) || (sFileExtensionLower == TEXT("wav")));
   }
 
-  cModelEventAddFile::cModelEventAddFile(const string_t& _sFilePath) :
-    sFilePath(_sFilePath)
+  cModelEventAddFiles::cModelEventAddFiles(const std::vector<string_t>& _files) :
+    files(_files)
   {
   }
 
-  void cModelEventAddFile::EventFunction(cModel& model)
+  void cModelEventAddFiles::EventFunction(cModel& model)
   {
-    model.AddTrack(sFilePath);
+    model.AddTracks(files);
   }
 
   cModelEventAddFolder::cModelEventAddFolder(const string_t& _sFolderPath) :
@@ -92,31 +92,44 @@ namespace medusa
     tracks.clear();
   }
 
-  void cModel::AddTrack(const string_t& sFilePath)
-  {
-    if (!IsFileTypeSupported(spitfire::filesystem::GetExtension(sFilePath))) return;
-
-    if (spitfire::util::IsMainThread()) {
-      cModelEventAddFile* pEvent = new cModelEventAddFile(sFilePath);
-      eventQueue.AddItemToBack(pEvent);
-    } else {
-      cTrackPropertiesReader propertiesReader;
-
-      cTrack* pTrack = new cTrack;
-      pTrack->sFilePath = sFilePath;
-      std::cout<<"cModel::AddTrack Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
-      propertiesReader.ReadTrackProperties(pTrack->metaData, pTrack->sFilePath);
-
-      tracks.push_back(pTrack);
-
-      pController->OnTrackAdded(pTrack, *pTrack);
-    }
-  }
-
   void cModel::AddTracks(const std::vector<string_t>& files)
   {
-    const size_t n = files.size();
-    for (size_t i = 0; i < n; i++) AddTrack(files[i]);
+    std::cout<<"cModel::AddTracks"<<std::endl;
+
+    std::cout<<"cModel::AddTracks 0"<<std::endl;
+    if (spitfire::util::IsMainThread()) {
+      std::cout<<"cModel::AddTracks 1"<<std::endl;
+      cModelEventAddFiles* pEvent = new cModelEventAddFiles(files);
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      std::cout<<"cModel::AddTracks 2"<<std::endl;
+
+      std::vector<string_t> supportedFiles;
+
+      {
+        const size_t n = files.size();
+        for (size_t i = 0; i < n; i++) {
+          if (IsFileTypeSupported(spitfire::filesystem::GetExtension(files[i]))) supportedFiles.push_back(files[i]);
+        }
+      }
+
+      if (!supportedFiles.empty()) {
+
+        cTrackPropertiesReader propertiesReader;
+
+        const size_t n = supportedFiles.size();
+        for (size_t i = 0; i < n; i++) {
+          cTrack* pTrack = new cTrack;
+          pTrack->sFilePath = supportedFiles[i];
+          std::cout<<"cModel::AddTracks Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
+          propertiesReader.ReadTrackProperties(pTrack->metaData, pTrack->sFilePath);
+
+          tracks.push_back(pTrack);
+
+          pController->OnTrackAdded(pTrack, *pTrack);
+        }
+      }
+    }
   }
 
   void cModel::AddTracksFromFolder(const string_t& sFolderPath)
@@ -125,14 +138,20 @@ namespace medusa
       cModelEventAddFolder* pEvent = new cModelEventAddFolder(sFolderPath);
       eventQueue.AddItemToBack(pEvent);
     } else {
+      std::cout<<"cModel::AddTracksFromFolder 0"<<std::endl;
+      std::vector<string_t> files;
       spitfire::filesystem::cFolderIterator iter(sFolderPath);
       iter.SetIgnoreHiddenFilesAndFolders();
       while (iter.IsValid()) {
+        std::cout<<"cModel::AddTracksFromFolder 1 "<<(iter.IsFolder() ? "folder" : "file")<<" \""<<iter.GetFullPath()<<"\""<<std::endl;
         if (iter.IsFolder()) AddTracksFromFolder(iter.GetFullPath());
-        else AddTrack(iter.GetFullPath());
+        else files.push_back(iter.GetFullPath());
 
         iter.Next();
       }
+
+      // Now add any files
+      AddTracks(files);
     }
   }
 
@@ -200,6 +219,7 @@ namespace medusa
     // Load the playlist
     util::LoadPlaylistFromCSV(util::GetPlayListFilePath(), tracks);
 
+    // Tell the controller that we added these tracks
     pController->OnTracksAdded(tracks);
 
     // Load the last played setting

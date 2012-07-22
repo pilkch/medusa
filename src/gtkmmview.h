@@ -91,7 +91,6 @@ protected:
   void OnActionMainWindowQuitSoon();
   void OnActionMainWindowQuitNow();
 
-  void OnActionAddTrack(const string_t& sFilePath);
   void OnActionAddTracks(const std::vector<string_t>& files);
   void OnActionAddTracksFromFolder(const string_t& sFolderPath);
   void OnActionRemoveTrack(trackid_t id);

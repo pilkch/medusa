@@ -144,11 +144,6 @@ void cGtkmmView::OnActionMainWindowQuitNow()
     return player.IsPlaying();
   }
 
-void cGtkmmView::OnActionAddTrack(const string_t& sFilePath)
-{
-  pController->AddTrack(sFilePath);
-}
-
 void cGtkmmView::OnActionAddTracks(const std::vector<string_t>& files)
 {
   pController->AddTracks(files);

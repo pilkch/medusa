@@ -23,7 +23,6 @@ namespace medusa
     void OnActionQuitSoon();
     void OnActionQuitNow();
 
-    void AddTrack(const string_t& sFilePath);
     void AddTracks(const std::vector<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
     void RemoveTrack(trackid_t id);
