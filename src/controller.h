@@ -28,6 +28,10 @@ namespace medusa
 
     void AddTracks(const std::list<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
+    #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+    void ImportFromBanshee();
+    #endif
+    void ImportFromRhythmbox();
     void StopLoading();
     void RemoveTracks(const std::list<trackid_t>& tracks);
     void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);

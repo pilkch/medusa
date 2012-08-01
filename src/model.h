@@ -52,6 +52,8 @@ namespace medusa
   private:
     virtual void ThreadFunction();
 
+    void UpdateStatusOnTracks(std::list<cTrack*>& tracks);
+
     void LoadPlaylist();
     void SavePlaylist() const;
 

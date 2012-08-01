@@ -187,25 +187,26 @@ trackid_t cGtkmmTrackList::GetTrackIDForRow(const Gtk::TreeModel::Row& row) cons
   return id;
 }
 
-bool cGtkmmTrackList::GetPropertiesForRow(const Gtk::TreeModel::Row& row, string_t& sFilePath, spitfire::audio::cMetaData& metaData) const
+bool cGtkmmTrackList::GetPropertiesForRow(const Gtk::TreeModel::Row& row, string_t& sFilePath, spitfire::audio::cMetaData& metaData, TRACK_STATUS& status) const
 {
   cUserDataPtr pUserData = row[columns.userdata];
   if (pUserData) {
     sFilePath = pUserData->sFilePath;
     metaData = pUserData->metaData;
+    status = pUserData->status;
     return true;
   }
 
   return false;
 }
 
-bool cGtkmmTrackList::GetPropertiesForRow(trackid_t id, string_t& sFilePath, spitfire::audio::cMetaData& metaData) const
+bool cGtkmmTrackList::GetPropertiesForRow(trackid_t id, string_t& sFilePath, spitfire::audio::cMetaData& metaData, TRACK_STATUS& status) const
 {
   Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
   while (iter) {
     Gtk::TreeModel::Row row = *iter;
     if (id == row[columns.id]) {
-      return GetPropertiesForRow(row, sFilePath, metaData);
+      return GetPropertiesForRow(row, sFilePath, metaData, status);
     }
 
     iter++;
@@ -214,21 +215,22 @@ bool cGtkmmTrackList::GetPropertiesForRow(trackid_t id, string_t& sFilePath, spi
   return false;
 }
 
-void cGtkmmTrackList::SetPropertiesForRow(const Gtk::TreeModel::Row& row, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
+void cGtkmmTrackList::SetPropertiesForRow(const Gtk::TreeModel::Row& row, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData, TRACK_STATUS status)
 {
   cUserDataPtr pUserData(new cUserData);
   pUserData->sFilePath = sFilePath;
   pUserData->metaData = metaData;
+  pUserData->status = status;
   row[columns.userdata]  = pUserData;
 }
 
-void cGtkmmTrackList::SetPropertiesForRow(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
+void cGtkmmTrackList::SetPropertiesForRow(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData, TRACK_STATUS status)
 {
   Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
   while (iter) {
     Gtk::TreeModel::Row row = *iter;
     if (id == row[columns.id]) {
-      SetPropertiesForRow(row, sFilePath, metaData);
+      SetPropertiesForRow(row, sFilePath, metaData, status);
       break;
     }
 
@@ -302,13 +304,21 @@ void cGtkmmTrackList::OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::T
   }
 }
 
+std::string cGtkmmTrackList::GetIconFileNameForStatus(TRACK_STATUS status) const
+{
+  if (status == TRACK_STATUS::FILE_DOES_NOT_EXIST) return "file_not_found";
+  else if (status == TRACK_STATUS::FILE_EMPTY) return "file_empty";
+
+  return "blank";
+}
+
 void cGtkmmTrackList::AddTrack(trackid_t id, const cTrack& track)
 {
   std::cout<<"cGtkmmTrackList::AddTrack \""<<track.sFilePath<<"\""<<std::endl;
 
   Gtk::TreeModel::Row row = *(playlistTreeModelRef->append());
   row[columns.id] = id;
-  row[columns.pixbuf] = Gdk::Pixbuf::create_from_file("data/empty.xpm");
+  row[columns.pixbuf] = Gdk::Pixbuf::create_from_file(("data/" + GetIconFileNameForStatus(track.status) + ".xpm").c_str());
   row[columns.artist] = spitfire::string::ToUTF8(track.metaData.sArtist);
   row[columns.title] = spitfire::string::ToUTF8(track.metaData.sTitle);
   row[columns.album] = spitfire::string::ToUTF8(track.metaData.sAlbum);
@@ -326,6 +336,7 @@ void cGtkmmTrackList::AddTrack(trackid_t id, const cTrack& track)
   cUserDataPtr pUserData(new cUserData);
   pUserData->sFilePath = track.sFilePath;
   pUserData->metaData = track.metaData;
+  pUserData->status = track.status;
   row[columns.userdata] = pUserData;
 
   nTracks++;
@@ -372,7 +383,12 @@ void cGtkmmTrackList::SetStatePlaying(trackid_t id)
     Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
     while (iter) {
       Gtk::TreeModel::Row row = *iter;
-      row[columns.pixbuf] = Gdk::Pixbuf::create_from_file((row[columns.id] == id) ? "data/playing.xpm" : "data/empty.xpm");
+      std::string sIconName = (row[columns.id] == id) ? "playing" : "blank";
+      cUserDataPtr pUserData = row[columns.userdata];
+      if (pUserData) {
+        if (pUserData->status != TRACK_STATUS::OK) sIconName = GetIconFileNameForStatus(pUserData->status);
+      }
+      row[columns.pixbuf] = Gdk::Pixbuf::create_from_file(("data/" + sIconName + ".xpm").c_str());
 
       iter++;
     }
@@ -386,7 +402,12 @@ void cGtkmmTrackList::SetStatePaused(trackid_t id)
     Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
     while (iter) {
       Gtk::TreeModel::Row row = *iter;
-      row[columns.pixbuf] = Gdk::Pixbuf::create_from_file((row[columns.id] == id) ? "data/paused.xpm" : "data/empty.xpm");
+      std::string sIconName = (row[columns.id] == id) ? "paused" : "blank";
+      cUserDataPtr pUserData = row[columns.userdata];
+      if (pUserData) {
+        if (pUserData->status != TRACK_STATUS::OK) sIconName = GetIconFileNameForStatus(pUserData->status);
+      }
+      row[columns.pixbuf] = Gdk::Pixbuf::create_from_file(("data/" + sIconName + ".xpm").c_str());
 
       iter++;
     }

@@ -878,7 +878,8 @@ void cGtkmmMainWindow::OnActionTrackMoveToFolder(const string_t& sDestinationFol
     // Move the file to the specified folder
     string_t sFilePath;
     spitfire::audio::cMetaData metaData;
-    pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+    TRACK_STATUS status = TRACK_STATUS::OK;
+    pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status);
     if (spitfire::filesystem::FileExists(sFilePath)) { // Only try to move tracks that exist
       // Build the destination path
       const string_t sFileName = spitfire::filesystem::GetFile(sFilePath);
@@ -906,7 +907,7 @@ void cGtkmmMainWindow::OnActionTrackMoveToFolder(const string_t& sDestinationFol
         }
         if (spitfire::filesystem::MoveFile(sFilePath, sDestinationPath)) {
           // Update our playlist
-          pTrackList->SetPropertiesForRow(row, sFilePath, metaData);
+          pTrackList->SetPropertiesForRow(row, sFilePath, metaData, status);
 
           // Notify the model that the file has been moved
           view.OnActionTrackMoveToFolder(id, sDestinationPath);
@@ -980,7 +981,8 @@ void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
       // Move the file to the rubbish bin
       string_t sFilePath;
       spitfire::audio::cMetaData metaData;
-      pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+      TRACK_STATUS status = TRACK_STATUS::OK;
+      pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status);
       spitfire::filesystem::MoveFileToTrash(sFilePath);
 
       iter.Next();
@@ -1006,7 +1008,8 @@ void cGtkmmMainWindow::OnActionTrackShowInFileManager()
     // Show the file in the file manager
     string_t sFilePath;
     spitfire::audio::cMetaData metaData;
-    pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+    TRACK_STATUS status = TRACK_STATUS::OK;
+    pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status);
     spitfire::filesystem::ShowFile(sFilePath);
 
     break;
@@ -1022,7 +1025,8 @@ void cGtkmmMainWindow::OnActionTrackProperties()
     const Gtk::TreeModel::Row& row = iter.GetRow();
     string_t sFilePath;
     spitfire::audio::cMetaData metaData;
-    pTrackList->GetPropertiesForRow(row, sFilePath, metaData);
+    TRACK_STATUS status = TRACK_STATUS::OK;
+    pTrackList->GetPropertiesForRow(row, sFilePath, metaData, status);
     std::cout<<"cGtkmmMainWindow::OnActionTrackProperties Properties selected for track "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
 
     iter.Next();
@@ -1075,7 +1079,8 @@ void cGtkmmMainWindow::OnActionPlaylistDoubleClick(trackid_t id)
 {
   string_t sFilePath;
   spitfire::audio::cMetaData metaData;
-  if (pTrackList->GetPropertiesForRow(id, sFilePath, metaData)) {
+  TRACK_STATUS status = TRACK_STATUS::OK;
+  if (pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status)) {
     std::cout<<"cGtkmmTrackList::OnActionPlaylistDoubleClick Track: "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
     OnActionPlayTrack(id, sFilePath, metaData);
   }
@@ -1267,7 +1272,8 @@ void cGtkmmMainWindow::OnActionPlayPreviousTrack()
   if (id != nullptr) {
     string_t sFilePath;
     spitfire::audio::cMetaData metaData;
-    pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+    TRACK_STATUS status = TRACK_STATUS::OK;
+    pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status);
     OnActionPlayTrack(id, sFilePath, metaData);
   }
 }
@@ -1278,7 +1284,8 @@ void cGtkmmMainWindow::OnActionPlayNextTrack()
   if (id != nullptr) {
     string_t sFilePath;
     spitfire::audio::cMetaData metaData;
-    pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+    TRACK_STATUS status = TRACK_STATUS::OK;
+    pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status);
     OnActionPlayTrack(id, sFilePath, metaData);
   }
 }
@@ -1303,7 +1310,8 @@ void cGtkmmMainWindow::SetStatePlaying(trackid_t id)
 {
   string_t sFilePath;
   spitfire::audio::cMetaData metaData;
-  pTrackList->GetPropertiesForRow(id, sFilePath, metaData);
+  TRACK_STATUS status = TRACK_STATUS::OK;
+  pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status);
 
   std::ostringstream o;
   if (!metaData.sArtist.empty()) o<<"<b><big>"<<spitfire::string::HTMLEncode(spitfire::string::ToUTF8(metaData.sArtist))<<"</big></b>";
@@ -1452,7 +1460,8 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
       if (settings.IsPlaying()) {
         string_t sFilePath;
         spitfire::audio::cMetaData metaData;
-        if (pTrackList->GetPropertiesForRow(idLastPlayed, sFilePath, metaData)) {
+        TRACK_STATUS status = TRACK_STATUS::OK;
+        if (pTrackList->GetPropertiesForRow(idLastPlayed, sFilePath, metaData, status)) {
           std::cout<<"cGtkmmTrackList::OnPlaylistLoaded Track: "<<metaData.sArtist<<" - "<<metaData.sTitle<<std::endl;
           OnActionPlayTrack(idLastPlayed, sFilePath, metaData);
         }

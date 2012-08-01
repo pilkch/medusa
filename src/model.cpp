@@ -233,6 +233,9 @@ namespace medusa
             ids.push_back(pTrack);
             std::list<cTrack*> tracks;
             tracks.push_back(pTrack);
+
+            UpdateStatusOnTracks(tracks);
+
             pController->OnTracksAdded(ids, tracks);
           }
 
@@ -346,6 +349,20 @@ namespace medusa
     }
   }
 
+  void cModel::UpdateStatusOnTracks(std::list<cTrack*>& tracks)
+  {
+    std::list<cTrack*>::iterator iter = tracks.begin();
+    const std::list<cTrack*>::const_iterator iterEnd = tracks.end();
+    while (iter != iterEnd) {
+      const string_t& sFilePath = (*iter)->sFilePath;
+      (*iter)->status = TRACK_STATUS::OK;
+      if (!spitfire::filesystem::FileExists(sFilePath)) (*iter)->status = TRACK_STATUS::FILE_DOES_NOT_EXIST;
+      else if (spitfire::filesystem::GetFileSize(sFilePath) == 0) (*iter)->status = TRACK_STATUS::FILE_EMPTY;
+
+      iter++;
+    }
+  }
+
   void cModel::LoadPlaylist()
   {
     std::cout<<"cModel::LoadPlaylist"<<std::endl;
@@ -358,6 +375,8 @@ namespace medusa
 
     // Tell the controller that we are about to load this many files
     pController->OnLoadingFilesToLoadIncrement(tracks.size());
+
+    UpdateStatusOnTracks(tracks);
 
     // Tell the controller that we added these tracks
     {

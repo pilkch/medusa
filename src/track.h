@@ -10,6 +10,12 @@
 
 namespace medusa
 {
+  enum class TRACK_STATUS {
+    OK,
+    FILE_DOES_NOT_EXIST,
+    FILE_EMPTY
+  };
+
   class cTrack
   {
   public:
@@ -22,10 +28,12 @@ namespace medusa
     spitfire::util::cDateTime dateAdded;
     spitfire::util::cDateTime dateLastPlayed;
     bool bIsPropertiesLoaded;
+    TRACK_STATUS status;
   };
 
   inline cTrack::cTrack():
-    bIsPropertiesLoaded(false)
+    bIsPropertiesLoaded(false),
+    status(TRACK_STATUS::OK)
   {
     dateLastPlayed.SetFromUnixEpoch();
   }

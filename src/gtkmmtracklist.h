@@ -76,11 +76,11 @@ public:
   void SetStatePaused(trackid_t id);
 
   trackid_t GetTrackIDForRow(const Gtk::TreeModel::Row& row) const;
-  bool GetPropertiesForRow(const Gtk::TreeModel::Row& row, string_t& sFilePath, spitfire::audio::cMetaData& metaData) const;
-  bool GetPropertiesForRow(trackid_t id, string_t& sFilePath, spitfire::audio::cMetaData& metaData) const;
+  bool GetPropertiesForRow(const Gtk::TreeModel::Row& row, string_t& sFilePath, spitfire::audio::cMetaData& metaData, TRACK_STATUS& status) const;
+  bool GetPropertiesForRow(trackid_t id, string_t& sFilePath, spitfire::audio::cMetaData& metaData, TRACK_STATUS& status) const;
 
-  void SetPropertiesForRow(const Gtk::TreeModel::Row& row, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
-  void SetPropertiesForRow(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
+  void SetPropertiesForRow(const Gtk::TreeModel::Row& row, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData, TRACK_STATUS status);
+  void SetPropertiesForRow(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData, TRACK_STATUS status);
 
   void EnsureRowIsVisible(trackid_t id);
 
@@ -91,10 +91,13 @@ protected:
   Gtk::Widget& GetWidget() { return playlistScrolledWindow; }
 
 private:
+  std::string GetIconFileNameForStatus(TRACK_STATUS status) const;
+
   bool OnSelectFunction(const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool path_currently_selected);
   void OnListSelectionChanged();
   bool OnListButtonPressEvent(GdkEventButton* event);
   void OnListDoubleClick(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
+  void OnListSortColumnChanged();
 
   void AddTrack(trackid_t id, const cTrack& track);
 
@@ -109,6 +112,7 @@ private:
   public:
     string_t sFilePath;
     spitfire::audio::cMetaData metaData;
+    TRACK_STATUS status;
   };
   typedef Glib::RefPtr<cUserData> cUserDataPtr;
 
