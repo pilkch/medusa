@@ -164,6 +164,18 @@ void cGtkmmView::OnActionAddTracksFromFolder(const string_t& sFolderPath)
   pController->AddTracksFromFolder(sFolderPath);
 }
 
+  #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+  void cGtkmmView::OnActionImportFromBanshee()
+  {
+    pController->ImportFromBanshee();
+  }
+  #endif
+
+  void cGtkmmView::OnActionImportFromRhythmbox()
+  {
+    pController->ImportFromRhythmbox();
+  }
+
   void cGtkmmView::OnActionStopLoading()
   {
     pController->StopLoading();

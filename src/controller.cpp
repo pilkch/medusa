@@ -48,6 +48,18 @@ namespace medusa
     model.AddTracksFromFolder(sFolderPath);
   }
 
+  #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+  void cController::ImportFromBanshee()
+  {
+    model.LoadBansheePlaylist();
+  }
+  #endif
+
+  void cController::ImportFromRhythmbox()
+  {
+    model.LoadRhythmBoxPlaylist();
+  }
+
   void cController::RemoveTracks(const std::list<trackid_t>& tracks)
   {
     model.RemoveTracks(tracks);

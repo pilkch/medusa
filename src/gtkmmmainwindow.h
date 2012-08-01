@@ -59,6 +59,11 @@ public:
 
   void OnActionBrowseFiles();
   void OnActionBrowseFolder();
+  void OnActionAddFilesFromMusicFolder();
+  #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+  void OnActionImportFromBanshee();
+  #endif
+  void OnActionImportFromRhythmbox();
   void OnActionStopLoading();
   void OnActionRemoveTrack();
   void OnActionTrackMoveToFolder(const string_t& sDestinationFolder);

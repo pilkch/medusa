@@ -104,6 +104,10 @@ protected:
 
   void OnActionAddTracks(const std::list<string_t>& files);
   void OnActionAddTracksFromFolder(const string_t& sFolderPath);
+  #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+  void OnActionImportFromBanshee();
+  #endif
+  void OnActionImportFromRhythmbox();
   void OnActionStopLoading();
   void OnActionRemoveTracks(const std::list<trackid_t>& tracks);
   void OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath);

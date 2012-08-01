@@ -213,6 +213,16 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFiles));
   m_refActionGroup->add(Gtk::Action::create("FileAddFolder", "Add Folder"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionBrowseFolder));
+  m_refActionGroup->add(Gtk::Action::create("FileAddFilesFromMusicFolder", "Add Files From Music Folder"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionAddFilesFromMusicFolder));
+  #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+  Glib::RefPtr<Gtk::Action> pActionImportFromBanshee = Gtk::Action::create("FileImportFromBanshee", "Import from Banshee");
+  m_refActionGroup->add(pActionImportFromBanshee,
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionImportFromBanshee));
+  #endif
+  Glib::RefPtr<Gtk::Action> pActionImportFromRhythmBox = Gtk::Action::create("FileImportFromRhythmbox", "Import from Rhythmbox");
+  m_refActionGroup->add(pActionImportFromRhythmBox,
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionImportFromRhythmbox));
   m_refActionGroup->add(Gtk::Action::create("FileRemove", "Remove"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionRemoveTrack));
   m_refActionGroup->add(Gtk::Action::create("FileMoveToFolderMenu", "Move to Folder"));
@@ -227,6 +237,10 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnMenuFileQuit));
 
+  #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+  pActionImportFromBanshee->set_sensitive(medusa::util::IsBansheePlaylistFilePresent());
+  #endif
+  pActionImportFromRhythmBox->set_sensitive(medusa::util::IsRhythmBoxPlaylistFilePresent());
   // Edit menu
   m_refActionGroup->add(Gtk::Action::create("EditMenu", "Edit"));
   m_refActionGroup->add(Gtk::Action::create("EditPreferences", Gtk::Stock::PREFERENCES),
@@ -264,6 +278,11 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "    <menu action='FileMenu'>"
       "      <menuitem action='FileAddFiles'/>"
       "      <menuitem action='FileAddFolder'/>"
+      "      <menuitem action='FileAddFilesFromMusicFolder'/>"
+    #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+      "      <menuitem action='FileImportFromBanshee'/>"
+    #endif
+      "      <menuitem action='FileImportFromRhythmbox'/>"
       "      <menuitem action='FileRemove'/>"
       "      <menu action='FileMoveToFolderMenu'>"
       "        <menuitem action='FileMoveToFolderBrowse'/>"
@@ -778,6 +797,44 @@ void cGtkmmMainWindow::OnActionBrowseFolder()
     view.OnActionAddTracksFromFolder(sSelectedFolder);
   }
 }
+
+  void cGtkmmMainWindow::OnActionAddFilesFromMusicFolder()
+  {
+    cGtkmmAlertDialog dialog(*this);
+    dialog.SetTitle(TEXT("Add all files from your Music folder?"));
+    dialog.SetDescription(TEXT("This will add all files from your Music folder."));
+    dialog.SetOk(TEXT("Add All Files"));
+    dialog.SetCancel();
+    ALERT_RESULT result = dialog.Run();
+    if (result == ALERT_RESULT::OK) {
+      const string_t sMusicFolder = spitfire::filesystem::GetHomeMusicDirectory();
+      view.OnActionAddTracksFromFolder(sMusicFolder);
+    }
+  }
+
+  #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+  void cGtkmmMainWindow::OnActionImportFromBanshee()
+  {
+    cGtkmmAlertDialog dialog(*this);
+    dialog.SetTitle(TEXT("Add all files from your Banshee playlist?"));
+    dialog.SetDescription(TEXT("This will add all files from your Banshee playlist."));
+    dialog.SetOk(TEXT("Add All Files"));
+    dialog.SetCancel();
+    ALERT_RESULT result = dialog.Run();
+    if (result == ALERT_RESULT::OK) view.OnActionImportFromBanshee();
+  }
+  #endif
+
+  void cGtkmmMainWindow::OnActionImportFromRhythmbox()
+  {
+    cGtkmmAlertDialog dialog(*this);
+    dialog.SetTitle(TEXT("Add all files from your Rhythmbox playlist?"));
+    dialog.SetDescription(TEXT("This will add all files from your Rhythmbox playlist."));
+    dialog.SetOk(TEXT("Add All Files"));
+    dialog.SetCancel();
+    ALERT_RESULT result = dialog.Run();
+    if (result == ALERT_RESULT::OK) view.OnActionImportFromRhythmbox();
+  }
 
   void cGtkmmMainWindow::OnActionStopLoading()
   {

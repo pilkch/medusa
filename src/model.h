@@ -36,6 +36,11 @@ namespace medusa
     void StopSoon();
     void StopNow();
 
+    #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+    void LoadBansheePlaylist();
+    #endif
+    void LoadRhythmBoxPlaylist();
+
     void AddTracks(const std::list<string_t>& files);
     void AddTracksFromFolder(const string_t& sFolderPath);
     void StopLoading();

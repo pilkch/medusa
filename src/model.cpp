@@ -41,6 +41,20 @@ namespace medusa
     string_t sFolderPath;
   };
 
+  #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+  class cModelEventLoadFromBanshee : public cModelEvent
+  {
+  public:
+    virtual void EventFunction(cModel& model) override;
+  };
+  #endif
+
+  class cModelEventLoadFromRhythmBox : public cModelEvent
+  {
+  public:
+    virtual void EventFunction(cModel& model) override;
+  };
+
   class cModelEventTrackUpdatedFilePath : public cModelEvent
   {
   public:
@@ -90,6 +104,19 @@ namespace medusa
   void cModelEventAddFolder::EventFunction(cModel& model)
   {
     model.AddTracksFromFolder(sFolderPath);
+  }
+
+
+  #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+  void cModelEventLoadFromBanshee::EventFunction(cModel& model)
+  {
+    model.LoadBansheePlaylist();
+  }
+  #endif
+
+  void cModelEventLoadFromRhythmBox::EventFunction(cModel& model)
+  {
+    model.LoadRhythmBoxPlaylist();
   }
 
 
@@ -358,6 +385,34 @@ namespace medusa
 
     // Save the playlist
     util::SavePlaylistToCSV(util::GetPlayListFilePath(), tracks);
+  }
+
+  #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+  void cModel::LoadBansheePlaylist()
+  {
+    if (spitfire::util::IsMainThread()) {
+      cModelEventLoadFromBanshee* pEvent = new cModelEventLoadFromBanshee;
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      std::cout<<"cModel::LoadBansheePlaylist"<<std::endl;
+      std::list<string_t> files;
+      util::LoadBansheePlaylistFile(files);
+      AddTracks(files);
+    }
+  }
+  #endif
+
+  void cModel::LoadRhythmBoxPlaylist()
+  {
+    if (spitfire::util::IsMainThread()) {
+      cModelEventLoadFromRhythmBox* pEvent = new cModelEventLoadFromRhythmBox;
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      std::cout<<"cModel::LoadRhythmBoxPlaylist"<<std::endl;
+      std::list<string_t> files;
+      util::LoadRhythmBoxPlaylistFile(files);
+      AddTracks(files);
+    }
   }
 
   trackid_t cModel::LoadLastPlayed()

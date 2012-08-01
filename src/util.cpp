@@ -4,7 +4,12 @@
 
 // Spitfire headers
 #include <spitfire/storage/csv.h>
+#include <spitfire/storage/document.h>
 #include <spitfire/storage/filesystem.h>
+#include <spitfire/storage/xml.h>
+
+// libxdgmm headers
+#include <libxdgmm/libxdgmm.h>
 
 // Medusa headers
 #include "util.h"
@@ -171,7 +176,7 @@ namespace medusa
       return spitfire::filesystem::GetThisApplicationSettingsDirectory() + TEXT("lastplayed.txt");
     }
 
-    bool LoadPlaylistFromCSV(const string_t& sFilePath, std::list<cTrack*>& playlist)
+    void ClearPlaylist(std::list<cTrack*>& playlist)
     {
       std::list<cTrack*>::iterator iter = playlist.begin();
       const std::list<cTrack*>::iterator iterEnd = playlist.end();
@@ -182,6 +187,11 @@ namespace medusa
       }
 
       playlist.clear();
+    }
+
+    bool LoadPlaylistFromCSV(const string_t& sFilePath, std::list<cTrack*>& playlist)
+    {
+      ClearPlaylist(playlist);
 
       spitfire::csv::cReader reader;
       if (!reader.Open(sFilePath)) {
@@ -264,6 +274,110 @@ namespace medusa
         iter++;
       }
 
+      return true;
+    }
+
+
+    #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+    string_t GetBansheePlaylistPath()
+    {
+      return "";
+    }
+
+    bool IsBansheePlaylistFilePresent()
+    {
+      return spitfire::filesystem::FileExists(GetBansheePlaylistPath());
+    }
+
+    bool LoadBansheePlaylistFile(std::list<string_t>& files)
+    {
+      files.clear();
+
+      // http://code.google.com/p/rhythmbox-banshee-import/source/browse/trunk/import.py
+
+      return false;
+    }
+    #endif // BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+
+
+    string_t DecodeRhythmBoxPlaylistLocation(const string_t& sLocation)
+    {
+      return spitfire::string::Replace(sLocation, TEXT("%20"), TEXT(" "));
+    }
+
+    string_t GetRhythmBoxPlaylistPath()
+    {
+      // ~/.local/share/rhythmbox/rhythmdb.xml
+      xdg::cXdg xdg;
+      const string_t sHomeDataDirectory(spitfire::string::ToString_t(xdg.GetHomeDataDirectory()));
+      return spitfire::filesystem::MakeFilePath(spitfire::filesystem::MakeFilePath(sHomeDataDirectory, TEXT("rhythmbox")), TEXT("rhythmdb.xml"));
+    }
+
+    bool IsRhythmBoxPlaylistFilePresent()
+    {
+      return spitfire::filesystem::FileExists(GetRhythmBoxPlaylistPath());
+    }
+
+    bool LoadRhythmBoxPlaylistFile(std::list<string_t>& files)
+    {
+      files.clear();
+
+      const string_t sFilePath(GetRhythmBoxPlaylistPath());
+
+      // <?xml version="1.0" standalone="yes"?>
+      // <rhythmdb version="1.8">
+      //   <entry type="song">
+      //     <location>file:///home/chris/Music/new%20music/The%20Raconteurs%20-%20Consoler%20Of%20The%20Lonely.mp3</location>
+      //     ...
+      //   </entry>
+      //   ...
+      // </rhythmdb>
+
+      spitfire::document::cDocument document;
+
+      spitfire::xml::reader reader;
+      if (!reader.ReadFromFile(document, sFilePath)) {
+        std::cerr<<"LoadRhythmBoxPlaylistFile Error opening \""<<sFilePath<<"\", returning false"<<std::endl;
+        return false;
+      }
+
+      spitfire::document::cDocument::cConstIterator iter(document);
+      if (!iter.IsValid()) {
+        std::cerr<<"LoadRhythmBoxPlaylistFile Error parsing \""<<sFilePath<<"\", returning false"<<std::endl;
+        return false;
+      }
+
+      iter.FindChild("rhythmdb");
+      if (!iter.IsValid()) {
+        std::cerr<<"LoadRhythmBoxPlaylistFile rhythmdb not found, returning false"<<std::endl;
+        return false;
+      }
+
+      // Iterate through the entry elements
+      string_t sType;
+      iter.FindChild("entry");
+      while (iter.IsValid()) {
+        std::cout<<"LoadRhythmBoxPlaylistFile entry"<<std::endl;
+        // Look for entries of type "song"
+        if (iter.GetAttribute("type", sType) && (sType == "song")) {
+          std::cout<<"LoadRhythmBoxPlaylistFile song"<<std::endl;
+          spitfire::document::cDocument::cConstIterator iterLocation = iter.GetChild("location");
+          if (iterLocation.IsValid()) {
+            std::cout<<"LoadRhythmBoxPlaylistFile song with location"<<std::endl;
+            iterLocation.FirstChild();
+            const string_t sLocation = iterLocation.GetContent();
+            if (spitfire::string::BeginsWith(sLocation, "file://")) {
+              std::cout<<"LoadRhythmBoxPlaylistFile song with file location"<<std::endl;
+              const string_t sFilePath = DecodeRhythmBoxPlaylistLocation(sLocation.substr(7));
+              files.push_back(sFilePath);
+            }
+          }
+        }
+
+        iter.Next();
+      };
+
+      std::cout<<"LoadRhythmBoxPlaylistFile returning true"<<std::endl;
       return true;
     }
   }

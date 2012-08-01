@@ -31,6 +31,14 @@ namespace medusa
 
     bool LoadPlaylistFromCSV(const string_t& sFilePath, std::list<cTrack*>& playlist);
     bool SavePlaylistToCSV(const string_t& sFilePath, const std::list<cTrack*>& playlist);
+
+    #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
+    bool IsBansheePlaylistFilePresent();
+    bool LoadBansheePlaylistFile(std::list<string_t>& files);
+    #endif
+
+    bool IsRhythmBoxPlaylistFilePresent();
+    bool LoadRhythmBoxPlaylistFile(std::list<string_t>& files);
   }
 }
 
