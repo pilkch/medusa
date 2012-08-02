@@ -30,12 +30,9 @@ SET(LIBRARY_SRC "${CMAKE_SOURCE_DIR}/src/")
 
 # Add definitions, compiler switches, etc.
 ADD_DEFINITIONS("-Wall -W -Wextra -Werror -Wformat -Wformat-y2k -Winit-self -Wstack-protector -Wunknown-pragmas -Wundef -Wcast-qual -Wwrite-strings -Wno-unused-parameter -Wpointer-arith -Wno-switch -Woverloaded-virtual -Wmissing-include-dirs -Wuninitialized -Wc++0x-compat -std=c++0x -ffor-scope -O2")
-ADD_DEFINITIONS("-DBUILD_PHYSICS_3D")
-ADD_DEFINITIONS("-DdSINGLE")
-ADD_DEFINITIONS("-DOPAL_USE_DOUBLE")
-#ADD_DEFINITIONS("-DBUILD_EDITOR")
-ADD_DEFINITIONS("-DBUILD_LEVEL")
-#ADD_DEFINITIONS("-DUNICODE -D_UNICODE")
+IF(WIN32)
+ADD_DEFINITIONS("-DUNICODE -D_UNICODE")
+ENDIF()
 ADD_DEFINITIONS("-D__GTK__")
 
 ADD_DEFINITIONS("-DSPITFIRE_APPLICATION_NAME=\"\\\"Medusa\\\"\"")
