@@ -2,6 +2,10 @@
 Copyright Â©  
 http://chris.iluo.net/
 
+If you find this project helpful, please consider making a donation. 
+
+[<img alt="Make a donation via Pledgie" src="http://www.pledgie.com/campaigns/17973.png?skin_name=chrome" border="0" />][1]  
+
 ### License
 
 This program is free software; you can redistribute it and/or  
@@ -21,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 ### About
 
 A simple music player because I am sick of Rhythmbox doing everything I don't care about and nothing that I do.  
-[Website][1]
+[Website][2]
 
 ### Building on Linux (Ubuntu 11.10 used)
 
@@ -55,15 +59,16 @@ I only use libraries that are license under either the GPL or similar and am ete
 gstreamermm  
 Copyright 2008, The gstreamermm Development Team  
 All rights reserved  
-[gstreamermm][2]
+[gstreamermm][3]
 
 gtkmm  
 Copyright 2002, gtkmm development team  
 All rights reserved  
-[gtkmm][3]
+[gtkmm][4]
 
- [1]: http://chris.iluo.net/projects/medusa
- [2]: http://live.gnome.org/GStreamer
- [3]: http://live.gnome.org/gtkmm
 
+ [1]: http://www.pledgie.com/campaigns/17973
+ [2]: http://chris.iluo.net/projects/medusa
+ [3]: http://live.gnome.org/GStreamer
+ [4]: http://live.gnome.org/gtkmm
 
