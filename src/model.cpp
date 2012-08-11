@@ -543,7 +543,8 @@ namespace medusa
         loadingProcessInterface.Reset();
       }
 
-      Yield();
+      // Try to avoid hogging the CPU/
+      spitfire::util::SleepThisThreadMS(1);
     }
 
     // Save the playlist on the background thread so that we can still process events on the main thread
