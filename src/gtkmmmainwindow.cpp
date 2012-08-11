@@ -1386,7 +1386,7 @@ void cGtkmmMainWindow::ApplySettings()
     if (nTracksLoading != 0) {
       o<<", loading ";
       o<<nTracksLoading;
-      o<<" tracks";
+      o<<" files";
     }
     statusBar.set_text(o.str());
 
