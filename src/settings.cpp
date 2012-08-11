@@ -31,11 +31,10 @@ void cSettings::Load()
   // Read the xml document
   spitfire::xml::reader reader;
 
+  spitfire::util::cProcessInterfaceVoid interface;
   const string_t sFilename = spitfire::filesystem::GetThisApplicationSettingsDirectory() + TEXT("config.xml");
-  if (!reader.ReadFromFile(document, sFilename)) {
-    std::cout<<"cSettings::Load \""<<spitfire::string::ToUTF8(sFilename)<<"\" not found"<<std::endl;
-    return;
-  }
+  spitfire::util::PROCESS_RESULT result = reader.ReadFromFile(interface, document, sFilename);
+  if (result != spitfire::util::PROCESS_RESULT::COMPLETE) std::cout<<"cSettings::Load \""<<spitfire::string::ToUTF8(sFilename)<<"\" not found"<<std::endl;
 }
 
 void cSettings::Save()
