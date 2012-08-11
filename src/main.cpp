@@ -3,6 +3,7 @@
 #include <string>
 
 // Spitfire headers
+#include <spitfire/util/string.h>
 #include <spitfire/util/thread.h>
 
 // Medusa headers
@@ -16,6 +17,8 @@ int main(int argc, char* argv[])
   std::cout<<"main"<<std::endl;
 
   spitfire::util::SetMainThread();
+
+  spitfire::string::Init();
 
   medusa::cModel model;
   medusa::cGtkmmView view(argc, argv);
