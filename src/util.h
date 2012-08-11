@@ -7,6 +7,7 @@
 // Spitfire headers
 #include <spitfire/audio/metadata.h>
 #include <spitfire/util/datetime.h>
+#include <spitfire/util/process.h>
 
 // Medusa headers
 #include "medusa.h"
@@ -38,7 +39,7 @@ namespace medusa
     #endif
 
     bool IsRhythmBoxPlaylistFilePresent();
-    bool LoadRhythmBoxPlaylistFile(std::list<string_t>& files);
+    spitfire::util::PROCESS_RESULT LoadRhythmBoxPlaylistFile(spitfire::util::cProcessInterface& interface, std::list<string_t>& files);
   }
 }
 

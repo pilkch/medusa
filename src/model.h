@@ -69,7 +69,21 @@ namespace medusa
 
     std::list<cTrack*> tracks;
 
-    spitfire::util::cSignalObject soStopLoading; // Signalled by the controller when the the model thread should stop loading files
+    class cLoadingProcessInterface : public spitfire::util::cProcessInterface
+    {
+    public:
+      cLoadingProcessInterface();
+
+      override virtual bool IsToStop() const { return soStopLoading.IsSignalled(); }
+
+      void SetStop() { soStopLoading.Signal(); }
+      void Reset() { soStopLoading.Reset(); }
+
+    private:
+      spitfire::util::cSignalObject soStopLoading;
+    };
+
+    cLoadingProcessInterface loadingProcessInterface; // Signalled by the controller when the the model thread should stop loading files
   };
 
   // ** cModel
@@ -77,6 +91,11 @@ namespace medusa
   inline void cModel::SetController(cController* _pController)
   {
     pController = _pController;
+  }
+
+  inline cModel::cLoadingProcessInterface::cLoadingProcessInterface() :
+    soStopLoading("cModel::cLoadingProcessInterface_soStopLoading")
+  {
   }
 }
 

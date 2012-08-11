@@ -655,7 +655,12 @@ bool cTrackPropertiesReader::ReadTrackProperties(spitfire::audio::cMetaData& met
 
   bool bResult = true;
 
-  if (!ReadTrackTags(metaData, sFilePath)) bResult = false;
+  if (spitfire::filesystem::GetExtensionNoDot(sFilePath) == TEXT("mp3")) {
+    if (!ReadTrackTags(metaData, sFilePath)) bResult = false;
+  } else {
+
+  }
+
   if (!ReadTrackLength(metaData, sFilePath)) bResult = false;
 
   return bResult;

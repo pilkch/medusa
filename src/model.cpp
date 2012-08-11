@@ -159,8 +159,7 @@ namespace medusa
     spitfire::util::cThread(soAction, "cModel"),
     pController(nullptr),
     soAction("cModel_soAction"),
-    eventQueue(soAction),
-    soStopLoading("cModel_soStopLoading")
+    eventQueue(soAction)
   {
   }
 
@@ -214,16 +213,16 @@ namespace medusa
         const std::list<string_t>::const_iterator iterEnd = supportedFiles.end();
         while (iter != iterEnd) {
           // Check if we have to stop loading
-          if (IsToStop() || soStopLoading.IsSignalled()) {
+          if (IsToStop() || loadingProcessInterface.IsToStop()) {
             pController->OnLoadingFilesToLoadDecrement(n - i);
             break;
           }
 
           cTrack* pTrack = new cTrack;
           pTrack->sFilePath = *iter;
-          std::cout<<"cModel::AddTracks Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
+          //std::cout<<"cModel::AddTracks Selected file \""<<pTrack->sFilePath<<"\""<<std::endl;
           propertiesReader.ReadTrackProperties(pTrack->metaData, pTrack->sFilePath);
-          std::cout<<"cModel::AddTracks After ReadTrackProperties"<<std::endl;
+          //std::cout<<"cModel::AddTracks After ReadTrackProperties"<<std::endl;
 
           tracks.push_back(pTrack);
 
@@ -428,8 +427,18 @@ namespace medusa
       eventQueue.AddItemToBack(pEvent);
     } else {
       std::cout<<"cModel::LoadRhythmBoxPlaylist"<<std::endl;
+
+      // Tell the controller that we are about to load this this playlist file
+      pController->OnLoadingFilesToLoadIncrement(1);
+
+      // Parse the playlist file and collect files from it
       std::list<string_t> files;
-      util::LoadRhythmBoxPlaylistFile(files);
+      util::LoadRhythmBoxPlaylistFile(loadingProcessInterface, files);
+
+      // Tell the controller that we have finished loading this playlist file
+      pController->OnLoadingFilesToLoadDecrement(1);
+
+      // Add the tracks to the model
       AddTracks(files);
     }
   }
@@ -506,7 +515,7 @@ namespace medusa
 
   void cModel::StopLoading()
   {
-    soStopLoading.Signal();
+    loadingProcessInterface.SetStop();
   }
 
   void cModel::ThreadFunction()
@@ -517,18 +526,21 @@ namespace medusa
     LoadPlaylist();
 
     while (true) {
-      //std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
+      std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
       soAction.WaitTimeoutMS(1000);
 
       if (IsToStop()) break;
 
+      std::cout<<"cModel::ThreadFunction Loop getting event"<<std::endl;
       cModelEvent* pEvent = eventQueue.RemoveItemFromFront();
       if (pEvent != nullptr) {
+        std::cout<<"cModel::ThreadFunction Loop calling event function"<<std::endl;
         pEvent->EventFunction(*this);
+        std::cout<<"cModel::ThreadFunction Loop deleting event"<<std::endl;
         spitfire::SAFE_DELETE(pEvent);
       } else {
         // If the queue is empty then we know that there are no more actions and it is safe to reset our stop loading signal object
-        soStopLoading.Reset();
+        loadingProcessInterface.Reset();
       }
 
       Yield();

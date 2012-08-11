@@ -318,7 +318,7 @@ namespace medusa
       return spitfire::filesystem::FileExists(GetRhythmBoxPlaylistPath());
     }
 
-    bool LoadRhythmBoxPlaylistFile(std::list<string_t>& files)
+    spitfire::util::PROCESS_RESULT LoadRhythmBoxPlaylistFile(spitfire::util::cProcessInterface& interface, std::list<string_t>& files)
     {
       files.clear();
 
@@ -336,21 +336,22 @@ namespace medusa
       spitfire::document::cDocument document;
 
       spitfire::xml::reader reader;
-      if (!reader.ReadFromFile(document, sFilePath)) {
-        std::cerr<<"LoadRhythmBoxPlaylistFile Error opening \""<<sFilePath<<"\", returning false"<<std::endl;
-        return false;
+      spitfire::util::PROCESS_RESULT result = reader.ReadFromFile(interface, document, sFilePath);
+      if (result != spitfire::util::PROCESS_RESULT::COMPLETE) {
+        std::cerr<<"LoadRhythmBoxPlaylistFile Error opening \""<<sFilePath<<"\", returning"<<std::endl;
+        return result;
       }
 
       spitfire::document::cDocument::cConstIterator iter(document);
       if (!iter.IsValid()) {
-        std::cerr<<"LoadRhythmBoxPlaylistFile Error parsing \""<<sFilePath<<"\", returning false"<<std::endl;
-        return false;
+        std::cerr<<"LoadRhythmBoxPlaylistFile Error parsing \""<<sFilePath<<"\", returning FAILED"<<std::endl;
+        return spitfire::util::PROCESS_RESULT::FAILED;
       }
 
       iter.FindChild("rhythmdb");
       if (!iter.IsValid()) {
-        std::cerr<<"LoadRhythmBoxPlaylistFile rhythmdb not found, returning false"<<std::endl;
-        return false;
+        std::cerr<<"LoadRhythmBoxPlaylistFile rhythmdb not found, returning FAILED"<<std::endl;
+        return spitfire::util::PROCESS_RESULT::FAILED;
       }
 
       // Iterate through the entry elements
@@ -378,7 +379,7 @@ namespace medusa
       };
 
       std::cout<<"LoadRhythmBoxPlaylistFile returning true"<<std::endl;
-      return true;
+      return spitfire::util::PROCESS_RESULT::FAILED;
     }
   }
 }
