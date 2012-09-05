@@ -121,8 +121,8 @@ cGtkmmTrackList::cGtkmmTrackList(cGtkmmMainWindow& _mainWindow) :
   append_column("Time", columns.time);
   append_column("Genre", columns.genre);
   append_column("Comment", columns.comment);
-  append_column("Date Last Played", columns.dateLastPlayed);
   append_column("Date Added", columns.dateAdded);
+  append_column("Date Last Played", columns.dateLastPlayed);
   append_column("Path", columns.filePath);
 
   // Set initial sorting column
