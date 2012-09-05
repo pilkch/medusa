@@ -1,5 +1,4 @@
-PROJECT(medusa)
-
+# Set the minimum cmake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.6)
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 
@@ -9,9 +8,10 @@ CMAKE_POLICY(SET CMP0002 OLD)
 # Needed for strings in defines
 CMAKE_POLICY(SET CMP0005 OLD)
 
-# If you don't want the full compiler output, remove the following line
 SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 SET(CMAKE_VERBOSE_MAKEFILE ON)
+
+PROJECT(medusa)
 
 # Debug build
 SET(CMAKE_BUILD_TYPE Debug)
