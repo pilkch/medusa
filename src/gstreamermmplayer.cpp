@@ -61,10 +61,20 @@ bool cGStreamermmPlayer::_OnBusMessage(const Glib::RefPtr<Gst::Bus>& bus, const 
   switch (message->get_message_type()) {
     case Gst::MESSAGE_EOS: {
       Stop();
+
       #ifndef BUILD_MEDUSA_PLAYBIN2
       // Call OnPlayerAboutToFinish here because OnAboutToFinish is only called on playbin2
       pView->OnPlayerAboutToFinish();
       #endif
+
+      break;
+    }
+    case Gst::MESSAGE_ERROR: {
+      Stop();
+
+      // Tell the viw that we had an error
+      pView->OnPlayerError();
+
       break;
     }
   }

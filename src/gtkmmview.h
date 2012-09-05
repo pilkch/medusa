@@ -32,6 +32,12 @@ namespace medusa
     virtual void EventFunction(cGtkmmView& view) override;
   };
 
+  class cGtkmmViewEventPlayerError : public cGtkmmViewEvent
+  {
+  public:
+    virtual void EventFunction(cGtkmmView& view) override;
+  };
+
   class cGtkmmViewEventLoadingFilesToLoadIncrement : public cGtkmmViewEvent
   {
   public:
@@ -87,6 +93,7 @@ public:
   friend class cGtkmmViewEventLoadingFilesToLoadIncrement;
   friend class cGtkmmViewEventLoadingFilesToLoadDecrement;
   friend class cGtkmmViewEventPlayerAboutToFinish;
+  friend class cGtkmmViewEventPlayerError;
   friend class cGtkmmViewEventPlaylistLoading;
   friend class cGtkmmViewEventPlaylistLoaded;
   friend class cGtkmmViewEventTracksAdded;
@@ -118,6 +125,7 @@ protected:
   void OnActionPlayPause();
   void OnPlayerUpdatePlaybackPosition();
   void OnPlayerAboutToFinish();
+  void OnPlayerError();
 
   virtual void OnLoadingFilesToLoadIncrement(size_t nFiles) override;
   virtual void OnLoadingFilesToLoadDecrement(size_t nFiles) override;

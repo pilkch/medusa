@@ -16,6 +16,11 @@ namespace medusa
     view.OnPlayerAboutToFinish();
   }
 
+  void cGtkmmViewEventPlayerError::EventFunction(cGtkmmView& view)
+  {
+    view.OnPlayerError();
+  }
+
   cGtkmmViewEventLoadingFilesToLoadIncrement::cGtkmmViewEventLoadingFilesToLoadIncrement(size_t _nFiles) :
     nFiles(_nFiles)
   {
@@ -193,13 +198,13 @@ void cGtkmmView::OnActionAddTracksFromFolder(const string_t& sFolderPath)
 
 void cGtkmmView::OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
 {
-  pController->OnActionPlayTrack(id);
-
   player.SetTrack(sFilePath, metaData.uiDurationMilliSeconds);
 
   pCurrentTrack = id;
 
   OnActionPlay();
+
+  pController->OnActionPlayTrack(id);
 }
 
 void cGtkmmView::OnActionPlaybackPositionChanged(uint64_t seconds)
@@ -216,9 +221,7 @@ void cGtkmmView::OnActionPlay()
 {
   if (player.IsStopped()) player.Play();
 
-  // Now we want to query the player again in case it failed to start or stop playback
-  if (player.IsStopped()) pMainWindow->SetStatePaused();
-  else pMainWindow->SetStatePlaying(pCurrentTrack);
+  pMainWindow->SetStatePlaying(pCurrentTrack);
 }
 
 void cGtkmmView::OnActionPlayPause()
@@ -259,6 +262,21 @@ void cGtkmmView::OnPlayerAboutToFinish()
     pMainWindow->OnActionPlayNextTrack();
   }
 }
+
+  void cGtkmmView::OnPlayerError()
+  {
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventPlayerError* pEvent = new cGtkmmViewEventPlayerError;
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      // Pause at the current track
+      pMainWindow->SetStatePaused();
+
+      // Skip to the next track
+      pMainWindow->OnActionPlayNextTrack();
+    }
+  }
 
   void cGtkmmView::OnLoadingFilesToLoadIncrement(size_t nFiles)
   {
