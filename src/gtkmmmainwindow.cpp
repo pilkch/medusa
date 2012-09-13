@@ -5,6 +5,8 @@
 #include <spitfire/storage/filesystem.h>
 
 // Medusa headers
+#include "discombobulator_lastfm_key.h"
+#include "discombobulator_lastfm_secret.h"
 #include "gtkmmabout.h"
 #include "gtkmmview.h"
 #include "gtkmmalertdialog.h"
@@ -1361,7 +1363,7 @@ void cGtkmmMainWindow::ApplySettings()
   // Start Last.fm controller
   if (settings.IsLastFMEnabled()) {
     std::cout<<"cGtkmmMainWindow::ApplySettings Starting lastfm"<<std::endl;
-    lastfm.Start(settings.GetLastFMUserName(), settings.GetLastFMPassword());
+    lastfm.Start(discombobulator::GetSecretLastfmKeyUTF8(), discombobulator::GetSecretLastfmSecretUTF8(), settings.GetLastFMUserName(), settings.GetLastFMPassword());
   }
 
   // Load the recent moved folders settings
