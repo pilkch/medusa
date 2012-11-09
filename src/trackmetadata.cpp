@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <iostream>
 #include <memory.h>
+#include <unistd.h>
 
 // Unix headers
 #include <sys/stat.h>
