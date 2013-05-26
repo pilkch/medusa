@@ -11,7 +11,7 @@ namespace medusa
 // mangle the event.
 // Clicking with other buttons moves the slider in step increments
 // Clicking with the middle button moves the slider to the location of the click.
-#define BUILD_GTKMM_SLIDER_DONT_JUMP_HACK
+//#define BUILD_GTKMM_SLIDER_DONT_JUMP_HACK
 
 // HACK: In gtkmm 2.4 the area before the slider was highlighted,
 // in gtkmm 3.0 and later this highlighting is turned off.
