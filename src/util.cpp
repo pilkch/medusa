@@ -367,7 +367,7 @@ namespace medusa
             std::cout<<"LoadRhythmBoxPlaylistFile song with location"<<std::endl;
             iterLocation.FirstChild();
             const string_t sLocation = iterLocation.GetContent();
-            if (spitfire::string::BeginsWith(sLocation, "file://")) {
+            if (spitfire::string::StartsWith(sLocation, "file://")) {
               std::cout<<"LoadRhythmBoxPlaylistFile song with file location"<<std::endl;
               const string_t sFilePath = DecodeRhythmBoxPlaylistLocation(sLocation.substr(7));
               files.push_back(sFilePath);

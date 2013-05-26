@@ -338,7 +338,7 @@ bool cLibID3Tag::ReadTrackTags(spitfire::audio::cMetaData& metaData, const strin
     std::cerr<<"cLibID3Tag::ReadTrackTags File does not exist, returning false"<<std::endl;
     return false;
   }
-  if (spitfire::filesystem::GetFileSize(sFilePath) == 0) {
+  if (spitfire::filesystem::GetFileSizeBytes(sFilePath) == 0) {
     std::cerr<<"cLibID3Tag::ReadTrackTags File is empty, returning false"<<std::endl;
     return false;
   }
@@ -488,7 +488,7 @@ bool cLibID3Tag::WriteTrackTags(const spitfire::audio::cMetaData& metaData, cons
     std::cerr<<"cLibID3Tag::WriteTrackTags File does not exist, returning false"<<std::endl;
     return false;
   }
-  if (spitfire::filesystem::GetFileSize(sFilePath) == 0) {
+  if (spitfire::filesystem::GetFileSizeBytes(sFilePath) == 0) {
     std::cerr<<"cLibID3Tag::WriteTrackTags File is empty, returning false"<<std::endl;
     return false;
   }

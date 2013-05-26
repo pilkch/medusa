@@ -356,7 +356,7 @@ namespace medusa
       const string_t& sFilePath = (*iter)->sFilePath;
       (*iter)->status = TRACK_STATUS::OK;
       if (!spitfire::filesystem::FileExists(sFilePath)) (*iter)->status = TRACK_STATUS::FILE_DOES_NOT_EXIST;
-      else if (spitfire::filesystem::GetFileSize(sFilePath) == 0) (*iter)->status = TRACK_STATUS::FILE_EMPTY;
+      else if (spitfire::filesystem::GetFileSizeBytes(sFilePath) == 0) (*iter)->status = TRACK_STATUS::FILE_EMPTY;
 
       iter++;
     }
