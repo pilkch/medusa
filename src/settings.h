@@ -32,6 +32,9 @@ public:
   bool IsNotifyOnSongChange() const;
   void SetNotifyOnSongChange(bool bNotifyOnSongChange);
 
+  bool IsNextSongOnMoveToTrash() const;
+  void SetNextSongOnMoveToTrash(bool bNextSongOnMoveToTrash);
+
   bool IsLastFMEnabled() const;
   void SetLastFMEnabled(bool bEnabled);
 

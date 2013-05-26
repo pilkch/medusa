@@ -857,6 +857,12 @@ void cGtkmmMainWindow::OnActionRemoveTrack()
     iter.Next();
   }
 
+  // If we are removing one track then find out if it is the currently playing track and if we should skip to the next one
+  if ((tracks.size() == 1) && (pTrackList->GetTrackCount() != 1)) {
+    trackid_t track = *(tracks.begin());
+    if (view.GetCurrentTrackID() == track) OnPlaybackNextClicked();
+  }
+
   // Tell the view that we are removing these tracks
   view.OnActionRemoveTracks(tracks);
 
@@ -988,6 +994,12 @@ void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
       spitfire::filesystem::MoveFileToTrash(sFilePath);
 
       iter.Next();
+    }
+
+    // If we are removing one track then find out if it is the currently playing track and if we should skip to the next one
+    if ((tracks.size() == 1) && (pTrackList->GetTrackCount() != 1)) {
+      trackid_t track = *(tracks.begin());
+      if (view.GetCurrentTrackID() == track) OnPlaybackNextClicked();
     }
 
     // Tell the view that we are removing these tracks

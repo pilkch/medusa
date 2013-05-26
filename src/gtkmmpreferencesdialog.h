@@ -32,6 +32,7 @@ private:
   Gtk::VBox boxPlayback;;
   Gtk::CheckButton playbackRepeat;
   Gtk::CheckButton playbackNotifyOnSongChange;
+  Gtk::CheckButton playbackNextSongOnMoveToTrash;
 
   // Last.fm
   Gtk::Frame groupLastfm;

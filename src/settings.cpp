@@ -191,6 +191,16 @@ void cSettings::SetNotifyOnSongChange(bool bNotifyOnSongChange)
   SetXMLValue(TEXT("settings"), TEXT("window"), TEXT("notifyOnSongChange"), bNotifyOnSongChange);
 }
 
+bool cSettings::IsNextSongOnMoveToTrash() const
+{
+  return GetXMLValue(TEXT("settings"), TEXT("playback"), TEXT("nextSongOnMoveToTrash"), true);
+}
+
+void cSettings::SetNextSongOnMoveToTrash(bool bNextSongOnMoveToTrash)
+{
+  SetXMLValue(TEXT("settings"), TEXT("window"), TEXT("nextSongOnMoveToTrash"), bNextSongOnMoveToTrash);
+}
+
 bool cSettings::IsLastFMEnabled() const
 {
   return GetXMLValue(TEXT("settings"), TEXT("lastfm"), TEXT("enabled"), false);

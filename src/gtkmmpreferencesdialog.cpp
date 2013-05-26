@@ -9,6 +9,7 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Wind
   groupPlayback("Playback"),
   playbackRepeat("Repeat"),
   playbackNotifyOnSongChange("Notify on song change"),
+  playbackNextSongOnMoveToTrash("Skip to next song when the current song is moved to the trash"),
   groupLastfm("Last.fm"),
   lastfmEnabled("Use Last.fm"),
   lastfmTable(2, 2),
@@ -30,12 +31,14 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Wind
 
   playbackRepeat.set_active(settings.IsRepeat());
   playbackNotifyOnSongChange.set_active(settings.IsNotifyOnSongChange());
+  playbackNextSongOnMoveToTrash.set_active(settings.IsNextSongOnMoveToTrash());
 
   // Playback
   pBox->pack_start(groupPlayback, Gtk::PACK_SHRINK);
   groupPlayback.add(boxPlayback);
   boxPlayback.pack_start(playbackRepeat, Gtk::PACK_SHRINK);
   boxPlayback.pack_start(playbackNotifyOnSongChange, Gtk::PACK_SHRINK);
+  boxPlayback.pack_start(playbackNextSongOnMoveToTrash, Gtk::PACK_SHRINK);
 
   lastfmEnabled.signal_toggled().connect(sigc::mem_fun(*this, &cGtkmmPreferencesDialog::OnEnableControls));
 
@@ -86,6 +89,7 @@ void cGtkmmPreferencesDialog::OnResponse(int response_id)
   if (response_id == Gtk::ResponseType::RESPONSE_OK) {
     settings.SetRepeat(playbackRepeat.get_active());
     settings.SetNotifyOnSongChange(playbackNotifyOnSongChange.get_active());
+    settings.SetNextSongOnMoveToTrash(playbackNextSongOnMoveToTrash.get_active());
 
     settings.SetLastFMEnabled(lastfmEnabled.get_active());
     settings.SetLastFMUserName(spitfire::string::ToString_t(lastfmUserName.get_text()));
