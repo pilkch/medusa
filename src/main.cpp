@@ -20,11 +20,13 @@ int main(int argc, char* argv[])
 
   spitfire::string::Init();
 
-  medusa::cModel model;
-  medusa::cGtkmmView view(argc, argv);
-  medusa::cController controller(model, view);
+  {
+    medusa::cModel model;
+    medusa::cGtkmmView view(argc, argv);
+    medusa::cController controller(model, view);
 
-  view.Run();
+    view.Run();
+  }
 
   return 0;
 }

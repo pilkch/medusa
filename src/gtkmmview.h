@@ -13,6 +13,7 @@
 #include "gstreamermmplayer.h"
 #include "gtkmmdispatcher.h"
 #include "gtkmmmainwindow.h"
+#include "webserver.h"
 
 namespace medusa
 {
@@ -147,6 +148,8 @@ private:
   cGtkmmMainWindow* pMainWindow;
 
   cGStreamermmPlayer player;
+
+  cWebServer webServer;
 
   const cTrack* pCurrentTrack;
 

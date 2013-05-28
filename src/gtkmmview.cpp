@@ -93,6 +93,9 @@ cGtkmmView::cGtkmmView(int argc, char** argv) :
 
 cGtkmmView::~cGtkmmView()
 {
+  // Stop our web server
+  webServer.Stop();
+
   // Destroy any further events
   while (true) {
     cGtkmmViewEvent* pEvent = eventQueue.RemoveItemFromFront();
@@ -140,8 +143,13 @@ cGtkmmView::~cGtkmmView()
 void cGtkmmView::OnActionMainWindowCreated()
 {
   std::cout<<"cGtkmmView::OnActionMainWindowCreated"<<std::endl;
+
+  // Tell our control that the mainwindow is ready
   assert(pController != nullptr);
   pController->OnActionCreated();
+
+  // We can now start our web server thread
+  webServer.Start();
 }
 
 void cGtkmmView::OnActionMainWindowQuitSoon()
@@ -203,6 +211,8 @@ void cGtkmmView::OnActionPlayTrack(trackid_t id, const string_t& sFilePath, cons
   pCurrentTrack = id;
 
   OnActionPlay();
+
+  webServer.OnActionPlayTrack(id, metaData);
 
   pController->OnActionPlayTrack(id);
 }
