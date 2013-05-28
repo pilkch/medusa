@@ -1,16 +1,169 @@
 // Medusa headers
-#include "webserver.h"
+#include "gtkmmview.h"
 #include "util.h"
+#include "webserver.h"
 
 namespace medusa
 {
   const size_t nMaxSongEntries = 15;
 
+  // ** cWebPageController
+
+  class cWebPageController
+  {
+  public:
+    explicit cWebPageController(const std::list<cWebServerSongEntry>& tracks);
+
+    void GetProperties(spitfire::storage::cHTMLDocumentProperties& properties) const;
+
+    spitfire::string_t GetTitle() const;
+    spitfire::string_t GetDescription() const;
+    spitfire::string_t GetBannerTitle() const;
+    spitfire::string_t GetSectionTitle() const;
+
+    std::vector<std::pair<std::string, std::string> > GetArticles() const;
+    template <class W>
+    void AddArticle(W& writer, const std::string& sArticle) const;
+
+    std::vector<std::pair<std::string, std::string> > GetAsides() const;
+    template <class W>
+    void AddAside(W& writer, const std::string& sAside) const;
+
+  private:
+    std::list<cWebServerSongEntry> tracks;
+  };
+
+  cWebPageController::cWebPageController(const std::list<cWebServerSongEntry>& _tracks) :
+    tracks(_tracks)
+  {
+  }
+
+  void cWebPageController::GetProperties(spitfire::storage::cHTMLDocumentProperties& properties) const
+  {
+    properties.sLanguageCode = TEXT("EN");
+  }
+
+  spitfire::string_t cWebPageController::GetTitle() const
+  {
+    return TEXT("My Title");
+  }
+
+  spitfire::string_t cWebPageController::GetDescription() const
+  {
+    return TEXT("My Description");
+  }
+
+  spitfire::string_t cWebPageController::GetBannerTitle() const
+  {
+    return TEXT("My Banner");
+  }
+
+  spitfire::string_t cWebPageController::GetSectionTitle() const
+  {
+    return TEXT("My Section");
+  }
+
+  std::vector<std::pair<std::string, std::string> > cWebPageController::GetArticles() const
+  {
+    std::vector<std::pair<std::string, std::string> > articles;
+    articles.push_back(std::make_pair(TEXT("myarticle"), TEXT("My Article")));
+    return articles;
+  }
+
+  template <class W>
+  void cWebPageController::AddArticle(W& writer, const std::string& sArticle) const
+  {
+    if (sArticle == TEXT("myarticle")) {
+      writer.WriteLine("<img src=\"images/medusa.png\"/><br/>");
+
+      writer.WriteLine("<h3>Last " + spitfire::string::ToString(nMaxSongEntries) + " Songs Played</h3>");
+
+      if (tracks.empty()) {
+        writer.WriteLine("No songs have been played yet");
+      } else {
+        writer.WriteLine("<table class=\"table_border\">");
+        writer.WriteLine("  <tr class=\"table_heading\">");
+        writer.WriteLine("    <th class=\"table_border\">Artist</th>");
+        writer.WriteLine("    <th class=\"table_border\">Title</th>");
+        writer.WriteLine("    <th class=\"table_border\">Duration</th>");
+        writer.WriteLine("    <th class=\"table_border\">Delete File</th>");
+        writer.WriteLine("  </tr>");
+        writer.WriteLine("");
+
+        std::list<cWebServerSongEntry>::const_iterator iter(tracks.begin());
+        const std::list<cWebServerSongEntry>::const_iterator iterEnd(tracks.end());
+        while (iter != iterEnd) {
+          writer.WriteLine("  <tr class=\"table_border\">");
+          writer.WriteLine("    <th class=\"table_border\">" + iter->sArtist + "</th>");
+          writer.WriteLine("    <th class=\"table_border\">" + iter->sTitle + "</th>");
+          writer.WriteLine("    <th class=\"table_border\">" + medusa::util::FormatTime(iter->uiDurationMilliSeconds) + "</th>");
+          writer.WriteLine("    <th class=\"table_border\"><form method=\"POST\" action=\"delete?track=" + spitfire::string::ToString(uintptr_t(iter->id)) + "\"><input type=\"image\" src=\"images/delete.png\" alt=\"Delete\" width=\"32\" height=\"32\"/></form></th>");
+          writer.WriteLine("  </tr>");
+
+          iter++;
+        }
+
+        writer.WriteLine("</table>");
+      }
+    }
+  }
+
+  std::vector<std::pair<std::string, std::string> > cWebPageController::GetAsides() const
+  {
+    std::vector<std::pair<std::string, std::string> > asides;
+    asides.push_back(std::make_pair(TEXT("myaside"), TEXT("My Aside")));
+    return asides;
+  }
+
+  template <class W>
+  void cWebPageController::AddAside(W& writer, const std::string& sAside) const
+  {
+    if (sAside == TEXT("myaside")) {
+      writer.WriteLine("      <p>This is my aside. Have an article: <a href=\"http://www.iandevlin.com/blog/2011/04/html5/html5-section-or-article\">section or article?</a>.</p>");
+    }
+  }
+
+
+  class cStringStreamWriter
+  {
+  public:
+    explicit cStringStreamWriter(std::ostringstream& o);
+
+    void WriteLine(const std::string& sLine);
+
+  private:
+    std::ostringstream& o;
+  };
+
+  cStringStreamWriter::cStringStreamWriter(std::ostringstream& _o) :
+    o(_o)
+  {
+  }
+
+  void cStringStreamWriter::WriteLine(const std::string& sLine)
+  {
+    o<<sLine<<"\n";
+  }
+
+
   // ** cWebServer
 
-  cWebServer::cWebServer() :
+  cWebServer::cWebServer(cGtkmmView& _view) :
+    view(_view),
     mutexEntries("mutexEntries")
   {
+  }
+
+  cWebServer::~cWebServer()
+  {
+    // Delete the entries
+    std::list<cWebServerSongEntry*>::iterator iter(entries.begin());
+    const std::list<cWebServerSongEntry*>::iterator iterEnd(entries.end());
+    while (iter != iterEnd) {
+      spitfire::SAFE_DELETE(*iter);
+
+      iter++;
+    }
   }
 
   void cWebServer::Start()
@@ -32,210 +185,92 @@ namespace medusa
   {
     spitfire::util::cLockObject lock(mutexEntries);
 
-    cWebServerSongEntry entry;
-    entry.id = id;
-    entry.sArtist = metaData.sArtist;
-    entry.sTitle = metaData.sTitle;
-    entry.uiDurationMilliSeconds = metaData.uiDurationMilliSeconds;
+    cWebServerSongEntry* pEntry = new cWebServerSongEntry;
+    pEntry->id = id;
+    pEntry->sArtist = metaData.sArtist;
+    pEntry->sTitle = metaData.sTitle;
+    pEntry->uiDurationMilliSeconds = metaData.uiDurationMilliSeconds;
 
-    entries.push_front(entry);
+    entries.push_front(pEntry);
 
     // Limit the number of entries
-    if (entries.size() > nMaxSongEntries) entries.pop_back();
+    if (entries.size() > nMaxSongEntries) {
+      // Remove the last entry
+      pEntry = entries.back();
+      entries.pop_back();
+
+      // Delete the entry
+      spitfire::SAFE_DELETE(pEntry);
+    }
   }
 
   bool cWebServer::HandleRequest(spitfire::network::http::cServer& server, spitfire::network::http::cConnectedClient& connection, const spitfire::network::http::cRequest& request)
   {
-    if (request.IsMethodGet() && (request.GetPath() == "/")) {
+    //LOG<<"cWebServer::HandleRequest method="<<(request.IsMethodGet() ? "is get" : (request.IsMethodPost() ? "is post" : "unknown"))<<", path="<<request.GetPath()<<std::endl;
 
-      std::list<cWebServerSongEntry> tempEntries;
+    trackid_t track = nullptr;
 
-      {
-        // Lock and make a copy of the entries
-        spitfire::util::cLockObject lock(mutexEntries);
+    if (request.IsMethodPost() && (spitfire::string::StartsWith(request.GetPath(), "/delete?track="))) {
+      const std::string sTrack = spitfire::string::StripLeading(request.GetPath(), "/delete?track=");
 
-        tempEntries = entries;
-      }
+      track = trackid_t(uintptr_t(spitfire::string::ToUnsignedInt(sTrack)));
 
-      static int x = 1;
+      // Notify the view
+      view.OnWebServerTrackMoveToRubbishBin(track);
+    } else if (!request.IsMethodGet() || (request.GetPath() != "/")) {
+      return false;
+    }
 
-      std::ostringstream o;
-      o<<"<html><head><title>Title</title></head><body>cWebServer " + spitfire::string::ToString(x) + "<br/>\n";
+    std::list<cWebServerSongEntry> tempEntries;
 
-      x++;
+    {
+      // Lock and make a copy of the entries
+      spitfire::util::cLockObject lock(mutexEntries);
 
-      if (tempEntries.empty()) {
-        o<<"No songs have been played yet\n";
-      } else {
-        o<<"  <table>\n";
-        o<<"    <tr><td></td><td>Artist</td><td>Title</td><td>Duration</td></tr>\n";
-
-        std::list<cWebServerSongEntry>::const_iterator iter(tempEntries.begin());
-        const std::list<cWebServerSongEntry>::const_iterator iterEnd(tempEntries.end());
+      // If we have a track to delete then we need to remove it from our list
+      if (track != nullptr) {
+        std::list<cWebServerSongEntry*>::iterator iter(entries.begin());
+        const std::list<cWebServerSongEntry*>::iterator iterEnd(entries.end());
         while (iter != iterEnd) {
-          o<<"    <tr><td>"<<intptr_t(iter->id)<<"</td><td>"<<iter->sArtist<<"</td><td>"<<iter->sTitle<<"</td><td>"<<medusa::util::FormatTime(iter->uiDurationMilliSeconds)<<"</td></tr>\n";
+          if ((*iter)->id == track) {
+            entries.remove(*iter);
+            break;
+          }
 
           iter++;
         }
-
-        o<<"  </table>\n";
       }
 
-      o<<"</body></html>\n";
+      // Add all the entries
+      std::list<cWebServerSongEntry*>::const_iterator iter(entries.begin());
+      const std::list<cWebServerSongEntry*>::const_iterator iterEnd(entries.end());
+      while (iter != iterEnd) {
+        tempEntries.push_back(*(*iter));
 
-      const std::string sContentUTF8 = o.str();
-
-      // TODO: Fill out the response from the request
-      spitfire::network::http::cResponse response;
-      response.SetContentLengthBytes(sContentUTF8.length());
-      connection.SendResponse(response);
-
-      // TODO: Send actual content
-      connection.SendContent(sContentUTF8);
-
-      connection.Write("\n\n");
-
-      return true;
+        iter++;
+      }
     }
 
-    return false;
+    std::ostringstream o;
+
+    cStringStreamWriter writer(o);
+    cWebPageController controller(tempEntries);
+    spitfire::storage::cHTMLDocument<cStringStreamWriter, cWebPageController> document;
+
+    document.Create(writer, controller);
+
+    const std::string sContentUTF8 = o.str();
+
+    // TODO: Fill out the response from the request
+    spitfire::network::http::cResponse response;
+    response.SetContentLengthBytes(sContentUTF8.length());
+    connection.SendResponse(response);
+
+    // TODO: Send actual content
+    connection.SendContent(sContentUTF8);
+
+    connection.Write("\n\n");
+
+    return true;
   }
 }
-
-/*
-// ** cMyController
-
-class cMyController
-{
-public:
-  void GetProperties(spitfire::storage::cHTMLDocumentProperties& properties) const;
-
-  spitfire::string_t GetTitle() const;
-  spitfire::string_t GetDescription() const;
-  spitfire::string_t GetBannerTitle() const;
-  spitfire::string_t GetSectionTitle() const;
-
-  std::vector<std::pair<std::string, std::string> > GetArticles() const;
-  template <class W>
-  void AddArticle(W& writer, const std::string& sArticle) const;
-
-  std::vector<std::pair<std::string, std::string> > GetAsides() const;
-  template <class W>
-  void AddAside(W& writer, const std::string& sAside) const;
-};
-
-void cMyController::GetProperties(spitfire::storage::cHTMLDocumentProperties& properties) const
-{
-  properties.sLanguageCode = TEXT("EN");
-}
-
-spitfire::string_t cMyController::GetTitle() const
-{
-  return TEXT("My Title");
-}
-
-spitfire::string_t cMyController::GetDescription() const
-{
-  return TEXT("My Description");
-}
-
-spitfire::string_t cMyController::GetBannerTitle() const
-{
-  return TEXT("My Banner");
-}
-
-spitfire::string_t cMyController::GetSectionTitle() const
-{
-  return TEXT("My Section");
-}
-
-std::vector<std::pair<std::string, std::string> > cMyController::GetArticles() const
-{
-  std::vector<std::pair<std::string, std::string> > articles;
-  articles.push_back(std::make_pair(TEXT("myarticle"), TEXT("My Article")));
-  return articles;
-}
-
-template <class W>
-void cMyController::AddArticle(W& writer, const std::string& sArticle) const
-{
-  if (sArticle == TEXT("myarticle")) {
-    writer.WriteLine("<ol>");
-    writer.WriteLine("  <li>Read the comments in this template</li>");
-    writer.WriteLine("  <li>Decide how you think your content may fit into the template</li>");
-    writer.WriteLine("  <li>Start building your document</li>");
-    writer.WriteLine("</ol>");
-    writer.WriteLine("");
-    writer.WriteLine("<table class=\"table_border\">");
-    writer.WriteLine("  <tr class=\"table_heading\">");
-    writer.WriteLine("    <th class=\"table_border\">Name</th>");
-    writer.WriteLine("    <th class=\"table_border\">Gender</th>");
-    writer.WriteLine("    <th class=\"table_border\">Age</th>");
-    writer.WriteLine("  </tr>");
-    writer.WriteLine("");
-    writer.WriteLine("  <tr>");
-    writer.WriteLine("    <td>Chris</td>");
-    writer.WriteLine("    <td>Male</td>");
-    writer.WriteLine("    <td>25</td>");
-    writer.WriteLine("  </tr>");
-    writer.WriteLine("");
-    writer.WriteLine("  <tr>");
-    writer.WriteLine("    <td class=\"table_border\">Tina</td>");
-    writer.WriteLine("    <td class=\"table_border\">Female</td>");
-    writer.WriteLine("    <td class=\"table_border\">30</td>");
-    writer.WriteLine("  </tr>");
-    writer.WriteLine("</table>");
-  }
-}
-
-std::vector<std::pair<std::string, std::string> > cMyController::GetAsides() const
-{
-  std::vector<std::pair<std::string, std::string> > asides;
-  asides.push_back(std::make_pair(TEXT("myaside"), TEXT("My Aside")));
-  return asides;
-}
-
-template <class W>
-void cMyController::AddAside(W& writer, const std::string& sAside) const
-{
-  if (sAside == TEXT("myaside")) {
-    writer.WriteLine("      <p>This is my aside. Have an article: <a href=\"http://www.iandevlin.com/blog/2011/04/html5/html5-section-or-article\">section or article?</a>.</p>");
-  }
-}
-
-
-class cMyWriter
-{
-public:
-  explicit cMyWriter(const spitfire::string_t& sFilePath);
-
-  void WriteLine(const std::string& sLine);
-
-private:
-  spitfire::storage::cWriteFile file;
-};
-
-cMyWriter::cMyWriter(const spitfire::string_t& sFilePath) :
-  file(sFilePath)
-{
-}
-
-void cMyWriter::WriteLine(const std::string& sLine)
-{
-  file.WriteLineUTF8LF(sLine);
-}
-
-
-void TestHTML()
-{
-  cMyController controller;
-
-  cMyWriter writer(TEXT("/home/chris/index.html"));
-
-  spitfire::storage::cHTMLDocument<cMyWriter, cMyController> document;
-
-  document.Create(writer, controller);
-}
-
-//#endif // BUILD_UNITTESTS
-*/

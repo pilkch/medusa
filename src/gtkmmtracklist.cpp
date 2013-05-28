@@ -342,6 +342,22 @@ void cGtkmmTrackList::AddTrack(trackid_t id, const cTrack& track)
   nTracks++;
 }
 
+void cGtkmmTrackList::DeleteTrack(trackid_t id)
+{
+  Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
+  while (iter) {
+    Gtk::TreeModel::Row row = *iter;
+    if (row[columns.id] == id) {
+      playlistTreeModelRef->erase(iter);
+      nTracks--;
+    }
+
+    iter++;
+  }
+
+  OnListSelectionChanged();
+}
+
 void cGtkmmTrackList::DeleteAll()
 {
   playlistTreeModelRef.clear();

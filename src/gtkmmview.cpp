@@ -68,12 +68,25 @@ namespace medusa
   }
 
 
+  cGtkmmViewEventWebServerTrackMoveToRubbishBin::cGtkmmViewEventWebServerTrackMoveToRubbishBin(trackid_t _id) :
+    id(_id)
+  {
+  }
+
+  void cGtkmmViewEventWebServerTrackMoveToRubbishBin::EventFunction(cGtkmmView& view)
+  {
+    view.OnWebServerTrackMoveToRubbishBin(id);
+  }
+
+
   // ** cGtkmmView
 
 cGtkmmView::cGtkmmView(int argc, char** argv) :
   kit(argc, argv),
   pMainWindow(nullptr),
   player(*this),
+  webServer(*this),
+  pCurrentTrack(nullptr),
   soAction("cGtkmmView_soAction"),
   eventQueue(soAction),
   mutexSettings("settings")
@@ -344,6 +357,19 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
     pMainWindow->OnTracksAdded(ids, tracks);
   }
 }
+
+  void cGtkmmView::OnWebServerTrackMoveToRubbishBin(trackid_t id)
+  {
+    std::cout<<"cGtkmmView::OnWebServerTrackMoveToRubbishBin"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventWebServerTrackMoveToRubbishBin* pEvent = new cGtkmmViewEventWebServerTrackMoveToRubbishBin(id);
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnWebServerTrackMoveToRubbishBin(id);
+    }
+  }
 
 void cGtkmmView::_Run()
 {

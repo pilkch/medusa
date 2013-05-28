@@ -92,6 +92,8 @@ public:
   void OnPlaylistLoaded(trackid_t idLastPlayed);
   void OnTracksAdded(const std::list<trackid_t>& ids, const std::list<cTrack*>& tracks);
 
+  void OnWebServerTrackMoveToRubbishBin(trackid_t id);
+
 private:
   trackid_t GetPreviousTrack() const;
   trackid_t GetNextTrack() const;

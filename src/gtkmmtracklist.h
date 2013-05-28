@@ -101,6 +101,7 @@ private:
 
   void AddTrack(trackid_t id, const cTrack& track);
 
+  void DeleteTrack(trackid_t id);
   void DeleteAll();
   void DeleteAllSelected();
 

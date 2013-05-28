@@ -86,11 +86,22 @@ namespace medusa
     std::list<cTrack*> tracks;
   };
 
+  class cGtkmmViewEventWebServerTrackMoveToRubbishBin : public cGtkmmViewEvent
+  {
+  public:
+    explicit cGtkmmViewEventWebServerTrackMoveToRubbishBin(trackid_t id);
+
+    virtual void EventFunction(cGtkmmView& view) override;
+
+    trackid_t id;
+  };
+
 class cGtkmmView : public cView
 {
 public:
   friend class cGtkmmMainWindow;
   friend class cGStreamermmPlayer;
+  friend class cWebServer;
   friend class cGtkmmViewEventLoadingFilesToLoadIncrement;
   friend class cGtkmmViewEventLoadingFilesToLoadDecrement;
   friend class cGtkmmViewEventPlayerAboutToFinish;
@@ -98,6 +109,7 @@ public:
   friend class cGtkmmViewEventPlaylistLoading;
   friend class cGtkmmViewEventPlaylistLoaded;
   friend class cGtkmmViewEventTracksAdded;
+  friend class cGtkmmViewEventWebServerTrackMoveToRubbishBin;
 
   cGtkmmView(int argc, char** argv);
   ~cGtkmmView();
@@ -133,6 +145,8 @@ protected:
   virtual void OnPlaylistLoading() override;
   virtual void OnPlaylistLoaded(trackid_t idLastPlayed) override;
   virtual void OnTracksAdded(const std::list<trackid_t>& ids, const std::list<cTrack*>& tracks) override;
+
+  void OnWebServerTrackMoveToRubbishBin(trackid_t id);
 
 private:
   void InstallDesktopFile();

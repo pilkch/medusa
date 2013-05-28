@@ -1482,4 +1482,34 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
       }
     }
   }
+
+  void cGtkmmMainWindow::OnWebServerTrackMoveToRubbishBin(trackid_t id)
+  {
+    std::cout<<"cGtkmmMainWindow::OnWebServerTrackMoveToRubbishBin"<<std::endl;
+
+    // Get the data for the track
+    string_t sFilePath;
+    spitfire::audio::cMetaData metaData;
+    TRACK_STATUS status = TRACK_STATUS::OK;
+    if (!pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status)) {
+      std::cout<<"cGtkmmMainWindow::OnWebServerTrackMoveToRubbishBin Track has already been removed, returning"<<std::endl;
+      return;
+    }
+
+    // Move the file to the rubbish bin
+    spitfire::filesystem::MoveFileToTrash(sFilePath);
+
+    // We are removing one track, so find out if it is the currently playing track and if we should skip to the next one
+    if (pTrackList->GetTrackCount() != 1) {
+      if (view.GetCurrentTrackID() == id) OnPlaybackNextClicked();
+    }
+
+    // Tell the view that we are removing these tracks
+    std::list<trackid_t> tracks;
+    tracks.push_back(id);
+    view.OnActionRemoveTracks(tracks);
+
+    // Remove the selected tracks
+    pTrackList->DeleteTrack(id);
+  }
 }

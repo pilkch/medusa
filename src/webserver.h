@@ -12,6 +12,8 @@
 
 namespace medusa
 {
+  class cGtkmmView;
+
   struct cWebServerSongEntry
   {
   public:
@@ -24,20 +26,25 @@ namespace medusa
   class cWebServer : public spitfire::network::http::cServerRequestHandler
   {
   public:
-    cWebServer();
+    explicit cWebServer(cGtkmmView& view);
+    ~cWebServer();
 
     void Start();
     void Stop();
 
     void OnActionPlayTrack(trackid_t id, const spitfire::audio::cMetaData& metaData);
 
+    void GetLastPlayedTracks(std::list<cWebServerSongEntry>& tracks);
+
   private:
     virtual override bool HandleRequest(spitfire::network::http::cServer& server, spitfire::network::http::cConnectedClient& connection, const spitfire::network::http::cRequest& request);
+
+    cGtkmmView& view;
 
     spitfire::network::http::cServer server;
 
     spitfire::util::cMutex mutexEntries;
-    std::list<cWebServerSongEntry> entries;
+    std::list<cWebServerSongEntry*> entries;
   };
 }
 
