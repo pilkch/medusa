@@ -1,4 +1,6 @@
 *~
+*.kate-swp
+*.kdev_include_paths
 
 project/*
 log/
