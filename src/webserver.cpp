@@ -97,7 +97,13 @@ namespace medusa
           writer.WriteLine("    <th class=\"table_border\">" + iter->sArtist + "</th>");
           writer.WriteLine("    <th class=\"table_border\">" + iter->sTitle + "</th>");
           writer.WriteLine("    <th class=\"table_border\">" + medusa::util::FormatTime(iter->uiDurationMilliSeconds) + "</th>");
-          writer.WriteLine("    <th class=\"table_border\"><form method=\"POST\" action=\"delete?track=" + spitfire::string::ToString(uintptr_t(iter->id)) + "\"><input type=\"image\" src=\"images/delete.png\" alt=\"Delete\" width=\"32\" height=\"32\"/></form></th>");
+          writer.WriteLine("    <th class=\"table_border\">");
+          writer.WriteLine("      <form action=\"/\" method=\"POST\">");
+          writer.WriteLine("        <input type=\"hidden\" name=\"action\" value=\"delete\"/>");
+          writer.WriteLine("        <input type=\"hidden\" name=\"track\" value=\"" + spitfire::string::ToString(uintptr_t(iter->id)) + "\"/>");
+          writer.WriteLine("        <input type=\"image\" src=\"images/trash.png\" alt=\"Delete\" width=\"32\" height=\"32\"/>");
+          writer.WriteLine("      </form>");
+          writer.WriteLine("    </th>");
           writer.WriteLine("  </tr>");
 
           iter++;
@@ -208,16 +214,35 @@ namespace medusa
   {
     //LOG<<"cWebServer::HandleRequest method="<<(request.IsMethodGet() ? "is get" : (request.IsMethodPost() ? "is post" : "unknown"))<<", path="<<request.GetPath()<<std::endl;
 
+    if (request.GetPath() != "/") {
+      LOG<<"cWebServer::HandleRequest Invalid path, returning false"<<std::endl;
+      return false;
+    }
+
     trackid_t track = nullptr;
 
-    if (request.IsMethodPost() && (spitfire::string::StartsWith(request.GetPath(), "/delete?track="))) {
-      const std::string sTrack = spitfire::string::StripLeading(request.GetPath(), "/delete?track=");
+    if (request.IsMethodPost()) {
+      // Deleting a track
+      const std::map<std::string, std::string>& values = request.GetFormData();
+      std::map<std::string, std::string>::const_iterator iter = values.find("action");
+      if ((iter == values.end()) || (iter->second != "delete")) {
+        LOG<<"cWebServer::HandleRequest Action was either not found or not equal to delete, returning false"<<std::endl;
+        return false;
+      }
+
+      iter = values.find("track");
+      if (iter == values.end()) {
+        LOG<<"cWebServer::HandleRequest Track was not found, returning false"<<std::endl;
+        return false;
+      }
+
+      const std::string sTrack = iter->second;
 
       track = trackid_t(uintptr_t(spitfire::string::ToUnsignedInt(sTrack)));
 
       // Notify the view
       view.OnWebServerTrackMoveToRubbishBin(track);
-    } else if (!request.IsMethodGet() || (request.GetPath() != "/")) {
+    } else if (!request.IsMethodGet()) {
       return false;
     }
 
