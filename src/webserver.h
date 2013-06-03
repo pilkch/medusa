@@ -21,6 +21,8 @@ namespace medusa
     string_t sArtist;
     string_t sTitle;
     uint64_t uiDurationMilliSeconds;
+    string_t sFilePath;
+    string_t sFileName;
   };
 
   class cWebServer : public spitfire::network::http::cServerRequestHandler
@@ -32,11 +34,13 @@ namespace medusa
     void Start();
     void Stop();
 
-    void OnActionPlayTrack(trackid_t id, const spitfire::audio::cMetaData& metaData);
+    void OnActionPlayTrack(trackid_t id, const spitfire::audio::cMetaData& metaData, const string_t& sFilePath);
 
     void GetLastPlayedTracks(std::list<cWebServerSongEntry>& tracks);
 
   private:
+    bool GetFilePathFromFileName(const string_t& sFileName, string_t& sFilePath);
+
     virtual override bool HandleRequest(spitfire::network::http::cServer& server, spitfire::network::http::cConnectedClient& connection, const spitfire::network::http::cRequest& request);
 
     cGtkmmView& view;

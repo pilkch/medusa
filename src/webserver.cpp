@@ -134,6 +134,7 @@ namespace medusa
           writer.WriteLine("    <th class=\"table_border\">" + iter->sTitle + "</th>");
           writer.WriteLine("    <th class=\"table_border\">" + medusa::util::FormatTime(iter->uiDurationMilliSeconds) + "</th>");
           writer.WriteLine("    <th class=\"table_border\">");
+          writer.WriteLine("      <a href=\"download/" + spitfire::filesystem::GetFile(iter->sFilePath) + "\"><img src=\"images/file_save.png\" alt=\"Save File\" width=\"" + spitfire::string::ToString(nSize) + "\" height=\"" + spitfire::string::ToString(nSize) + "\"/></a>");
           writer.WriteLine("    </th>");
           writer.WriteLine("    <th class=\"table_border\">");
           AddFormWithImageButton(writer, iter->id, "file_trash", "file_trash", "Delete File", nSize);
@@ -221,15 +222,17 @@ namespace medusa
     server.Stop();
   }
 
-  void cWebServer::OnActionPlayTrack(trackid_t id, const spitfire::audio::cMetaData& metaData)
+  void cWebServer::OnActionPlayTrack(trackid_t id, const spitfire::audio::cMetaData& metaData, const string_t& sFilePath)
   {
-    spitfire::util::cLockObject lock(mutexEntries);
-
     cWebServerSongEntry* pEntry = new cWebServerSongEntry;
     pEntry->id = id;
     pEntry->sArtist = metaData.sArtist;
     pEntry->sTitle = metaData.sTitle;
     pEntry->uiDurationMilliSeconds = metaData.uiDurationMilliSeconds;
+    pEntry->sFilePath = sFilePath;
+    pEntry->sFileName = spitfire::filesystem::GetFile(sFilePath);
+
+    spitfire::util::cLockObject lock(mutexEntries);
 
     entries.push_front(pEntry);
 
@@ -244,12 +247,43 @@ namespace medusa
     }
   }
 
+  bool cWebServer::GetFilePathFromFileName(const string_t& sFileName, string_t& sFilePath)
+  {
+    spitfire::util::cLockObject lock(mutexEntries);
+
+    // Find the file name in the list
+    std::list<cWebServerSongEntry*>::iterator iter(entries.begin());
+    const std::list<cWebServerSongEntry*>::iterator iterEnd(entries.end());
+    while (iter != iterEnd) {
+      if ((*iter)->sFileName == sFileName) {
+        sFilePath = (*iter)->sFilePath;
+        return true;
+      }
+
+      iter++;
+    }
+
+    return false;
+  }
+
   bool cWebServer::HandleRequest(spitfire::network::http::cServer& server, spitfire::network::http::cConnectedClient& connection, const spitfire::network::http::cRequest& request)
   {
     //LOG<<"cWebServer::HandleRequest method="<<(request.IsMethodGet() ? "is get" : (request.IsMethodPost() ? "is post" : "unknown"))<<", path="<<request.GetPath()<<std::endl;
 
+    if (spitfire::string::StartsWith(request.GetPath(), "/download/")) {
+      const string_t sFileName = spitfire::filesystem::GetFile(request.GetPath());
+      string_t sFilePath;
+      if (!GetFilePathFromFileName(sFileName, sFilePath)) {
+        LOG<<"cWebServer::HandleRequest Invalid download path \""<<request.GetPath()<<"\", returning false"<<std::endl;
+        return false;
+      }
+
+      server.ServeFileWithResolvedFilePath(connection, request, sFilePath);
+      return true;
+    }
+
     if (request.GetPath() != "/") {
-      LOG<<"cWebServer::HandleRequest Invalid path, returning false"<<std::endl;
+      LOG<<"cWebServer::HandleRequest Invalid path \""<<request.GetPath()<<"\", returning false"<<std::endl;
       return false;
     }
 

@@ -250,7 +250,7 @@ void cGtkmmView::OnActionPlayTrack(trackid_t id, const string_t& sFilePath, cons
 
   OnActionPlay();
 
-  webServer.OnActionPlayTrack(id, metaData);
+  webServer.OnActionPlayTrack(id, metaData, sFilePath);
 
   pController->OnActionPlayTrack(id);
 }
