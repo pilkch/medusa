@@ -5,7 +5,7 @@
 
 namespace medusa
 {
-  const size_t nMaxSongEntries = 15;
+  const size_t nMaxSongEntries = 20;
 
   // ** cWebPageController
 
@@ -30,6 +30,11 @@ namespace medusa
     void AddAside(W& writer, const std::string& sAside) const;
 
   private:
+    template <class W>
+    void AddFormWithImageButton(W& writer, const std::string& sAction, const std::string& sImage, const std::string& sAlternativeText, size_t nSize) const;
+    template <class W>
+    void AddFormWithImageButton(W& writer, trackid_t track, const std::string& sAction, const std::string& sImage, const std::string& sAlternativeText, size_t nSize) const;
+
     std::list<cWebServerSongEntry> tracks;
   };
 
@@ -45,7 +50,7 @@ namespace medusa
 
   spitfire::string_t cWebPageController::GetTitle() const
   {
-    return TEXT("My Title");
+    return TEXT("Medusa");
   }
 
   spitfire::string_t cWebPageController::GetDescription() const
@@ -66,16 +71,43 @@ namespace medusa
   std::vector<std::pair<std::string, std::string> > cWebPageController::GetArticles() const
   {
     std::vector<std::pair<std::string, std::string> > articles;
-    articles.push_back(std::make_pair(TEXT("myarticle"), TEXT("My Article")));
+    articles.push_back(std::make_pair(TEXT("playback"), TEXT("Playback")));
+    articles.push_back(std::make_pair(TEXT("tracks"), TEXT("Tracks")));
     return articles;
+  }
+
+  template <class W>
+  void cWebPageController::AddFormWithImageButton(W& writer, trackid_t track, const std::string& sAction, const std::string& sImage, const std::string& sAlternativeText, size_t nSize) const
+  {
+    writer.WriteLine("      <form action=\"/\" method=\"POST\">");
+    writer.WriteLine("        <input type=\"hidden\" name=\"action\" value=\"" + sAction + "\"/>");
+    writer.WriteLine("        <input type=\"hidden\" name=\"track\" value=\"" + spitfire::string::ToString(uintptr_t(track)) + "\"/>");
+    writer.WriteLine("        <input type=\"image\" src=\"images/" + sImage + ".png\" alt=\"" + sAlternativeText + "\" width=\"" + spitfire::string::ToString(nSize) + "\" height=\"" + spitfire::string::ToString(nSize) + "\"/>");
+    writer.WriteLine("      </form>");
+  }
+
+  template <class W>
+  void cWebPageController::AddFormWithImageButton(W& writer, const std::string& sAction, const std::string& sImage, const std::string& sAlternativeText, size_t nSize) const
+  {
+    writer.WriteLine("      <form action=\"/\" method=\"POST\">");
+    writer.WriteLine("        <input type=\"hidden\" name=\"action\" value=\"" + sAction + "\"/>");
+    writer.WriteLine("        <input type=\"image\" src=\"images/" + sImage + ".png\" alt=\"" + sAlternativeText + "\" width=\"" + spitfire::string::ToString(nSize) + "\" height=\"" + spitfire::string::ToString(nSize) + "\"/>");
+    writer.WriteLine("      </form>");
   }
 
   template <class W>
   void cWebPageController::AddArticle(W& writer, const std::string& sArticle) const
   {
-    if (sArticle == TEXT("myarticle")) {
+    if (sArticle == TEXT("playback")) {
       writer.WriteLine("<img src=\"images/medusa.png\"/><br/>");
 
+      const size_t nSize = 32;
+      AddFormWithImageButton(writer, "playback_previous", "playback_previous", "Previous", nSize);
+      AddFormWithImageButton(writer, "playback_play", "playback_play", "Play", nSize);
+      AddFormWithImageButton(writer, "playback_next", "playback_next", "Next", nSize);
+      AddFormWithImageButton(writer, "volume_mute", "volume_mute", "Mute Volume", nSize);
+      AddFormWithImageButton(writer, "volume_full", "volume_full", "Full Volume", nSize);
+    } else if (sArticle == TEXT("tracks")) {
       writer.WriteLine("<h3>Last " + spitfire::string::ToString(nMaxSongEntries) + " Songs Played</h3>");
 
       if (tracks.empty()) {
@@ -86,9 +118,13 @@ namespace medusa
         writer.WriteLine("    <th class=\"table_border\">Artist</th>");
         writer.WriteLine("    <th class=\"table_border\">Title</th>");
         writer.WriteLine("    <th class=\"table_border\">Duration</th>");
-        writer.WriteLine("    <th class=\"table_border\">Delete File</th>");
+        writer.WriteLine("    <th class=\"table_border\">Download</th>");
+        writer.WriteLine("    <th class=\"table_border\">Delete</th>");
         writer.WriteLine("  </tr>");
         writer.WriteLine("");
+
+        const size_t nSize = 16;
+        const std::string sSize = spitfire::string::ToString(nSize);
 
         std::list<cWebServerSongEntry>::const_iterator iter(tracks.begin());
         const std::list<cWebServerSongEntry>::const_iterator iterEnd(tracks.end());
@@ -98,11 +134,9 @@ namespace medusa
           writer.WriteLine("    <th class=\"table_border\">" + iter->sTitle + "</th>");
           writer.WriteLine("    <th class=\"table_border\">" + medusa::util::FormatTime(iter->uiDurationMilliSeconds) + "</th>");
           writer.WriteLine("    <th class=\"table_border\">");
-          writer.WriteLine("      <form action=\"/\" method=\"POST\">");
-          writer.WriteLine("        <input type=\"hidden\" name=\"action\" value=\"delete\"/>");
-          writer.WriteLine("        <input type=\"hidden\" name=\"track\" value=\"" + spitfire::string::ToString(uintptr_t(iter->id)) + "\"/>");
-          writer.WriteLine("        <input type=\"image\" src=\"images/trash.png\" alt=\"Delete\" width=\"32\" height=\"32\"/>");
-          writer.WriteLine("      </form>");
+          writer.WriteLine("    </th>");
+          writer.WriteLine("    <th class=\"table_border\">");
+          AddFormWithImageButton(writer, iter->id, "file_trash", "file_trash", "Delete File", nSize);
           writer.WriteLine("    </th>");
           writer.WriteLine("  </tr>");
 
@@ -225,23 +259,43 @@ namespace medusa
       // Deleting a track
       const std::map<std::string, std::string>& values = request.GetFormData();
       std::map<std::string, std::string>::const_iterator iter = values.find("action");
-      if ((iter == values.end()) || (iter->second != "delete")) {
-        LOG<<"cWebServer::HandleRequest Action was either not found or not equal to delete, returning false"<<std::endl;
-        return false;
-      }
-
-      iter = values.find("track");
       if (iter == values.end()) {
-        LOG<<"cWebServer::HandleRequest Track was not found, returning false"<<std::endl;
+        LOG<<"cWebServer::HandleRequest Action was not found, returning false"<<std::endl;
         return false;
       }
 
-      const std::string sTrack = iter->second;
+      if (iter->second == "playback_previous") {
+        // Notify the view
+        view.OnWebServerPreviousTrack();
+      } else if (iter->second == "playback_play") {
+        // Notify the view
+        view.OnWebServerPlayPause();
+      } else if (iter->second == "playback_next") {
+        // Notify the view
+        view.OnWebServerNextTrack();
+      } else if (iter->second == "volume_mute") {
+        // Notify the view
+        view.OnWebServerSetVolumeMute();
+      } else if (iter->second == "volume_full") {
+        // Notify the view
+        view.OnWebServerSetVolumeFull();
+      } else if (iter->second == "file_trash") {
+        iter = values.find("track");
+        if (iter == values.end()) {
+          LOG<<"cWebServer::HandleRequest Track was not found, returning false"<<std::endl;
+          return false;
+        }
 
-      track = trackid_t(uintptr_t(spitfire::string::ToUnsignedInt(sTrack)));
+        const std::string sTrack = iter->second;
 
-      // Notify the view
-      view.OnWebServerTrackMoveToRubbishBin(track);
+        track = trackid_t(uintptr_t(spitfire::string::ToUnsignedInt(sTrack)));
+
+        // Notify the view
+        view.OnWebServerTrackMoveToRubbishBin(track);
+      } else {
+        LOG<<"cWebServer::HandleRequest Unknown action, returning false"<<std::endl;
+        return false;
+      }
     } else if (!request.IsMethodGet()) {
       return false;
     }

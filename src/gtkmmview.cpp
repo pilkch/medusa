@@ -68,6 +68,31 @@ namespace medusa
   }
 
 
+  void cGtkmmViewEventWebServerPreviousTrack::EventFunction(cGtkmmView& view)
+  {
+    view.OnWebServerPreviousTrack();
+  }
+
+  void cGtkmmViewEventWebServerPlayPause::EventFunction(cGtkmmView& view)
+  {
+    view.OnWebServerPlayPause();
+  }
+
+  void cGtkmmViewEventWebServerNextTrack::EventFunction(cGtkmmView& view)
+  {
+    view.OnWebServerNextTrack();
+  }
+
+  void cGtkmmViewEventWebServerSetVolumeMute::EventFunction(cGtkmmView& view)
+  {
+    view.OnWebServerSetVolumeMute();
+  }
+
+  void cGtkmmViewEventWebServerSetVolumeFull::EventFunction(cGtkmmView& view)
+  {
+    view.OnWebServerSetVolumeFull();
+  }
+
   cGtkmmViewEventWebServerTrackMoveToRubbishBin::cGtkmmViewEventWebServerTrackMoveToRubbishBin(trackid_t _id) :
     id(_id)
   {
@@ -357,6 +382,71 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
     pMainWindow->OnTracksAdded(ids, tracks);
   }
 }
+
+  void cGtkmmView::OnWebServerPreviousTrack()
+  {
+    std::cout<<"cGtkmmView::OnWebServerPreviousTrack"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventWebServerPreviousTrack* pEvent = new cGtkmmViewEventWebServerPreviousTrack();
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnWebServerPreviousTrack();
+    }
+  }
+
+  void cGtkmmView::OnWebServerPlayPause()
+  {
+    std::cout<<"cGtkmmView::OnWebServerPlayPause"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventWebServerPlayPause* pEvent = new cGtkmmViewEventWebServerPlayPause();
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnWebServerPlayPause();
+    }
+  }
+
+  void cGtkmmView::OnWebServerNextTrack()
+  {
+    std::cout<<"cGtkmmView::OnWebServerNextTrack"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventWebServerNextTrack* pEvent = new cGtkmmViewEventWebServerNextTrack();
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnWebServerNextTrack();
+    }
+  }
+
+  void cGtkmmView::OnWebServerSetVolumeMute()
+  {
+    std::cout<<"cGtkmmView::OnWebServerSetVolumeMute"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventWebServerSetVolumeMute* pEvent = new cGtkmmViewEventWebServerSetVolumeMute();
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnWebServerSetVolumeMute();
+    }
+  }
+
+  void cGtkmmView::OnWebServerSetVolumeFull()
+  {
+    std::cout<<"cGtkmmView::OnWebServerSetVolumeFull"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventWebServerSetVolumeFull* pEvent = new cGtkmmViewEventWebServerSetVolumeFull();
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnWebServerSetVolumeFull();
+    }
+  }
 
   void cGtkmmView::OnWebServerTrackMoveToRubbishBin(trackid_t id)
   {

@@ -1483,6 +1483,31 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
     }
   }
 
+  void cGtkmmMainWindow::OnWebServerPreviousTrack()
+  {
+    OnPlaybackPreviousClicked();
+  }
+
+  void cGtkmmMainWindow::OnWebServerPlayPause()
+  {
+    OnPlaybackPlayPauseButtonToggled();
+  }
+
+  void cGtkmmMainWindow::OnWebServerNextTrack()
+  {
+    OnPlaybackNextClicked();
+  }
+
+  void cGtkmmMainWindow::OnWebServerSetVolumeMute()
+  {
+    OnActionVolumeValueChanged(0);
+  }
+
+  void cGtkmmMainWindow::OnWebServerSetVolumeFull()
+  {
+    OnActionVolumeValueChanged(100);
+  }
+
   void cGtkmmMainWindow::OnWebServerTrackMoveToRubbishBin(trackid_t id)
   {
     std::cout<<"cGtkmmMainWindow::OnWebServerTrackMoveToRubbishBin"<<std::endl;

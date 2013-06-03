@@ -86,6 +86,36 @@ namespace medusa
     std::list<cTrack*> tracks;
   };
 
+  class cGtkmmViewEventWebServerPreviousTrack : public cGtkmmViewEvent
+  {
+  public:
+    virtual void EventFunction(cGtkmmView& view) override;
+  };
+
+  class cGtkmmViewEventWebServerPlayPause : public cGtkmmViewEvent
+  {
+  public:
+    virtual void EventFunction(cGtkmmView& view) override;
+  };
+
+  class cGtkmmViewEventWebServerNextTrack : public cGtkmmViewEvent
+  {
+  public:
+    virtual void EventFunction(cGtkmmView& view) override;
+  };
+
+  class cGtkmmViewEventWebServerSetVolumeMute : public cGtkmmViewEvent
+  {
+  public:
+    virtual void EventFunction(cGtkmmView& view) override;
+  };
+
+  class cGtkmmViewEventWebServerSetVolumeFull : public cGtkmmViewEvent
+  {
+  public:
+    virtual void EventFunction(cGtkmmView& view) override;
+  };
+
   class cGtkmmViewEventWebServerTrackMoveToRubbishBin : public cGtkmmViewEvent
   {
   public:
@@ -109,6 +139,11 @@ public:
   friend class cGtkmmViewEventPlaylistLoading;
   friend class cGtkmmViewEventPlaylistLoaded;
   friend class cGtkmmViewEventTracksAdded;
+  friend class cGtkmmViewEventWebServerPreviousTrack;
+  friend class cGtkmmViewEventWebServerPlayPause;
+  friend class cGtkmmViewEventWebServerNextTrack;
+  friend class cGtkmmViewEventWebServerSetVolumeMute;
+  friend class cGtkmmViewEventWebServerSetVolumeFull;
   friend class cGtkmmViewEventWebServerTrackMoveToRubbishBin;
 
   cGtkmmView(int argc, char** argv);
@@ -146,6 +181,11 @@ protected:
   virtual void OnPlaylistLoaded(trackid_t idLastPlayed) override;
   virtual void OnTracksAdded(const std::list<trackid_t>& ids, const std::list<cTrack*>& tracks) override;
 
+  void OnWebServerPreviousTrack();
+  void OnWebServerPlayPause();
+  void OnWebServerNextTrack();
+  void OnWebServerSetVolumeMute();
+  void OnWebServerSetVolumeFull();
   void OnWebServerTrackMoveToRubbishBin(trackid_t id);
 
 private:
