@@ -526,17 +526,17 @@ namespace medusa
     LoadPlaylist();
 
     while (true) {
-      std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
+      //std::cout<<"cModel::ThreadFunction Loop"<<std::endl;
       soAction.WaitTimeoutMS(1000);
 
       if (IsToStop()) break;
 
-      std::cout<<"cModel::ThreadFunction Loop getting event"<<std::endl;
+      //std::cout<<"cModel::ThreadFunction Loop getting event"<<std::endl;
       cModelEvent* pEvent = eventQueue.RemoveItemFromFront();
       if (pEvent != nullptr) {
-        std::cout<<"cModel::ThreadFunction Loop calling event function"<<std::endl;
+        //std::cout<<"cModel::ThreadFunction Loop calling event function"<<std::endl;
         pEvent->EventFunction(*this);
-        std::cout<<"cModel::ThreadFunction Loop deleting event"<<std::endl;
+        //std::cout<<"cModel::ThreadFunction Loop deleting event"<<std::endl;
         spitfire::SAFE_DELETE(pEvent);
       } else {
         // If the queue is empty then we know that there are no more actions and it is safe to reset our stop loading signal object
