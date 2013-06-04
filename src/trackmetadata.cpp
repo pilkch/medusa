@@ -650,14 +650,18 @@ bool cTrackPropertiesReader::ReadTrackProperties(spitfire::audio::cMetaData& met
 {
   metaData.Clear();
 
-  bool bResult = true;
-
-  if (spitfire::filesystem::GetExtensionNoDot(sFilePath) == TEXT("mp3")) {
-    if (!ReadTrackTags(metaData, sFilePath)) bResult = false;
-  } else {
-
+  const string_t sExtension = spitfire::filesystem::GetExtensionNoDot(sFilePath);
+  if (sExtension != TEXT("mp3")) {
+    LOG<<"cTrackPropertiesReader::ReadTrackProperties File type \""<<sExtension<<"\" is not supported, only mp3 files are currently supported, returning false"<<std::endl;
+    return false;
   }
 
+  bool bResult = true;
+
+  // Use libid3tag to read the tags
+  if (!ReadTrackTags(metaData, sFilePath)) bResult = false;
+
+  // Use libmad to get the duration
   if (!ReadTrackLength(metaData, sFilePath)) bResult = false;
 
   return bResult;
