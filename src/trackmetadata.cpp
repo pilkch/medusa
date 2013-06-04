@@ -673,21 +673,19 @@ bool cTrackPropertiesReader::ReadTrackTags(spitfire::audio::cMetaData& metaData,
   return libID3Tag.ReadTrackTags(metaData, sFilePath);
 }
 
+
 // Use libmad to read the track length
-// http://mythaudio.googlecode.com/svn/trunk/mythaudio/metaioid3v2.cpp
+// http://hacks.slashdirt.org/musicindex/doc/html/playlist-mp3_8c_source.html#l00252
+
+//#define BUILD_XING
 
 bool cTrackPropertiesReader::ReadTrackLength(spitfire::audio::cMetaData& metaData, const string_t& sFilePath) const
 {
-  // TODO: CLEAN UP THIS FUNCTION
-
   metaData.uiDurationMilliSeconds = 0;
 
   const std::string sFileNameUTF8 = spitfire::string::ToUTF8(sFilePath);
   FILE* file = fopen(sFileNameUTF8.c_str(), "r");
   if (file == nullptr) return false;
-
-  struct stat s;
-  fstat(fileno(file), &s);
 
   struct mad_stream stream;
   mad_stream_init(&stream);
@@ -695,72 +693,113 @@ bool cTrackPropertiesReader::ReadTrackLength(spitfire::audio::cMetaData& metaDat
   struct mad_header header;
   mad_header_init(&header);
 
-  unsigned long old_bitrate = 0;
-  bool bIsVBR = false;
-  int amount_checked = 0;
-  int alt_length = 0;
+  struct mad_frame frame;
+  mad_frame_init(&frame);
 
-  unsigned char buffer[8192];
-  unsigned int buflen = 0;
 
-  mad_timer_t timer = mad_timer_zero;
+  const size_t INPUT_BUFFER_SIZE = 16 * 1024;
 
-  size_t iterations = 0;
+  unsigned char madinput_buffer[INPUT_BUFFER_SIZE];
+  size_t madread_size = 0;
+  size_t remaining = 0;
+  mad_timer_t duration = mad_timer_zero;
 
-  bool bContinue = true;
-  while (bContinue) {
-    // If for some reason we can't progress through this file then we break
-    if (iterations > 500) break;
+  unsigned long tagsize = 0;
+  unsigned long data_used = 0;
+  unsigned long frames = 0;
 
-    // Increment our safety counter
-    iterations++;
+  bool bVBR = false;
+  uint64_t uiBitrate = 0;
 
-    if (buflen < sizeof(buffer)) {
-      int bytes = fread(buffer + buflen, 1, sizeof(buffer) - buflen, file);
-      if (bytes <= 0) break;
-      buflen += bytes;
+  while (true) {
+    // Find out how much we have to read from the file
+    remaining = stream.bufend - stream.next_frame;
+    memcpy(madinput_buffer, stream.this_frame, remaining);
+    madread_size = fread(madinput_buffer + remaining, 1, INPUT_BUFFER_SIZE - remaining, file);
+
+    if (madread_size <= 0) {
+      LOG<<"cTrackPropertiesReader::ReadTrackLength madread_size <= 0 for file \""<<sFileNameUTF8<<"\", breaking"<<std::endl;
+      break;
     }
 
-    mad_stream_buffer(&stream, buffer, buflen);
+    mad_stream_buffer(&stream, madinput_buffer, madread_size + remaining);
 
     while (true) {
       if (mad_header_decode(&header, &stream) == -1) {
-        if (!MAD_RECOVERABLE(stream.error)) break;
+        if (stream.error == MAD_ERROR_BUFLEN) break;
 
-        if (stream.error == MAD_ERROR_LOSTSYNC) {
-          int tagsize = id3_tag_query(stream.this_frame, stream.bufend - stream.this_frame);
-          if (tagsize > 0) {
-            mad_stream_skip(&stream, tagsize);
-            s.st_size -= tagsize;
-          }
-        }
-      } else {
-        if (amount_checked == 0) old_bitrate = header.bitrate;
-        else if (header.bitrate != old_bitrate) bIsVBR = true;
-
-        if ((amount_checked == 32) && !bIsVBR) {
-          alt_length = (s.st_size * 8) / (old_bitrate / 1000);
-          bContinue = false;
+        if (!MAD_RECOVERABLE(stream.error)) {
+          LOG<<"cTrackPropertiesReader::ReadTrackLength Unrecoverable read error for file \""<<sFileNameUTF8<<"\", breaking"<<std::endl;
           break;
         }
-        amount_checked++;
-        mad_timer_add(&timer, header.duration);
+        if (stream.error == MAD_ERROR_LOSTSYNC) {
+          // Ignore LOSTSYNC due to ID3 tags
+          tagsize = id3_tag_query(stream.this_frame, stream.bufend - stream.this_frame);
+          if (tagsize > 0) {
+            mad_stream_skip(&stream, tagsize);
+            continue;
+          }
+        }
+        continue;
       }
+
+      frames++; // Count the number of frames for average length calculation
+      mad_timer_add(&duration, header.duration); // Sum frame duration
+      data_used += stream.next_frame - stream.this_frame;
+
+      if (frames == 1) {
+        // The first frame should give us pretty much everything we need, unless...
+        uiBitrate = header.bitrate;
+
+        // ...we have a VBR file. See if it has XING headers first
+        frame.header = header;
+        if (mad_frame_decode(&frame, &stream) == -1) {
+          if (!MAD_RECOVERABLE(stream.error)) {
+            LOG<<"cTrackPropertiesReader::ReadTrackLength Unrecoverable frame decode for file \""<<sFileNameUTF8<<"\", breaking"<<std::endl;
+            break;
+          }
+        }
+
+#ifdef BUILD_XING
+        if (xing_parse(&xing, stream.anc_ptr, stream.anc_bitlen) == 0) {
+          // Found xing header
+          if (xing.frames != 0) { // some files are broken beyond repair, ignore them
+            bVBR = true;
+            // Get the total number of frames and find out the average bitrate
+            frames = xing.frames;
+            mad_timer_multiply(&duration, frames);
+            uiBitrate = (8 * xing.bytes) / mad_timer_count(duration, MAD_UNITS_SECONDS);
+          }
+          break;
+        }
+#endif
+      } else {
+        // Maybe we have a VBR file without xing header
+        if (uiBitrate != header.bitrate) bVBR = true;
+        if (bVBR) uiBitrate += header.bitrate; // We'll do an average
+      }
+
+      // TODO: This loop will yield wrong result eg if the first
+      // 2+ frames have the same bitrate, the sum will only trigger
+      // after these and the average performed later on on the total
+      // number of frames will be incorrect.
     }
 
+    // We need to break the main loop either on fatal error or when we have already computed the numbers we need.
+    // Otherwise things get really messy (frames not being == to the number of frames actually read
     if (stream.error != MAD_ERROR_BUFLEN) break;
-
-    memmove(buffer, stream.next_frame, &buffer[buflen] - stream.next_frame);
-    buflen -= stream.next_frame - &buffer[0];
   }
 
+  // The length can sometimes be encoded in ID3 tags
+  if (metaData.uiDurationMilliSeconds == 0) metaData.uiDurationMilliSeconds = mad_timer_count(duration, MAD_UNITS_MILLISECONDS);
+
+  // Close libmad
+  mad_frame_finish(&frame);
   mad_header_finish(&header);
   mad_stream_finish(&stream);
 
+  // Close our file
   fclose(file);
-
-  if (bIsVBR) metaData.uiDurationMilliSeconds = mad_timer_count(timer, MAD_UNITS_MILLISECONDS);
-  else metaData.uiDurationMilliSeconds = alt_length;
 
   return true;
 }
