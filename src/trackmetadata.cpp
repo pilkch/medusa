@@ -456,11 +456,9 @@ string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* szLabel, const string_t& 
   for (int i = 0; nullptr != (p_frame = id3_tag_findframe(pTag, szLabel, i)); ++i) {
     int field_num = 1;
 
-    string_t tmp = TEXT("");
-
     // Compare the first field with the description if supplied
     if (!desc.empty()) {
-      tmp = GetRawID3String(&p_frame->fields[field_num++]);
+      string_t tmp = GetRawID3String(&p_frame->fields[field_num++]);
 
       // Now compare tmp to desc
       if (tmp != desc) {
@@ -470,9 +468,7 @@ string_t cLibID3Tag::GetTag(id3_tag* pTag, const char* szLabel, const string_t& 
     }
 
     // Get the value and return it.
-    tmp = GetRawID3String(&p_frame->fields[field_num]);
-
-    return tmp;
+    return GetRawID3String(&p_frame->fields[field_num]);
   }
 
   // Not found.
