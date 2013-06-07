@@ -86,9 +86,9 @@ namespace medusa
   template <class W>
   void cWebPageController::AddFormWithImageButton(W& writer, const std::string& sAction, const std::string& sImage, const std::string& sAlternativeText, size_t nSize) const
   {
-    writer.WriteLine("      <button onclick=\"" + sAction + "\">");
+    writer.WriteLine("      <a href=\"#\" onclick=\"" + sAction + "\" class=\"image_button\">");
     writer.WriteLine("        <img src=\"images/" + sImage + ".png\" width=\"" + spitfire::string::ToString(nSize) + "\" height=\"" + spitfire::string::ToString(nSize) + "\" alt=\"" + sAlternativeText + "\"/>");
-    writer.WriteLine("      </button>");
+    writer.WriteLine("      </a>");
   }
 
   template <class W>

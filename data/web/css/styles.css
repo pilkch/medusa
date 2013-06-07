@@ -1,15 +1,24 @@
 /* ---------------------------------------------------------
    View Styles
    --------------------------------------------------------- */
+
+  /* Black background and white text*/
   body {
     background-color:black;
     color:white;
   }
-  /* Default link styling */
+
+  /* Grey link styling */
   a:link { color:#CCCCCC; }
   a:visited { color:#666666; }
   a:hover, a:focus { color:#999999; }
   a:active { color:#666666; }
+
+  /* Remove hyperlink underline from image buttons */
+  a.image_button:link {text-decoration:none;}
+  a.image_button:visited {text-decoration:none;}
+  a.image_button:hover {text-decoration:none;}
+  a.image_button:active {text-decoration:none;}
 
 /* ---------------------------------------------------------
    Print Styles
