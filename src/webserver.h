@@ -41,6 +41,8 @@ namespace medusa
   private:
     bool GetFilePathFromFileName(const string_t& sFileName, string_t& sFilePath);
 
+    void ServePlainTextContent(spitfire::network::http::cConnectedClient& connection, spitfire::network::http::STATUS status, const std::string& sContentUTF8);
+
     virtual override bool HandleRequest(spitfire::network::http::cServer& server, spitfire::network::http::cConnectedClient& connection, const spitfire::network::http::cRequest& request);
 
     cGtkmmView& view;
