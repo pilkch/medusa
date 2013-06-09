@@ -47,6 +47,7 @@ namespace medusa
   {
     std::vector<std::string> scripts;
     scripts.push_back("scripts/actions.js");
+    scripts.push_back("scripts/events.js");
     return scripts;
   }
 
@@ -110,7 +111,7 @@ namespace medusa
         writer.WriteLine("No songs have been played yet");
       } else {
         writer.WriteLine("<table class=\"table_border\">");
-        writer.WriteLine("  <tr class=\"table_heading\">");
+        writer.WriteLine("  <tr id=\"tracklist_header\" class=\"table_heading\">");
         writer.WriteLine("    <th class=\"table_border\">Artist</th>");
         writer.WriteLine("    <th class=\"table_border\">Title</th>");
         writer.WriteLine("    <th class=\"table_border\">Duration</th>");
@@ -276,6 +277,46 @@ namespace medusa
     connection.Write("\n\n");
   }
 
+  void cWebServer::ServeEventSource(spitfire::network::http::cConnectedClient& connection)
+  {
+    // Turn off buffering for our writes
+    connection.SetNoDelay();
+
+    // Make sure we are starting an event stream
+    spitfire::network::http::cResponse response;
+    response.SetContentTypeTextEventStream();
+    response.SetCacheControlNoCache();
+    response.SetConnectionKeepAlive();
+    connection.SendResponse(response);
+
+    while (connection.IsOpen()) {
+      sleep(1);
+      LOG<<"cWebServer::HandleRequest Sending update"<<std::endl;
+
+      // Dummy entry for testing
+      cWebServerSongEntry entry;
+      entry.id = nullptr;
+      entry.sArtist = "Artist";
+      entry.sTitle = "Title";
+      entry.uiDurationMilliSeconds = 445003;
+      entry.sFilePath = "my file path.mp3";
+      entry.sFileName = "file.mp3";
+
+      // Send an "OnActionPlayTrack" event
+      connection.Write("event: OnActionPlayTrack\n");
+      connection.Write("data: { ");
+      connection.Write("\"id\": \"" + spitfire::string::ToString(entry.id) + "\",");
+      connection.Write("\"sArtist\": \"" + entry.sArtist + "\",");
+      connection.Write("\"sTitle\": \"" + entry.sTitle + "\",");
+      connection.Write("\"sDurationMS\": \"" + medusa::util::FormatTime(entry.uiDurationMilliSeconds) + "\",");
+      connection.Write("\"sFilePath\": \"" + spitfire::filesystem::GetFile(entry.sFilePath) + "\",");
+      connection.Write("\"sFileName\": \"" + entry.sFileName + "\"");
+      connection.Write(" }\n");
+
+      connection.Write("\n");
+    }
+  }
+
   bool cWebServer::HandleRequest(spitfire::network::http::cServer& server, spitfire::network::http::cConnectedClient& connection, const spitfire::network::http::cRequest& request)
   {
     //LOG<<"cWebServer::HandleRequest method="<<(request.IsMethodGet() ? "is get" : (request.IsMethodPost() ? "is post" : "unknown"))<<", path="<<request.GetPath()<<std::endl;
@@ -293,6 +334,7 @@ namespace medusa
     }
 
     if (request.GetPath() == "/action") {
+      // Actions sent to the server
       if (!request.IsMethodPost()) {
         LOG<<"cWebServer::HandleRequest Action used without POST"<<std::endl;
         ServePlainTextContent(connection, spitfire::network::http::STATUS::METHOD_NOT_ALLOWED, "POST must be used for all actions");
@@ -344,6 +386,26 @@ namespace medusa
       }
 
       ServePlainTextContent(connection, spitfire::network::http::STATUS::OK, "OK Action submitted");
+      return true;
+    } else if (request.GetPath() == "/updates") {
+      // Updates sent by the server
+      // http://www.html5rocks.com/en/tutorials/eventsource/basics/
+
+      if (!request.IsMethodGet()) {
+        LOG<<"cWebServer::HandleRequest Updates used without GET"<<std::endl;
+        ServePlainTextContent(connection, spitfire::network::http::STATUS::METHOD_NOT_ALLOWED, "GET must be used for the event source");
+        return true;
+      }
+
+      if (request.GetAccept() != "text/event-stream") {
+        LOG<<"cWebServer::HandleRequest Updates used without Accept: text/event-stream"<<std::endl;
+        ServePlainTextContent(connection, spitfire::network::http::STATUS::METHOD_NOT_ALLOWED, "Updates must be used with the Accept: text/event-stream header field set");
+        return true;
+      }
+
+      LOG<<"cWebServer::HandleRequest Starting event source"<<std::endl;
+
+      ServeEventSource(connection);
       return true;
     } else if (request.GetPath() != "/") {
       LOG<<"cWebServer::HandleRequest Invalid path \""<<request.GetPath()<<"\", returning false"<<std::endl;

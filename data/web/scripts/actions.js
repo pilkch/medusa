@@ -13,7 +13,7 @@ function PostAction(action)
         document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
       }*/
     }
-    xmlhttp.open("POST", "action", true);
+    xmlhttp.open("POST", "/action", true);
     xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xmlhttp.send("action=" + action);
   }
