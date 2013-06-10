@@ -3,6 +3,7 @@
 
 // Spitfire headers
 #include <spitfire/storage/filesystem.h>
+#include <spitfire/platform/notifications.h>
 
 // Medusa headers
 #include "discombobulator_lastfm_key.h"
@@ -20,6 +21,12 @@
 
 namespace medusa
 {
+  const size_t NOTIFICATION_PLAYBACK = 400;
+  const size_t NOTIFICATION_PREVIOUS = 401;
+  const size_t NOTIFICATION_PAUSE = 402;
+  const size_t NOTIFICATION_NEXT = 403;
+
+
   // ** cFolderList
 
   bool cFolderList::AreFullPathsUnique() const
@@ -193,6 +200,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   SetStatusIconText(TEXT("Medusa"));
 
+  // Handle popup notifications
+  spitfire::operatingsystem::NotificationInit(*this);
 
   // Drag and drop from Nautilus
   std::vector<Gtk::TargetEntry> listTargets;
@@ -631,6 +640,7 @@ void cGtkmmMainWindow::ShowWindow()
   bIsIconified = false;
   deiconify();
   present();
+  raise();
 }
 
 void cGtkmmMainWindow::HideWindow()
@@ -659,6 +669,38 @@ void cGtkmmMainWindow::OnStatusIconPopupMenu(guint button, guint32 activate_time
   std::cout<<"cGtkmmMainWindow::OnStatusIconPopupMenu"<<std::endl;
   assert(pStatusIconPopupMenu != nullptr);
   pStatusIcon->popup_menu_at_position(*pStatusIconPopupMenu, button, activate_time);
+}
+
+void cGtkmmMainWindow::OnNotificationClicked(size_t notificationID)
+{
+  if (notificationID == NOTIFICATION_PLAYBACK) {
+    // If the window is closed then we should open it
+    if (bIsIconified) ShowWindow();
+  } else LOG<<"cGtkmmMainWindow::OnNotificationClicked Unknown notificationID "<<notificationID<<std::endl;
+}
+
+void cGtkmmMainWindow::OnNotificationAction(size_t actionID)
+{
+  LOG<<"cGtkmmMainWindow::OnNotificationAction"<<std::endl;
+
+  switch (actionID) {
+    case NOTIFICATION_PREVIOUS: {
+      OnActionPlayPreviousTrack();
+      break;
+    }
+    case NOTIFICATION_PAUSE: {
+      OnPlaybackPlayPauseButtonToggled();
+      break;
+    }
+    case NOTIFICATION_NEXT: {
+      OnActionPlayNextTrack();
+      break;
+    }
+    default: {
+      LOG<<"cGtkmmMainWindow::OnNotificationAction Unknown actionID "<<actionID<<std::endl;
+      break;
+    }
+  };
 }
 
 void cGtkmmMainWindow::OnMenuHelpAbout()
@@ -690,6 +732,9 @@ void cGtkmmMainWindow::OnMenuFileQuit()
   if (lastfm.IsRunning()) lastfm.Stop();
 
   view.OnActionMainWindowQuitNow();
+
+  // Stop handling popup notifications
+  spitfire::operatingsystem::NotificationDestroy();
 
   //hide(); //Closes the main window to stop the Gtk::Main::run().
   Gtk::Main::quit();
@@ -1126,6 +1171,27 @@ void cGtkmmMainWindow::OnActionPlayTrack(trackid_t id, const string_t& sFilePath
   view.OnActionPlayTrack(id, sFilePath, metaData);
 
   lastfm.StartPlayingTrack(metaData);
+
+  // Show a notification message bubble
+  spitfire::operatingsystem::cNotification notification(NOTIFICATION_PLAYBACK);
+
+  std::ostringstream oTitle;
+  if (!metaData.sArtist.empty()) oTitle<<spitfire::string::ToUTF8(metaData.sArtist);
+  if (!metaData.sArtist.empty() && !metaData.sTitle.empty()) oTitle<<" - ";
+  if (!metaData.sTitle.empty()) oTitle<<spitfire::string::ToUTF8(metaData.sTitle);
+
+  std::ostringstream oDescription;
+  if (metaData.uiTracknum != 0) oDescription<<"Track "<<metaData.uiTracknum;
+  if (!metaData.sAlbum.empty()) {
+    if (metaData.uiTracknum != 0) oDescription<<" on ";
+    else oDescription<<"On ";
+    oDescription<<spitfire::string::ToUTF8(metaData.sAlbum);
+  }
+
+  notification.SetTitle(oTitle.str());
+  notification.SetDescription(oDescription.str());
+  notification.SetActionsMusicPlayer(NOTIFICATION_PREVIOUS, NOTIFICATION_PAUSE, NOTIFICATION_NEXT);
+  spitfire::operatingsystem::NotificationShow(notification, 8000);
 }
 
 void cGtkmmMainWindow::OnPlaybackPlayPauseMenuToggled()

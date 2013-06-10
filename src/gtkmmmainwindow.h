@@ -9,6 +9,7 @@
 
 // Spitfire headers
 #include <spitfire/audio/lastfm.h>
+#include <spitfire/platform/notifications.h>
 
 // Medusa headers
 #include "settings.h"
@@ -45,7 +46,7 @@ namespace medusa
   class cGtkmmSlider;
   class cGtkmmTrackList;
 
-class cGtkmmMainWindow : public Gtk::Window {
+class cGtkmmMainWindow : public Gtk::Window, public spitfire::operatingsystem::cNotificationHandler {
 public:
   cGtkmmMainWindow(cGtkmmView& view, cSettings& settings);
   virtual ~cGtkmmMainWindow() {}
@@ -133,6 +134,10 @@ private:
   void OnPlaybackPlayPauseMenuToggled();
   void OnPlaybackRepeatButtonToggled();
   void OnPlaybackPlayPauseButtonToggled();
+
+  // For handling popup notifications
+  virtual void OnNotificationClicked(size_t notificationID) override;
+  virtual void OnNotificationAction(size_t actionID) override;
 
   cGtkmmView& view;
   cSettings& settings;
