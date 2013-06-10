@@ -192,18 +192,6 @@ namespace medusa
   {
   }
 
-  cWebServer::~cWebServer()
-  {
-    // Delete the entries
-    std::list<cWebServerSongEntry*>::iterator iter(entries.begin());
-    const std::list<cWebServerSongEntry*>::iterator iterEnd(entries.end());
-    while (iter != iterEnd) {
-      spitfire::SAFE_DELETE(*iter);
-
-      iter++;
-    }
-  }
-
   void cWebServer::Start()
   {
     // Set our request handler
@@ -221,26 +209,22 @@ namespace medusa
 
   void cWebServer::OnActionPlayTrack(trackid_t id, const spitfire::audio::cMetaData& metaData, const string_t& sFilePath)
   {
-    cWebServerSongEntry* pEntry = new cWebServerSongEntry;
-    pEntry->id = id;
-    pEntry->sArtist = metaData.sArtist;
-    pEntry->sTitle = metaData.sTitle;
-    pEntry->uiDurationMilliSeconds = metaData.uiDurationMilliSeconds;
-    pEntry->sFilePath = sFilePath;
-    pEntry->sFileName = spitfire::filesystem::GetFile(sFilePath);
+    cWebServerSongEntry entry;
+    entry.id = id;
+    entry.sArtist = metaData.sArtist;
+    entry.sTitle = metaData.sTitle;
+    entry.uiDurationMilliSeconds = metaData.uiDurationMilliSeconds;
+    entry.sFilePath = sFilePath;
+    entry.sFileName = spitfire::filesystem::GetFile(sFilePath);
 
     spitfire::util::cLockObject lock(mutexEntries);
 
-    entries.push_front(pEntry);
+    entries.push_front(entry);
 
     // Limit the number of entries
     if (entries.size() > nMaxSongEntries) {
       // Remove the last entry
-      pEntry = entries.back();
       entries.pop_back();
-
-      // Delete the entry
-      spitfire::SAFE_DELETE(pEntry);
     }
   }
 
@@ -249,11 +233,11 @@ namespace medusa
     spitfire::util::cLockObject lock(mutexEntries);
 
     // Find the file name in the list
-    std::list<cWebServerSongEntry*>::iterator iter(entries.begin());
-    const std::list<cWebServerSongEntry*>::iterator iterEnd(entries.end());
+    std::list<cWebServerSongEntry>::iterator iter(entries.begin());
+    const std::list<cWebServerSongEntry>::iterator iterEnd(entries.end());
     while (iter != iterEnd) {
-      if ((*iter)->sFileName == sFileName) {
-        sFilePath = (*iter)->sFilePath;
+      if (iter->sFileName == sFileName) {
+        sFilePath = iter->sFilePath;
         return true;
       }
 
@@ -277,7 +261,46 @@ namespace medusa
     connection.Write("\n\n");
   }
 
-  void cWebServer::ServeEventSource(spitfire::network::http::cConnectedClient& connection)
+  bool cWebServer::IsTrackInList(trackid_t id, const std::list<cWebServerSongEntry>& knownEntries) const
+  {
+    std::list<cWebServerSongEntry>::const_iterator iter(knownEntries.begin());
+    const std::list<cWebServerSongEntry>::const_iterator iterEnd(knownEntries.end());
+    while (iter != iterEnd) {
+      if (iter->id == id) return true;
+
+      iter++;
+    }
+
+    return false;
+  }
+
+  std::list<cWebServerSongEntry> cWebServer::GetNewEntries(const std::list<cWebServerSongEntry>& knownEntries)
+  {
+    std::list<cWebServerSongEntry> tempEntries;
+
+    {
+      // Lock and make a copy of the entries
+      spitfire::util::cLockObject lock(mutexEntries);
+
+      // Add all the entries
+      tempEntries = entries;
+    }
+
+    std::list<cWebServerSongEntry> newEntries;
+
+    std::list<cWebServerSongEntry>::const_iterator iter(tempEntries.begin());
+    const std::list<cWebServerSongEntry>::const_iterator iterEnd(tempEntries.end());
+    while (iter != iterEnd) {
+      if (!IsTrackInList(iter->id, knownEntries)) newEntries.push_back(*iter);
+
+      iter++;
+    }
+
+    return newEntries;
+  }
+
+
+  void cWebServer::ServeEventSource(spitfire::network::http::cServer& server, spitfire::network::http::cConnectedClient& connection)
   {
     // Turn off buffering for our writes
     connection.SetNoDelay();
@@ -289,31 +312,54 @@ namespace medusa
     response.SetConnectionKeepAlive();
     connection.SendResponse(response);
 
-    while (connection.IsOpen()) {
-      sleep(1);
-      LOG<<"cWebServer::HandleRequest Sending update"<<std::endl;
+    std::list<cWebServerSongEntry> knownEntries;
 
-      // Dummy entry for testing
-      cWebServerSongEntry entry;
-      entry.id = nullptr;
-      entry.sArtist = "Artist";
-      entry.sTitle = "Title";
-      entry.uiDurationMilliSeconds = 445003;
-      entry.sFilePath = "my file path.mp3";
-      entry.sFileName = "file.mp3";
+    {
+      // Lock and make a copy of the entries
+      spitfire::util::cLockObject lock(mutexEntries);
 
-      // Send an "OnActionPlayTrack" event
-      connection.Write("event: OnActionPlayTrack\n");
-      connection.Write("data: { ");
-      connection.Write("\"id\": \"" + spitfire::string::ToString(entry.id) + "\",");
-      connection.Write("\"sArtist\": \"" + entry.sArtist + "\",");
-      connection.Write("\"sTitle\": \"" + entry.sTitle + "\",");
-      connection.Write("\"sDurationMS\": \"" + medusa::util::FormatTime(entry.uiDurationMilliSeconds) + "\",");
-      connection.Write("\"sFilePath\": \"" + spitfire::filesystem::GetFile(entry.sFilePath) + "\",");
-      connection.Write("\"sFileName\": \"" + entry.sFileName + "\"");
-      connection.Write(" }\n");
+      // Add all the entries
+      knownEntries = entries;
+    }
 
-      connection.Write("\n");
+    while (!server.IsToStop() && connection.IsOpen()) {
+      spitfire::util::SleepThisThreadMS(1000);
+
+      std::list<cWebServerSongEntry> newEntries = GetNewEntries(knownEntries);
+      if (!newEntries.empty()) {
+        std::list<cWebServerSongEntry>::const_iterator iter(newEntries.begin());
+        const std::list<cWebServerSongEntry>::const_iterator iterEnd(newEntries.end());
+        while (iter != iterEnd) {
+          LOG<<"cWebServer::HandleRequest Sending update"<<std::endl;
+
+          // Dummy entry for testing
+          const cWebServerSongEntry& entry = *iter;
+
+          // Send an "OnActionPlayTrack" event
+          connection.Write("event: OnActionPlayTrack\n");
+          connection.Write("data: { ");
+          connection.Write("\"id\": \"" + spitfire::string::ToString(entry.id) + "\",");
+          connection.Write("\"sArtist\": \"" + entry.sArtist + "\",");
+          connection.Write("\"sTitle\": \"" + entry.sTitle + "\",");
+          connection.Write("\"sDurationMS\": \"" + medusa::util::FormatTime(entry.uiDurationMilliSeconds) + "\",");
+          connection.Write("\"sFilePath\": \"" + spitfire::filesystem::GetFile(entry.sFilePath) + "\",");
+          connection.Write("\"sFileName\": \"" + entry.sFileName + "\"");
+          connection.Write(" }\n");
+
+          connection.Write("\n");
+
+          // Add the entry to our known list of known entries
+          knownEntries.push_front(entry);
+
+          // Limit the number of entries
+          if (knownEntries.size() > nMaxSongEntries) {
+            // Remove the last entry
+            knownEntries.pop_back();
+          }
+
+          iter++;
+        }
+      }
     }
   }
 
@@ -405,7 +451,7 @@ namespace medusa
 
       LOG<<"cWebServer::HandleRequest Starting event source"<<std::endl;
 
-      ServeEventSource(connection);
+      ServeEventSource(server, connection);
       return true;
     } else if (request.GetPath() != "/") {
       LOG<<"cWebServer::HandleRequest Invalid path \""<<request.GetPath()<<"\", returning false"<<std::endl;
@@ -422,13 +468,7 @@ namespace medusa
       spitfire::util::cLockObject lock(mutexEntries);
 
       // Add all the entries
-      std::list<cWebServerSongEntry*>::const_iterator iter(entries.begin());
-      const std::list<cWebServerSongEntry*>::const_iterator iterEnd(entries.end());
-      while (iter != iterEnd) {
-        tempEntries.push_back(*(*iter));
-
-        iter++;
-      }
+      tempEntries = entries;
     }
 
     std::ostringstream o;

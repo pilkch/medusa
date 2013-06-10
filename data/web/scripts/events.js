@@ -40,7 +40,7 @@ if (typeof(EventSource) !== "undefined") {
 
   // Handle errors
   source.onerror = function(event) {
-    alert("EventSource error");
+    //alert("EventSource error");
     if (event.readyState == EventSource.CLOSED) {
       // Connection was closed.
     }

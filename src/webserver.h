@@ -29,7 +29,6 @@ namespace medusa
   {
   public:
     explicit cWebServer(cGtkmmView& view);
-    ~cWebServer();
 
     void Start();
     void Stop();
@@ -39,10 +38,13 @@ namespace medusa
     void GetLastPlayedTracks(std::list<cWebServerSongEntry>& tracks);
 
   private:
+    bool IsTrackInList(trackid_t id, const std::list<cWebServerSongEntry>& knownEntries) const;
+    std::list<cWebServerSongEntry> GetNewEntries(const std::list<cWebServerSongEntry>& knownEntries);
+
     bool GetFilePathFromFileName(const string_t& sFileName, string_t& sFilePath);
 
     void ServePlainTextContent(spitfire::network::http::cConnectedClient& connection, spitfire::network::http::STATUS status, const std::string& sContentUTF8);
-    void ServeEventSource(spitfire::network::http::cConnectedClient& connection);
+    void ServeEventSource(spitfire::network::http::cServer& server, spitfire::network::http::cConnectedClient& connection);
 
     virtual override bool HandleRequest(spitfire::network::http::cServer& server, spitfire::network::http::cConnectedClient& connection, const spitfire::network::http::cRequest& request);
 
@@ -51,7 +53,7 @@ namespace medusa
     spitfire::network::http::cServer server;
 
     spitfire::util::cMutex mutexEntries;
-    std::list<cWebServerSongEntry*> entries;
+    std::list<cWebServerSongEntry> entries;
   };
 }
 
