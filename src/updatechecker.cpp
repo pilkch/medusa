@@ -63,8 +63,8 @@ namespace medusa
     //<latest>
     //  <linux>
     //    <version>0.8</version>
-    //    <download>http://chris.iluo.net/medusa/medusa.tar.gz</download>
-    //    <page>http://chris.iluo.net/medusa/</page>
+    //    <download>http://chris.iluo.net/projects/medusa/medusa.tar.gz</download>
+    //    <page>http://chris.iluo.net/projects/medusa/</page>
     //  </linux>
     //</latest>
 
