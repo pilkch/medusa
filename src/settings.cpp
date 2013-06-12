@@ -151,6 +151,16 @@ void cSettings::SetShowMainWindow(bool bShowMainWindow)
   SetXMLValue(TEXT("settings"), TEXT("window"), TEXT("showMainWindow"), bShowMainWindow);
 }
 
+string_t cSettings::GetIgnoreUpdateVersion() const
+{
+  return GetXMLValue<string_t>(TEXT("settings"), TEXT("update"), TEXT("ignoredVersion"), "");
+}
+
+void cSettings::SetIgnoreUpdateVersion(const string_t& sVersion)
+{
+  SetXMLValue(TEXT("settings"), TEXT("update"), TEXT("ignoredVersion"), sVersion);
+}
+
 bool cSettings::IsPlaying() const
 {
   return GetXMLValue(TEXT("settings"), TEXT("playback"), TEXT("playing"), true);

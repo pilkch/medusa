@@ -15,6 +15,7 @@
 #include "settings.h"
 #include "track.h"
 #include "gtkmmicontheme.h"
+#include "updatechecker.h"
 
 namespace medusa
 {
@@ -100,6 +101,9 @@ public:
   void OnWebServerSetVolumeFull();
   void OnWebServerTrackMoveToRubbishBin(trackid_t id);
 
+  // For handling new version notifications
+  void OnNewVersionFound(int iMajorVersion, int iMinorVersion, const string_t& sDownloadPage);
+
 private:
   trackid_t GetPreviousTrack() const;
   trackid_t GetNextTrack() const;
@@ -141,6 +145,8 @@ private:
 
   cGtkmmView& view;
   cSettings& settings;
+
+  cUpdateChecker updateChecker;
 
   spitfire::audio::lastfm::cLastFM lastfm;
 

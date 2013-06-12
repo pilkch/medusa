@@ -103,6 +103,18 @@ namespace medusa
     view.OnWebServerTrackMoveToRubbishBin(id);
   }
 
+  cGtkmmViewEventUpdateCheckerNewVersionFound::cGtkmmViewEventUpdateCheckerNewVersionFound(int _iMajorVersion, int _iMinorVersion, const string_t& _sDownloadPage) :
+    iMajorVersion(_iMajorVersion),
+    iMinorVersion(_iMinorVersion),
+    sDownloadPage(_sDownloadPage)
+  {
+  }
+
+  void cGtkmmViewEventUpdateCheckerNewVersionFound::EventFunction(cGtkmmView& view)
+  {
+    view.OnNewVersionFound(iMajorVersion, iMinorVersion, sDownloadPage);
+  }
+
 
   // ** cGtkmmView
 
@@ -458,6 +470,19 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
       notifyMainThread.Notify();
     } else {
       pMainWindow->OnWebServerTrackMoveToRubbishBin(id);
+    }
+  }
+
+  void cGtkmmView::OnNewVersionFound(int iNewMajorVersion, int iNewMinorVersion, const string_t& sDownloadPage)
+  {
+    std::cout<<"cGtkmmView::OnNewVersionFound"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventUpdateCheckerNewVersionFound* pEvent = new cGtkmmViewEventUpdateCheckerNewVersionFound(iNewMajorVersion, iNewMinorVersion, sDownloadPage);
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnNewVersionFound(iNewMajorVersion, iNewMinorVersion, sDownloadPage);
     }
   }
 

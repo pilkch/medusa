@@ -20,6 +20,9 @@ public:
   bool IsShowMainWindow() const;
   void SetShowMainWindow(bool bShowMainWindow);
 
+  string_t GetIgnoreUpdateVersion() const;
+  void SetIgnoreUpdateVersion(const string_t& sVersion);
+
   bool IsPlaying() const;
   void SetPlaying(bool bPlaying);
 

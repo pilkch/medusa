@@ -126,7 +126,19 @@ namespace medusa
     trackid_t id;
   };
 
-class cGtkmmView : public cView
+  class cGtkmmViewEventUpdateCheckerNewVersionFound : public cGtkmmViewEvent
+  {
+  public:
+    cGtkmmViewEventUpdateCheckerNewVersionFound(int iMajorVersion, int iMinorVersion, const string_t& sDownloadPage);
+
+    virtual void EventFunction(cGtkmmView& view) override;
+
+    int iMajorVersion;
+    int iMinorVersion;
+    string_t sDownloadPage;
+  };
+
+class cGtkmmView : public cView, public cUpdateCheckerHandler
 {
 public:
   friend class cGtkmmMainWindow;
@@ -145,6 +157,7 @@ public:
   friend class cGtkmmViewEventWebServerSetVolumeMute;
   friend class cGtkmmViewEventWebServerSetVolumeFull;
   friend class cGtkmmViewEventWebServerTrackMoveToRubbishBin;
+  friend class cGtkmmViewEventUpdateCheckerNewVersionFound;
 
   cGtkmmView(int argc, char** argv);
   ~cGtkmmView();
@@ -194,6 +207,9 @@ private:
   void OnNotify();
 
   void _Run();
+
+  // Called by the update checker
+  virtual void OnNewVersionFound(int iMajorVersion, int iMinorVersion, const string_t& sDownloadPage) override;
 
   Gtk::Main kit;
 

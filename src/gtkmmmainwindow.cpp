@@ -4,6 +4,7 @@
 // Spitfire headers
 #include <spitfire/storage/filesystem.h>
 #include <spitfire/platform/notifications.h>
+#include <spitfire/platform/operatingsystem.h>
 
 // Medusa headers
 #include "discombobulator_lastfm_key.h"
@@ -154,6 +155,7 @@ namespace medusa
 cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   view(_view),
   settings(_settings),
+  updateChecker(view),
   bIsIconified(false),
   pMenuPopup(nullptr),
   pMenuPopupRecentMoveToFolder(nullptr),
@@ -587,6 +589,9 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   buttonStopLoading.hide();
 
   ApplySettings();
+
+  // Start the update checker
+  updateChecker.Run();
 }
 
 void cGtkmmMainWindow::OnThemeChanged()
@@ -703,6 +708,49 @@ void cGtkmmMainWindow::OnNotificationAction(size_t actionID)
   };
 }
 
+  void cGtkmmMainWindow::OnNewVersionFound(int iNewMajorVersion, int iNewMinorVersion, const string_t& sDownloadPage)
+  {
+    LOG<<"cGtkmmMainWindow::OnNewVersionFound"<<std::endl;
+
+    ASSERT(spitfire::util::IsMainThread());
+
+    // Get our current version
+    const string_t sVersion = BUILD_APPLICATION_VERSION_STRING;
+    spitfire::string::cStringParser sp(sVersion);
+    string_t sMajorVersion;
+    ASSERT(sp.GetToStringAndSkip(".", sMajorVersion));
+    const string_t sMinorVersion = sp.GetToEnd();
+    const int iMajorVersion = spitfire::string::ToUnsignedInt(sMajorVersion);
+    const int iMinorVersion = spitfire::string::ToUnsignedInt(sMinorVersion);
+
+    LOG<<"cGtkmmMainWindow::OnNewVersionFound current="<<iMajorVersion<<"."<<iMinorVersion<<", new="<<iNewMajorVersion<<"."<<iNewMinorVersion<<", url="<<sDownloadPage<<std::endl;
+
+    const int iVersion = (10 * iMajorVersion) + iMinorVersion;
+    const int iNewVersion = (10 * iNewMajorVersion) + iNewMinorVersion;
+    if (iNewVersion > iVersion) {
+      const string_t sNewVersion = spitfire::string::ToString(iNewMajorVersion) + TEXT(".") + spitfire::string::ToString(iNewMinorVersion);
+
+      // Check if we should ignore this version
+      const string_t sIgnoreVersion = settings.GetIgnoreUpdateVersion();
+      const bool bIgnoreThisVersion = (sIgnoreVersion == sNewVersion);
+
+      if (!bIgnoreThisVersion) {
+        cGtkmmAlertDialog dialog(*this);
+        dialog.SetTitle(TEXT("There is a newer version available, ") + sNewVersion + TEXT("."));
+        dialog.SetDescription(TEXT("Would you like to visit the Medusa website?"));
+        dialog.SetOk(TEXT("Open Web Page"));
+        dialog.SetOther(TEXT("Skip This Version"));
+        dialog.SetCancel();
+        ALERT_RESULT result = dialog.Run();
+        if (result == ALERT_RESULT::OK) {
+          spitfire::operatingsystem::OpenURL(sDownloadPage);
+        } else if (result == ALERT_RESULT::NO) {
+          settings.SetIgnoreUpdateVersion(sNewVersion);
+        }
+      }
+    }
+  }
+
 void cGtkmmMainWindow::OnMenuHelpAbout()
 {
   std::cout<<"cGtkmmMainWindow::OnMenuHelpAbout"<<std::endl;
@@ -713,6 +761,9 @@ void cGtkmmMainWindow::OnMenuHelpAbout()
 void cGtkmmMainWindow::OnMenuFileQuit()
 {
   std::cout<<"cGtkmmMainWindow::OnMenuFileQuit"<<std::endl;
+
+  // Tell the update checker thread to stop soon
+  if (updateChecker.IsRunning()) updateChecker.StopThreadSoon();
 
   // Tell the lastfm thread to stop soon
   if (lastfm.IsRunning()) lastfm.StopSoon();
@@ -727,6 +778,9 @@ void cGtkmmMainWindow::OnMenuFileQuit()
 
   // Save playback settings
   settings.SetPlaying(view.IsPlaying());
+
+  // Tell the update checker thread to stop now
+  if (updateChecker.IsRunning()) updateChecker.StopThreadSoon();
 
   // Tell the lastfm thread to stop now
   if (lastfm.IsRunning()) lastfm.Stop();
