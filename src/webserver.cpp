@@ -68,17 +68,18 @@ namespace medusa
 
   spitfire::string_t cWebPageController::GetBannerTitle() const
   {
-    return TEXT("My Banner");
+    return TEXT("");
   }
 
   spitfire::string_t cWebPageController::GetSectionTitle() const
   {
-    return TEXT("My Section");
+    return TEXT("");
   }
 
   std::vector<std::pair<std::string, std::string> > cWebPageController::GetArticles() const
   {
     std::vector<std::pair<std::string, std::string> > articles;
+    articles.push_back(std::make_pair(TEXT("medusa"), TEXT("Medusa")));
     articles.push_back(std::make_pair(TEXT("playback"), TEXT("Playback")));
     articles.push_back(std::make_pair(TEXT("tracks"), TEXT("Tracks")));
     return articles;
@@ -95,9 +96,9 @@ namespace medusa
   template <class W>
   void cWebPageController::AddArticle(W& writer, const std::string& sArticle) const
   {
-    if (sArticle == TEXT("playback")) {
+    if (sArticle == TEXT("medusa")) {
       writer.WriteLine("<img src=\"images/medusa.png\"/><br/>");
-
+    } else if (sArticle == TEXT("playback")) {
       const size_t nSize = 32;
       AddFormWithImageButton(writer, "OnActionPlaybackPrevious()", "playback_previous", "Previous", nSize);
       AddFormWithImageButton(writer, "OnActionPlaybackPlay()", "playback_play", "Play", nSize);
@@ -149,16 +150,12 @@ namespace medusa
   std::vector<std::pair<std::string, std::string> > cWebPageController::GetAsides() const
   {
     std::vector<std::pair<std::string, std::string> > asides;
-    asides.push_back(std::make_pair(TEXT("myaside"), TEXT("My Aside")));
     return asides;
   }
 
   template <class W>
   void cWebPageController::AddAside(W& writer, const std::string& sAside) const
   {
-    if (sAside == TEXT("myaside")) {
-      writer.WriteLine("      <p>This is my aside. Have an article: <a href=\"http://www.iandevlin.com/blog/2011/04/html5/html5-section-or-article\">section or article?</a>.</p>");
-    }
   }
 
 
