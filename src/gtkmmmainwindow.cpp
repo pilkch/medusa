@@ -5,6 +5,7 @@
 #include <spitfire/storage/filesystem.h>
 #include <spitfire/platform/notifications.h>
 #include <spitfire/platform/operatingsystem.h>
+#include <spitfire/platform/pipe.h>
 
 // Medusa headers
 #include "discombobulator_lastfm_key.h"
@@ -1220,11 +1221,21 @@ void cGtkmmMainWindow::OnActionSliderValueChanged(const cGtkmmSlider& slider, ui
   else OnActionVolumeValueChanged(uiValue);
 }
 
+bool IsScreenSaverActive()
+{
+  const std::string sOutput = spitfire::platform::PipeReadToString("gnome-screensaver-command -q");
+  size_t found = 0;
+  return spitfire::string::Find(sOutput, TEXT("is active"), found);
+}
+
 void cGtkmmMainWindow::OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData)
 {
   view.OnActionPlayTrack(id, sFilePath, metaData);
 
   lastfm.StartPlayingTrack(metaData);
+
+  // Don't show notifications if the screen saver is active because they pile up
+  if (IsScreenSaverActive()) return;
 
   // Show a notification message bubble
   spitfire::operatingsystem::cNotification notification(NOTIFICATION_PLAYBACK);
