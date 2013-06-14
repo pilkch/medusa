@@ -56,6 +56,9 @@ public:
   void GetRecentMoveToFolders(std::vector<string_t>& folders) const;
   void SetRecentMoveToFolders(const std::vector<string_t>& folders);
 
+  bool IsWebServerEnabled() const;
+  void SetWebServerEnabled(bool bWebServerEnabled);
+
 private:
   template <class T>
   T GetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& valueDefault) const;

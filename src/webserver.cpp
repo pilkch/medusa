@@ -192,13 +192,18 @@ namespace medusa
   {
   }
 
+  bool cWebServer::IsRunning() const
+  {
+    return server.IsRunning();
+  }
+
   void cWebServer::Start()
   {
     // Set our request handler
     server.SetRequestHandler(*this);
 
     // Run the server thread
-    server.Start();
+    server.Start(MEDUSA_WEB_SERVER_PORT);
   }
 
   void cWebServer::Stop()

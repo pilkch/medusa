@@ -47,6 +47,12 @@ private:
   Gtk::Label lastfmNewToLastfmDescription;
   Gtk::LinkButton lastfmSignUpForAnAccount;
 
+  // Web Server
+  Gtk::Frame groupWebServer;
+  Gtk::VBox boxWebServer;
+  Gtk::CheckButton webServerEnabled;
+  Gtk::LinkButton webServerLink;
+
   Gtk::Separator separator;
 
   Gtk::Button* pOkButton;

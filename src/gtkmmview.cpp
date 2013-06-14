@@ -144,7 +144,7 @@ cGtkmmView::cGtkmmView(int argc, char** argv) :
 cGtkmmView::~cGtkmmView()
 {
   // Stop our web server
-  webServer.Stop();
+  if (webServer.IsRunning()) webServer.Stop();
 
   // Destroy any further events
   while (true) {
@@ -197,15 +197,25 @@ void cGtkmmView::OnActionMainWindowCreated()
   // Tell our control that the mainwindow is ready
   assert(pController != nullptr);
   pController->OnActionCreated();
-
-  // We can now start our web server thread
-  webServer.Start();
 }
 
 void cGtkmmView::OnActionMainWindowQuitSoon()
 {
   pController->OnActionQuitSoon();
 }
+
+  void cGtkmmView::OnActionMainWindowApplySettings()
+  {
+    // Make sure that the web server reflects the settings
+    const bool bIsWebServerEnabled = settings.IsWebServerEnabled();
+    if (bIsWebServerEnabled && !webServer.IsRunning()) {
+      // We can now start our web server thread
+      webServer.Start();
+    } else if (!bIsWebServerEnabled && webServer.IsRunning()) {
+      // We can now stop our web server thread
+      webServer.Stop();
+    }
+  }
 
 void cGtkmmView::OnActionMainWindowQuitNow()
 {

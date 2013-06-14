@@ -167,6 +167,7 @@ public:
 
 protected:
   void OnActionMainWindowCreated();
+  void OnActionMainWindowApplySettings();
   void OnActionMainWindowQuitSoon();
   void OnActionMainWindowQuitNow();
 

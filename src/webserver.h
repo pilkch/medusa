@@ -30,6 +30,8 @@ namespace medusa
   public:
     explicit cWebServer(cGtkmmView& view);
 
+    bool IsRunning() const;
+
     void Start();
     void Stop();
 

@@ -4,6 +4,8 @@
 // Spitfire headers
 #include <spitfire/util/string.h>
 
+#define MEDUSA_WEB_SERVER_PORT 38001
+
 #define INVALID_TRACK nullptr
 
 namespace medusa

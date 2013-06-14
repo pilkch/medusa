@@ -1512,6 +1512,8 @@ void cGtkmmMainWindow::ApplySettings()
   const size_t n = paths.size();
   for (size_t i = 0; i < n; i++) recentMovedToFolders.AddPath(paths[i]);
 
+  view.OnActionMainWindowApplySettings();
+
   std::cout<<"cGtkmmMainWindow::ApplySettings returning"<<std::endl;
 }
 
@@ -1580,7 +1582,7 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
 
   void cGtkmmMainWindow::OnPlaylistLoading()
   {
-    std::cout<<"cGtkmmMainWindow::OnPlaylistLoaded"<<std::endl;
+    LOG<<"cGtkmmMainWindow::OnPlaylistLoading"<<std::endl;
     if (!settings.IsShowMainWindow()) HideWindow();
 
     const unsigned int uiVolume0To100 = settings.GetVolume0To100();
@@ -1592,6 +1594,8 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
 
   void cGtkmmMainWindow::OnPlaylistLoaded(trackid_t idLastPlayed)
   {
+    LOG<<"cGtkmmMainWindow::OnPlaylistLoaded"<<std::endl;
+
     // TODO: enable controls
 
     // Get the index of last played file to settings

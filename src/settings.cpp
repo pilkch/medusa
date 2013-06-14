@@ -287,4 +287,15 @@ void cSettings::SetLastFMPassword(const string_t& sPassword)
       SetXMLValue(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocation") + spitfire::string::ToString(i), folders[i]);
     }
   }
+
+  bool cSettings::IsWebServerEnabled() const
+  {
+    return GetXMLValue(TEXT("settings"), TEXT("webserver"), TEXT("enabled"), true);
+  }
+
+  void cSettings::SetWebServerEnabled(bool bWebServerEnabled)
+  {
+    SetXMLValue(TEXT("settings"), TEXT("webserver"), TEXT("enabled"), bWebServerEnabled);
+  }
+
 }
