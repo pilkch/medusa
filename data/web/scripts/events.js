@@ -1,5 +1,10 @@
 if (typeof(EventSource) !== "undefined") {
   var source = new EventSource("/updates");
+
+  //source.onopen = function(e) {
+  //  $("#test").html("Connected to server. Waiting for data...");
+  //}
+
   source.onmessage = function(event) {
     document.getElementById("tracks").innerHTML += "Data: " + event.data + "<br/>";
   };
@@ -41,7 +46,9 @@ if (typeof(EventSource) !== "undefined") {
   // Handle errors
   source.onerror = function(event) {
     //alert("EventSource error");
-    if (event.readyState == EventSource.CLOSED) {
+    if (event.readyState == EventSource.CONNECTING) {
+      // Reconnecting
+    } else if (event.readyState == EventSource.CLOSED) {
       // Connection was closed.
     }
   };
