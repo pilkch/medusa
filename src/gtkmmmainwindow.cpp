@@ -590,9 +590,6 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   buttonStopLoading.hide();
 
   ApplySettings();
-
-  // Start the update checker
-  updateChecker.Run();
 }
 
 void cGtkmmMainWindow::OnThemeChanged()
@@ -1612,6 +1609,9 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
         }
       }
     }
+
+    // Start the update checker now that we have finished doing the serious work
+    updateChecker.Run();
   }
 
   void cGtkmmMainWindow::OnWebServerPreviousTrack()
