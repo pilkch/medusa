@@ -27,7 +27,7 @@ if (typeof(EventSource) !== "undefined") {
               <a href=\"download/" + track.sFilePath + "\"><img src=\"images/file_save.png\" alt=\"Save File\" width=\"16\" height=\"16\"/></a> \
             </th> \
             <th class=\"table_border\"> \
-              <a href=\"#\" onclick=\"OnActionDeleteTrack(" + track.id + ")\" class=\"image_button\"> \
+              <a href=\"javascript:;\" onclick=\"OnActionDeleteTrack(" + track.id + ")\" class=\"image_button\"> \
                 <img src=\"images/file_trash.png\" width=\"16\" height=\"16\" alt=\"Delete File\"/> \
               </a> \
             </th>"
