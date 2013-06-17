@@ -132,10 +132,11 @@ FIND_PACKAGE(PkgConfig)
 # From the output of:
 # pkg-config gstreamermm-0.10 glibmm-2.4 --libs --cflags
 PKG_CHECK_MODULES(GSTREAMERMM gstreamer-0.10)
-INCLUDE_DIRECTORIES("/usr/include/gstreamermm-0.10")
 INCLUDE_DIRECTORIES("/usr/include/libxml++-2.6")
 INCLUDE_DIRECTORIES("/usr/lib/libxml++-2.6/include/")
 INCLUDE_DIRECTORIES("/usr/include/gstreamer-0.10")
+INCLUDE_DIRECTORIES("/usr/include/gstreamermm-0.10")
+INCLUDE_DIRECTORIES("/usr/lib/gstreamermm-0.10/include")
 INCLUDE_DIRECTORIES("/usr/include/sigc++-2.0")
 INCLUDE_DIRECTORIES("/usr/include/libxml2")
 SET(CMAKE_CXX__FLAGS ${CMAKE_CXX__FLAGS} ${GSTREAMERMM_CFLAGS})
@@ -201,6 +202,7 @@ SET(LIBRARIES_LINKED
   mad
   clastfm
   notify
+  pthread
 )
 
 FOREACH(LIBRARY_FILE ${LIBRARIES})
