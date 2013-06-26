@@ -138,7 +138,7 @@ namespace medusa
     string_t sDownloadPage;
   };
 
-class cGtkmmView : public cView, public cUpdateCheckerHandler
+class cGtkmmView : public cView, public spitfire::util::cUpdateCheckerHandler
 {
 public:
   friend class cGtkmmMainWindow;

@@ -10,12 +10,12 @@
 // Spitfire headers
 #include <spitfire/audio/lastfm.h>
 #include <spitfire/platform/notifications.h>
+#include <spitfire/util/updatechecker.h>
 
 // Medusa headers
 #include "settings.h"
 #include "track.h"
 #include "gtkmmicontheme.h"
-#include "updatechecker.h"
 
 namespace medusa
 {
@@ -146,7 +146,7 @@ private:
   cGtkmmView& view;
   cSettings& settings;
 
-  cUpdateChecker updateChecker;
+  spitfire::util::cUpdateChecker updateChecker;
 
   spitfire::audio::lastfm::cLastFM lastfm;
 

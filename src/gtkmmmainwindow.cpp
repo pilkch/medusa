@@ -178,7 +178,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 {
   std::cout<<"cGtkmmMainWindow::cGtkmmMainWindow"<<std::endl;
 
-  set_title("Medusa");
+  set_title(BUILD_APPLICATION_NAME);
   //set_skip_taskbar_hint(true); // Minimise to status icon
   set_size_request(400, 300);
   set_default_size(800, 400);
@@ -778,7 +778,7 @@ void cGtkmmMainWindow::OnMenuFileQuit()
   settings.SetPlaying(view.IsPlaying());
 
   // Tell the update checker thread to stop now
-  if (updateChecker.IsRunning()) updateChecker.StopThreadSoon();
+  if (updateChecker.IsRunning()) updateChecker.StopThreadNow();
 
   // Tell the lastfm thread to stop now
   if (lastfm.IsRunning()) lastfm.Stop();
