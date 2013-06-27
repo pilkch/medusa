@@ -2,7 +2,7 @@
 #define MEDUSA_SETTINGS_H
 
 // Spitfire headers
-#include <spitfire/storage/document.h>
+#include <spitfire/storage/settings.h>
 
 // Medusa headers
 #include "medusa.h"
@@ -60,12 +60,7 @@ public:
   void SetWebServerEnabled(bool bWebServerEnabled);
 
 private:
-  template <class T>
-  T GetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& valueDefault) const;
-  template <class T>
-  void SetXMLValue(const string_t& sSection, const string_t& sItem, const string_t& sAttribute, const T& value);
-
-  spitfire::document::cDocument document;
+  spitfire::storage::cSettingsDocument document;
 };
 }
 

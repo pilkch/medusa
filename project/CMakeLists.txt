@@ -84,7 +84,7 @@ spitfire.cpp
 audio/lastfm.cpp audio/metadata.cpp audio/playlist.cpp
 communication/http.cpp communication/network.cpp
 platform/notifications.cpp platform/operatingsystem.cpp platform/pipe.cpp
-storage/csv.cpp storage/document.cpp storage/file.cpp storage/filesystem.cpp storage/xml.cpp
+storage/csv.cpp storage/document.cpp storage/file.cpp storage/filesystem.cpp storage/settings.cpp storage/xml.cpp
 util/datetime.cpp util/lang.cpp util/string.cpp util/thread.cpp util/updatechecker.cpp)
 
 PREFIX_PATHS(${LIBRARY_SPITFIRE_SOURCE_DIRECTORY} ${LIBRARY_SPITFIRE_SOURCE_FILES})
