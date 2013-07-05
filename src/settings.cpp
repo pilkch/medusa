@@ -22,7 +22,7 @@ namespace medusa
 {
   void cSettings::Load()
   {
-    document.Save();
+    document.Load();
   }
 
   void cSettings::Save()
