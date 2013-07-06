@@ -4,7 +4,7 @@
 namespace medusa
 {
 cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Window& parent) :
-  Gtk::Dialog("PreferencesDialog", parent, true),
+  Gtk::Dialog("Preferences", parent, true),
   settings(_settings),
   groupPlayback("Playback"),
   playbackRepeat("Repeat"),
