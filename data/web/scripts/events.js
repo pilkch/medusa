@@ -40,6 +40,21 @@ if (typeof(EventSource) !== "undefined") {
 
       // Insert after the header
       parent.insertBefore(tr, next);
+
+      // Remove the oldest track if we have more than 20 tracks plus the tracklist header
+      if (parent.children.length > (20 + 1)) {
+        var lastChildElement = parent.lastChild;
+
+        // Find the last element that is not text
+        while (lastChildElement && (lastChildElement.nodeType !== 1)) {
+          lastChildElement = lastChildElement.previousSibling;
+        }
+
+        // If we found the last element then remove it
+        if (lastChildElement) {
+          lastChildElement.parentNode.removeChild(lastChildElement);
+        }
+      }
     //}
   }, false);
 
