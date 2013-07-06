@@ -1,3 +1,6 @@
+// Spitfire headers
+#include <spitfire/communication/network.h>
+
 // Medusa headers
 #include "gtkmmpreferencesdialog.h"
 
@@ -19,7 +22,6 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Wind
   lastfmSignUpForAnAccount("http://www.last.fm/join", "Sign up for an account"),
   groupWebServer("Playback"),
   webServerEnabled("Enable web server"),
-  webServerLink("http://127.0.0.1:" + spitfire::string::ToString(MEDUSA_WEB_SERVER_PORT), "Test the web server"),
   pOkButton(nullptr)
 {
   set_border_width(5);
@@ -79,7 +81,26 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Wind
   pBox->pack_start(groupWebServer, Gtk::PACK_SHRINK);
   groupWebServer.add(boxWebServer);
   boxWebServer.pack_start(webServerEnabled, Gtk::PACK_SHRINK);
-  boxWebServer.pack_start(webServerLink, Gtk::PACK_SHRINK);
+
+  std::list<spitfire::network::cIPAddress> addresses;
+  if (spitfire::network::GetIPAddressesOfNetworkInterfaces(addresses)) {
+    std::list<spitfire::network::cIPAddress>::const_iterator iter(addresses.begin());
+    const std::list<spitfire::network::cIPAddress>::const_iterator iterEnd(addresses.end());
+    while (iter != iterEnd) {
+      const string_t sAddress = iter->ToString();
+      LOG<<"Interface "<<sAddress<<std::endl;
+
+      // Create a new link and add it to our dialog
+      Gtk::LinkButton* pLinkButton = new Gtk::LinkButton("http://" + sAddress + ":" + spitfire::string::ToString(MEDUSA_WEB_SERVER_PORT), "Test the web server");
+      boxWebServer.pack_start(*pLinkButton, Gtk::PACK_SHRINK);
+
+      // Add the link to our list
+      webServerLinks.push_back(pLinkButton);
+
+      iter++;
+    }
+  }
+
 
   // Add separator
   pBox->pack_start(separator, Gtk::PACK_SHRINK);
@@ -94,6 +115,12 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Wind
 
   show_all_children();
 }
+
+  cGtkmmPreferencesDialog::~cGtkmmPreferencesDialog()
+  {
+    const size_t n = webServerLinks.size();
+    for (size_t i = 0; i < n; i++) delete webServerLinks[i];
+  }
 
 void cGtkmmPreferencesDialog::OnResponse(int response_id)
 {
@@ -114,13 +141,17 @@ void cGtkmmPreferencesDialog::OnResponse(int response_id)
 
 void cGtkmmPreferencesDialog::OnEnableControls()
 {
-  const bool bEnabled = lastfmEnabled.get_active();
+  bool bEnabled = lastfmEnabled.get_active();
   lastfmUserNameDescription.set_sensitive(bEnabled);
   lastfmUserName.set_sensitive(bEnabled);
   lastfmPasswordDescription.set_sensitive(bEnabled);
   lastfmPassword.set_sensitive(bEnabled);
 
   if (pOkButton != nullptr) pOkButton->set_sensitive(!bEnabled || (bEnabled && !lastfmUserName.get_text().empty() && !lastfmPassword.get_text().empty()));
+
+  bEnabled = webServerEnabled.get_active();
+  const size_t n = webServerLinks.size();
+  for (size_t i = 0; i < n; i++) webServerLinks[i]->set_sensitive(bEnabled);
 }
 
 bool cGtkmmPreferencesDialog::Run()

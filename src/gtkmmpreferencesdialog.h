@@ -1,7 +1,10 @@
 #ifndef MEDUSA_GTKMMPREFERENCESDIALOG_H
 #define MEDUSA_GTKMMPREFERENCESDIALOG_H
 
-// gtkmm headers
+// Standard headers
+#include <vector>
+
+// Gtkmm headers
 #include <gtkmm.h>
 
 // Medusa headers
@@ -14,7 +17,7 @@ class cGtkmmPreferencesDialog : public Gtk::Dialog
 {
 public:
   cGtkmmPreferencesDialog(cSettings& settings, Gtk::Window& parent);
-  virtual ~cGtkmmPreferencesDialog() {}
+  virtual ~cGtkmmPreferencesDialog();
 
   bool Run();
 
@@ -51,7 +54,7 @@ private:
   Gtk::Frame groupWebServer;
   Gtk::VBox boxWebServer;
   Gtk::CheckButton webServerEnabled;
-  Gtk::LinkButton webServerLink;
+  std::vector<Gtk::LinkButton*> webServerLinks;
 
   Gtk::Separator separator;
 

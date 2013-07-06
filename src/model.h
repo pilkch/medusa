@@ -1,6 +1,10 @@
 #ifndef model_h
 #define model_h
 
+// Standard headers
+#include <list>
+#include <set>
+
 // Spitfire headers
 #include <spitfire/spitfire.h>
 #include <spitfire/audio/metadata.h>
@@ -52,8 +56,6 @@ namespace medusa
   private:
     virtual void ThreadFunction();
 
-    void UpdateStatusOnTracks(std::list<cTrack*>& tracks);
-
     void LoadPlaylist();
     void SavePlaylist() const;
 
@@ -67,7 +69,7 @@ namespace medusa
     spitfire::util::cSignalObject soAction;
     spitfire::util::cThreadSafeQueue<cModelEvent> eventQueue;
 
-    std::list<cTrack*> tracks;
+    std::set<cTrack*> tracks;
 
     class cLoadingProcessInterface : public spitfire::util::cProcessInterface
     {

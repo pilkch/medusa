@@ -3,6 +3,7 @@
 
 // Standard headers
 #include <list>
+#include <set>
 
 // Spitfire headers
 #include <spitfire/audio/metadata.h>
@@ -30,8 +31,8 @@ namespace medusa
     string_t GetPlayListFilePath();
     string_t GetLastPlayedFilePath();
 
-    bool LoadPlaylistFromCSV(const string_t& sFilePath, std::list<cTrack*>& playlist);
-    bool SavePlaylistToCSV(const string_t& sFilePath, const std::list<cTrack*>& playlist);
+    bool LoadPlaylistFromCSV(const string_t& sFilePath, std::set<cTrack*>& playlist);
+    bool SavePlaylistToCSV(const string_t& sFilePath, const std::set<cTrack*>& playlist);
 
     #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
     bool IsBansheePlaylistFilePresent();

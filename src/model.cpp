@@ -21,6 +21,22 @@ namespace medusa
     return ((sFileExtensionLower == TEXT(".mp3")) || (sFileExtensionLower == TEXT(".wav")));
   }
 
+  template <typename T>
+  inline void UpdateStatusOnTracks(T& tracks)
+  {
+    typename T::iterator iter = tracks.begin();
+    const typename T::const_iterator iterEnd = tracks.end();
+    while (iter != iterEnd) {
+      const string_t& sFilePath = (*iter)->sFilePath;
+      (*iter)->status = TRACK_STATUS::OK;
+      if (!spitfire::filesystem::FileExists(sFilePath)) (*iter)->status = TRACK_STATUS::FILE_DOES_NOT_EXIST;
+      else if (spitfire::filesystem::GetFileSizeBytes(sFilePath) == 0) (*iter)->status = TRACK_STATUS::FILE_EMPTY;
+
+      iter++;
+    }
+  }
+
+
   class cModelEventAddFiles : public cModelEvent
   {
   public:
@@ -165,10 +181,10 @@ namespace medusa
 
   cModel::~cModel()
   {
-    std::list<cTrack*>::iterator iter = tracks.begin();
-    const std::list<cTrack*>::iterator iterEnd = tracks.end();
+    std::set<cTrack*>::iterator iter = tracks.begin();
+    const std::set<cTrack*>::iterator iterEnd = tracks.end();
     while (iter != iterEnd) {
-      spitfire::SAFE_DELETE(*iter);
+      delete *iter;
 
       iter++;
     }
@@ -224,7 +240,7 @@ namespace medusa
           propertiesReader.ReadTrackProperties(pTrack->metaData, pTrack->sFilePath);
           //std::cout<<"cModel::AddTracks After ReadTrackProperties"<<std::endl;
 
-          tracks.push_back(pTrack);
+          tracks.insert(pTrack);
 
           {
             // TODO: Group these and add them say, 10 at a time
@@ -294,16 +310,9 @@ namespace medusa
       const std::list<const cTrack*>::const_iterator iterRemoveEnd = tracksToRemove.end();
       while (iterRemove != iterRemoveEnd) {
         // Find the track in the list and remove it
-        std::list<cTrack*>::iterator iter = tracks.begin();
-        const std::list<cTrack*>::iterator iterEnd = tracks.end();
-        while (iter != iterEnd) {
-          if (*iter == *iterRemove) {
-            tracks.erase(iter);
-            break;
-          }
-
-          iter++;
-        }
+        cTrack* pTrack = const_cast<cTrack*>(*iterRemove);
+        std::set<cTrack*>::iterator iter = tracks.find(pTrack);
+        if (iter != tracks.end()) tracks.erase(iter);
 
         iterRemove++;
       }
@@ -320,8 +329,8 @@ namespace medusa
       cModelEventTrackUpdatedFilePath* pEvent = new cModelEventTrackUpdatedFilePath(id, sFilePath);
       eventQueue.AddItemToBack(pEvent);
     } else {
-      std::list<cTrack*>::iterator iter = tracks.begin();
-      const std::list<cTrack*>::iterator iterEnd = tracks.end();
+      std::set<cTrack*>::iterator iter = tracks.begin();
+      const std::set<cTrack*>::iterator iterEnd = tracks.end();
       while (iter != iterEnd) {
         if (*iter == id) {
           std::cout<<"cModel::UpdateTrackFilePath Found track \""<<(*iter)->sFilePath<<"\""<<std::endl;
@@ -348,20 +357,6 @@ namespace medusa
     }
   }
 
-  void cModel::UpdateStatusOnTracks(std::list<cTrack*>& tracks)
-  {
-    std::list<cTrack*>::iterator iter = tracks.begin();
-    const std::list<cTrack*>::const_iterator iterEnd = tracks.end();
-    while (iter != iterEnd) {
-      const string_t& sFilePath = (*iter)->sFilePath;
-      (*iter)->status = TRACK_STATUS::OK;
-      if (!spitfire::filesystem::FileExists(sFilePath)) (*iter)->status = TRACK_STATUS::FILE_DOES_NOT_EXIST;
-      else if (spitfire::filesystem::GetFileSizeBytes(sFilePath) == 0) (*iter)->status = TRACK_STATUS::FILE_EMPTY;
-
-      iter++;
-    }
-  }
-
   void cModel::LoadPlaylist()
   {
     std::cout<<"cModel::LoadPlaylist"<<std::endl;
@@ -380,14 +375,16 @@ namespace medusa
     // Tell the controller that we added these tracks
     {
       std::list<trackid_t> ids;
-      std::list<cTrack*>::iterator iter = tracks.begin();
-      const std::list<cTrack*>::const_iterator iterEnd = tracks.end();
+      std::list<cTrack*> tempTracks;
+      std::set<cTrack*>::iterator iter = tracks.begin();
+      const std::set<cTrack*>::const_iterator iterEnd = tracks.end();
       while (iter != iterEnd) {
         ids.push_back(*iter);
+        tempTracks.push_back(*iter);
 
         iter++;
       }
-      pController->OnTracksAdded(ids, tracks);
+      pController->OnTracksAdded(ids, tempTracks);
     }
 
     // Load the last played setting
@@ -464,8 +461,8 @@ namespace medusa
     // Get the last played track
     if (index < tracks.size()) {
       size_t i = 0;
-      std::list<cTrack*>::iterator iter = tracks.begin();
-      const std::list<cTrack*>::const_iterator iterEnd = tracks.end();
+      std::set<cTrack*>::iterator iter = tracks.begin();
+      const std::set<cTrack*>::const_iterator iterEnd = tracks.end();
       while (iter != iterEnd) {
         if (i == index) {
           idLastPlayed = *iter;
@@ -488,8 +485,8 @@ namespace medusa
     size_t index = INVALID_TRACK_INDEX;
 
     size_t i = 0;
-    std::list<cTrack*>::const_iterator iter = tracks.begin();
-    const std::list<cTrack*>::const_iterator iterEnd = tracks.end();
+    std::set<cTrack*>::const_iterator iter = tracks.begin();
+    const std::set<cTrack*>::const_iterator iterEnd = tracks.end();
     while (iter != iterEnd) {
       if (*iter == idLastPlayed) {
         index = i;
