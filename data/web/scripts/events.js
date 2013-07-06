@@ -6,7 +6,7 @@ if (typeof(EventSource) !== "undefined") {
   //}
 
   source.onmessage = function(event) {
-    document.getElementById("tracks").innerHTML += "Data: " + event.data + "<br/>";
+    //document.getElementById("tracks").innerHTML += "Data: " + event.data + "<br/>";
   };
 
   // Listen for specific messages
