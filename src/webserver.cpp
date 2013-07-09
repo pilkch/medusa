@@ -135,7 +135,7 @@ namespace medusa
           writer.WriteLine("      <a href=\"download/" + spitfire::filesystem::GetFile(iter->sFilePath) + "\"><img src=\"images/file_save.png\" alt=\"Save File\" width=\"" + spitfire::string::ToString(nSize) + "\" height=\"" + spitfire::string::ToString(nSize) + "\"/></a>");
           writer.WriteLine("    </th>");
           writer.WriteLine("    <th class=\"table_border\">");
-          AddFormWithImageButton(writer, "OnActionDeleteTrack(" + spitfire::string::ToString(iter->id) + ")", "file_trash", "Delete File", nSize);
+          AddFormWithImageButton(writer, "OnActionDeleteTrack(" + spitfire::string::ToString(intptr_t(iter->id)) + ")", "file_trash", "Delete File", nSize);
           writer.WriteLine("    </th>");
           writer.WriteLine("  </tr>");
 
@@ -340,7 +340,7 @@ namespace medusa
           // Send an "OnActionPlayTrack" event
           connection.Write("event: OnActionPlayTrack\n");
           connection.Write("data: { ");
-          connection.Write("\"id\": \"" + spitfire::string::ToString(entry.id) + "\",");
+          connection.Write("\"id\": \"" + spitfire::string::ToString(intptr_t(entry.id)) + "\",");
           connection.Write("\"sArtist\": \"" + entry.sArtist + "\",");
           connection.Write("\"sTitle\": \"" + entry.sTitle + "\",");
           connection.Write("\"sDurationMS\": \"" + medusa::util::FormatTime(entry.uiDurationMilliSeconds) + "\",");
