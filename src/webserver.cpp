@@ -417,7 +417,7 @@ namespace medusa
         iter = values.find("track");
         if (iter == values.end()) {
           LOG<<"cWebServer::HandleRequest Track was not found"<<std::endl;
-          ServePlainTextContent(connection, spitfire::network::http::STATUS::BAD_REQUEST, "The action \"delete\" must specify a track id in the \"id\" field");
+          ServePlainTextContent(connection, spitfire::network::http::STATUS::BAD_REQUEST, "The action \"file_trash\" must specify a track id in the \"id\" field");
           return true;
         }
 
@@ -428,7 +428,7 @@ namespace medusa
         // Notify the view
         view.OnWebServerTrackMoveToRubbishBin(track);
       } else {
-        LOG<<"cWebServer::HandleRequest Unknown action"<<std::endl;
+        LOG<<"cWebServer::HandleRequest Unknown action \""<<iter->second<<"\""<<std::endl;
         ServePlainTextContent(connection, spitfire::network::http::STATUS::BAD_REQUEST, "Unknown action, valid actions are \"playback_previous\", \"playback_play\", \"playback_next\", \"volume_mute\", \"volume_full\", \"file_trash\", ");
         return true;
       }

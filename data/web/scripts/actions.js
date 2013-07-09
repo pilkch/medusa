@@ -46,5 +46,5 @@ function OnActionVolumeFull()
 
 function OnActionDeleteTrack(id)
 {
-  PostAction("delete&track=" + id);
+  PostAction("file_trash&track=" + id);
 }
