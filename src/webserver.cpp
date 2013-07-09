@@ -127,15 +127,17 @@ namespace medusa
         std::list<cWebServerSongEntry>::const_iterator iter(tracks.begin());
         const std::list<cWebServerSongEntry>::const_iterator iterEnd(tracks.end());
         while (iter != iterEnd) {
+          const cWebServerSongEntry& entry = *iter;
+
           writer.WriteLine("  <tr class=\"table_border\">");
-          writer.WriteLine("    <th class=\"table_border\">" + iter->sArtist + "</th>");
-          writer.WriteLine("    <th class=\"table_border\">" + iter->sTitle + "</th>");
-          writer.WriteLine("    <th class=\"table_border\">" + medusa::util::FormatTime(iter->uiDurationMilliSeconds) + "</th>");
+          writer.WriteLine("    <th class=\"table_border\">" + entry.sArtist + "</th>");
+          writer.WriteLine("    <th class=\"table_border\">" + entry.sTitle + "</th>");
+          writer.WriteLine("    <th class=\"table_border\">" + medusa::util::FormatTime(entry.uiDurationMilliSeconds) + "</th>");
           writer.WriteLine("    <th class=\"table_border\">");
-          writer.WriteLine("      <a href=\"download/" + spitfire::filesystem::GetFile(iter->sFilePath) + "\"><img src=\"images/file_save.png\" alt=\"Save File\" width=\"" + spitfire::string::ToString(nSize) + "\" height=\"" + spitfire::string::ToString(nSize) + "\"/></a>");
+          writer.WriteLine("      <a href=\"download/" + spitfire::filesystem::GetFile(entry.sFilePath) + "\"><img src=\"images/file_save.png\" alt=\"Save File\" width=\"" + spitfire::string::ToString(nSize) + "\" height=\"" + spitfire::string::ToString(nSize) + "\"/></a>");
           writer.WriteLine("    </th>");
           writer.WriteLine("    <th class=\"table_border\">");
-          AddFormWithImageButton(writer, "OnActionDeleteTrack(" + spitfire::string::ToString(intptr_t(iter->id)) + ")", "file_trash", "Delete File", nSize);
+          AddFormWithImageButton(writer, "OnActionDeleteTrack(" + spitfire::string::ToString(intptr_t(entry.id)) + ")", "file_trash", "Delete File", nSize);
           writer.WriteLine("    </th>");
           writer.WriteLine("  </tr>");
 
@@ -334,7 +336,6 @@ namespace medusa
         while (iter != iterEnd) {
           LOG<<"cWebServer::HandleRequest Sending update"<<std::endl;
 
-          // Dummy entry for testing
           const cWebServerSongEntry& entry = *iter;
 
           // Send an "OnActionPlayTrack" event
