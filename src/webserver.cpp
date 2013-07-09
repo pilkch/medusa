@@ -389,7 +389,7 @@ namespace medusa
         return true;
       }
 
-      // Deleting a track
+      // Performing an action
       const std::map<std::string, std::string>& values = request.GetFormData();
       std::map<std::string, std::string>::const_iterator iter = values.find("action");
       if (iter == values.end()) {
