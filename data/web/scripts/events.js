@@ -20,8 +20,7 @@ if (typeof(EventSource) !== "undefined") {
 
       // Set the content of the row
       tr.innerHTML =
-       "    <th class=\"table_border\">" + track.sArtist + "</th> \
-            <th class=\"table_border\">" + track.sTitle + "</th> \
+       "    <th class=\"table_border\">" + track.sSong + "</th> \
             <th class=\"table_border\">" + track.sDurationMS + "</th> \
             <th class=\"table_border\"> \
               <a href=\"download/" + track.sFilePath + "\"><img src=\"images/file_save.png\" alt=\"Save File\" width=\"16\" height=\"16\"/></a> \

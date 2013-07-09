@@ -18,6 +18,15 @@ namespace medusa
 {
   namespace util
   {
+    string_t FormatArtistAndTitle(const string_t& sArtist, const string_t& sTitle)
+    {
+      if (sArtist.empty() && sTitle.empty()) return "Unknown artist - Unknown title";
+      else if (sArtist.empty()) return "Unknown artist - " + sTitle;
+      else if (sTitle.empty()) return sArtist + " - Unknown title";
+
+      return sArtist + " - " + sTitle;
+    }
+
     string_t FormatNumber(uint64_t uiValue)
     {
       if (uiValue == 0) return TEXT("");

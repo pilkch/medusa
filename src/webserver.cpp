@@ -113,8 +113,7 @@ namespace medusa
       } else {
         writer.WriteLine("<table class=\"table_border\">");
         writer.WriteLine("  <tr id=\"tracklist_header\" class=\"table_heading\">");
-        writer.WriteLine("    <th class=\"table_border\">Artist</th>");
-        writer.WriteLine("    <th class=\"table_border\">Title</th>");
+        writer.WriteLine("    <th class=\"table_border\">Song</th>");
         writer.WriteLine("    <th class=\"table_border\">Duration</th>");
         writer.WriteLine("    <th class=\"table_border\">Download</th>");
         writer.WriteLine("    <th class=\"table_border\">Delete</th>");
@@ -130,8 +129,7 @@ namespace medusa
           const cWebServerSongEntry& entry = *iter;
 
           writer.WriteLine("  <tr id=\"entry_" + spitfire::string::ToString(intptr_t(entry.id)) + "\" class=\"table_border\">");
-          writer.WriteLine("    <th class=\"table_border\">" + entry.sArtist + "</th>");
-          writer.WriteLine("    <th class=\"table_border\">" + entry.sTitle + "</th>");
+          writer.WriteLine("    <th class=\"table_border\">" + util::FormatArtistAndTitle(entry.sArtist, entry.sTitle) + "</th>");
           writer.WriteLine("    <th class=\"table_border\">" + medusa::util::FormatTime(entry.uiDurationMilliSeconds) + "</th>");
           writer.WriteLine("    <th class=\"table_border\">");
           writer.WriteLine("      <a href=\"download/" + spitfire::filesystem::GetFile(entry.sFilePath) + "\"><img src=\"images/file_save.png\" alt=\"Save File\" width=\"" + spitfire::string::ToString(nSize) + "\" height=\"" + spitfire::string::ToString(nSize) + "\"/></a>");
@@ -342,8 +340,7 @@ namespace medusa
           connection.Write("event: OnActionPlayTrack\n");
           connection.Write("data: { ");
           connection.Write("\"id\": \"" + spitfire::string::ToString(intptr_t(entry.id)) + "\",");
-          connection.Write("\"sArtist\": \"" + entry.sArtist + "\",");
-          connection.Write("\"sTitle\": \"" + entry.sTitle + "\",");
+          connection.Write("\"sSong\": \"" + util::FormatArtistAndTitle(entry.sArtist, entry.sTitle) + "\",");
           connection.Write("\"sDurationMS\": \"" + medusa::util::FormatTime(entry.uiDurationMilliSeconds) + "\",");
           connection.Write("\"sFilePath\": \"" + spitfire::filesystem::GetFile(entry.sFilePath) + "\",");
           connection.Write("\"sFileName\": \"" + entry.sFileName + "\"");

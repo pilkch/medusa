@@ -18,6 +18,7 @@ namespace medusa
 {
   namespace util
   {
+    string_t FormatArtistAndTitle(const string_t& sArtist, const string_t& sTitle);
     string_t FormatNumber(uint64_t uiValue);
     string_t FormatTime(uint64_t milliseconds);
 
