@@ -46,5 +46,10 @@ function OnActionVolumeFull()
 
 function OnActionDeleteTrack(id)
 {
+  // Send the request to the web server
   PostAction("file_trash&track=" + id);
+
+  // Remove the track
+  var entry = document.getElementById("entry_" + id);
+  entry.parentNode.removeChild(entry);
 }

@@ -129,7 +129,7 @@ namespace medusa
         while (iter != iterEnd) {
           const cWebServerSongEntry& entry = *iter;
 
-          writer.WriteLine("  <tr class=\"table_border\">");
+          writer.WriteLine("  <tr id=\"entry_" + spitfire::string::ToString(intptr_t(entry.id)) + "\" class=\"table_border\">");
           writer.WriteLine("    <th class=\"table_border\">" + entry.sArtist + "</th>");
           writer.WriteLine("    <th class=\"table_border\">" + entry.sTitle + "</th>");
           writer.WriteLine("    <th class=\"table_border\">" + medusa::util::FormatTime(entry.uiDurationMilliSeconds) + "</th>");
