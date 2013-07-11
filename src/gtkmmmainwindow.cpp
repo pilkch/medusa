@@ -1,6 +1,12 @@
 // Standard headers
 #include <iostream>
 
+// libgtkmm headers
+#include <libgtkmm/about.h>
+#include <libgtkmm/alertdialog.h>
+#include <libgtkmm/slider.h>
+#include <libgtkmm/filebrowse.h>
+
 // Spitfire headers
 #include <spitfire/storage/filesystem.h>
 #include <spitfire/platform/notifications.h>
@@ -10,13 +16,9 @@
 // Medusa headers
 #include "discombobulator_lastfm_key.h"
 #include "discombobulator_lastfm_secret.h"
-#include "gtkmmabout.h"
 #include "gtkmmview.h"
-#include "gtkmmalertdialog.h"
-#include "gtkmmslider.h"
 #include "gtkmmmainwindow.h"
 #include "gtkmmtracklist.h"
-#include "gtkmmfilebrowse.h"
 #include "gtkmmpreferencesdialog.h"
 #include "trackmetadata.h"
 #include "util.h"
@@ -371,7 +373,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   boxToolbarAndVolume.pack_start(*Gtk::manage(new Gtk::Separator()), Gtk::PACK_SHRINK);
 
-  pVolumeSlider = new cGtkmmSlider(*this, true);
+  pVolumeSlider = new gtkmm::cGtkmmSlider(*this, true);
   pVolumeSlider->SetRange(0, 100);
   pVolumeSlider->SetValue(100);
   pVolumeSlider->SetValue(settings.GetVolume0To100());
@@ -546,7 +548,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   textCurrentlyPlaying.set_markup("");
 
 
-  pPositionSlider = new cGtkmmSlider(*this, false);
+  pPositionSlider = new gtkmm::cGtkmmSlider(*this, false);
   pPositionSlider->SetRange(0, 0);
 
   boxPlaybackButtons.pack_start(textCurrentlyPlaying, Gtk::PACK_SHRINK);
@@ -733,16 +735,16 @@ void cGtkmmMainWindow::OnNotificationAction(size_t actionID)
       const bool bIgnoreThisVersion = (sIgnoreVersion == sNewVersion);
 
       if (!bIgnoreThisVersion) {
-        cGtkmmAlertDialog dialog(*this);
+        gtkmm::cGtkmmAlertDialog dialog(*this);
         dialog.SetTitle(TEXT("There is a newer version available, ") + sNewVersion + TEXT("."));
         dialog.SetDescription(TEXT("Would you like to visit the Medusa website?"));
         dialog.SetOk(TEXT("Open Web Page"));
         dialog.SetOther(TEXT("Skip This Version"));
         dialog.SetCancel();
-        ALERT_RESULT result = dialog.Run();
-        if (result == ALERT_RESULT::OK) {
+        gtkmm::ALERT_RESULT result = dialog.Run();
+        if (result == gtkmm::ALERT_RESULT::OK) {
           spitfire::operatingsystem::OpenURL(sDownloadPage);
-        } else if (result == ALERT_RESULT::NO) {
+        } else if (result == gtkmm::ALERT_RESULT::NO) {
           settings.SetIgnoreUpdateVersion(sNewVersion);
         }
       }
@@ -752,7 +754,7 @@ void cGtkmmMainWindow::OnNotificationAction(size_t actionID)
 void cGtkmmMainWindow::OnMenuHelpAbout()
 {
   std::cout<<"cGtkmmMainWindow::OnMenuHelpAbout"<<std::endl;
-  cGtkmmAboutDialog about;
+  gtkmm::cGtkmmAboutDialog about;
   about.Run(*this);
 }
 
@@ -840,14 +842,14 @@ void cGtkmmMainWindow::OnFileDroppedFromNautilus(const Glib::RefPtr<Gdk::DragCon
 
 void cGtkmmMainWindow::OnActionBrowseFiles()
 {
-  cGtkmmFileDialog dialog;
-  dialog.SetType(cGtkmmFileDialog::TYPE::OPEN);
+  gtkmm::cGtkmmFileDialog dialog;
+  dialog.SetType(gtkmm::cGtkmmFileDialog::TYPE::OPEN);
   dialog.SetSelectMultipleFiles(true);
   dialog.SetCaption(TEXT("Add audio files"));
   dialog.SetDefaultFolder(settings.GetLastAddLocation());
 
   // http://filext.com/file-extension/MP3
-  cFilter filterMp3;
+  gtkmm::cFilter filterMp3;
   filterMp3.sName = TEXT("MP3 files");
   filterMp3.mimeTypes.push_back("audio/mpeg");
   filterMp3.mimeTypes.push_back("audio/x-mpeg");
@@ -860,14 +862,14 @@ void cGtkmmMainWindow::OnActionBrowseFiles()
   filterMp3.mimeTypes.push_back("audio/x-mpegaudio");
 
   // http://filext.com/file-extension/WAV
-  cFilter filterWav;
+  gtkmm::cFilter filterWav;
   filterWav.sName = TEXT("Wav files");
   filterWav.mimeTypes.push_back("audio/wav");
   filterWav.mimeTypes.push_back("audio/x-wav");
   filterWav.mimeTypes.push_back("audio/wave");
   filterWav.mimeTypes.push_back("audio/x-pn-wav");
 
-  cFilterList filterList;
+  gtkmm::cFilterList filterList;
   filterList.AddFilter(filterMp3);
   filterList.AddFilter(filterWav);
   filterList.AddFilterAllFiles();
@@ -884,8 +886,8 @@ void cGtkmmMainWindow::OnActionBrowseFiles()
 
 void cGtkmmMainWindow::OnActionBrowseFolder()
 {
-  cGtkmmFolderDialog dialog;
-  dialog.SetType(cGtkmmFolderDialog::TYPE::SELECT);
+  gtkmm::cGtkmmFolderDialog dialog;
+  dialog.SetType(gtkmm::cGtkmmFolderDialog::TYPE::SELECT);
   dialog.SetCaption(TEXT("Add audio folder"));
   dialog.SetDefaultFolder(settings.GetLastAddLocation());
   if (dialog.Run(*this)) {
@@ -899,13 +901,13 @@ void cGtkmmMainWindow::OnActionBrowseFolder()
 
   void cGtkmmMainWindow::OnActionAddFilesFromMusicFolder()
   {
-    cGtkmmAlertDialog dialog(*this);
+    gtkmm::cGtkmmAlertDialog dialog(*this);
     dialog.SetTitle(TEXT("Add all files from your Music folder?"));
     dialog.SetDescription(TEXT("This will add all files from your Music folder."));
     dialog.SetOk(TEXT("Add All Files"));
     dialog.SetCancel();
-    ALERT_RESULT result = dialog.Run();
-    if (result == ALERT_RESULT::OK) {
+    gtkmm::ALERT_RESULT result = dialog.Run();
+    if (result == gtkmm::ALERT_RESULT::OK) {
       const string_t sMusicFolder = spitfire::filesystem::GetHomeMusicDirectory();
       view.OnActionAddTracksFromFolder(sMusicFolder);
     }
@@ -914,25 +916,25 @@ void cGtkmmMainWindow::OnActionBrowseFolder()
   #ifdef BUILD_MEDUSA_IMPORT_BANSHEE_PLAYLIST
   void cGtkmmMainWindow::OnActionImportFromBanshee()
   {
-    cGtkmmAlertDialog dialog(*this);
+    gtkmm::cGtkmmAlertDialog dialog(*this);
     dialog.SetTitle(TEXT("Add all files from your Banshee playlist?"));
     dialog.SetDescription(TEXT("This will add all files from your Banshee playlist."));
     dialog.SetOk(TEXT("Add All Files"));
     dialog.SetCancel();
-    ALERT_RESULT result = dialog.Run();
-    if (result == ALERT_RESULT::OK) view.OnActionImportFromBanshee();
+    gtkmm::ALERT_RESULT result = dialog.Run();
+    if (result == gtkmm::ALERT_RESULT::OK) view.OnActionImportFromBanshee();
   }
   #endif
 
   void cGtkmmMainWindow::OnActionImportFromRhythmbox()
   {
-    cGtkmmAlertDialog dialog(*this);
+    gtkmm::cGtkmmAlertDialog dialog(*this);
     dialog.SetTitle(TEXT("Add all files from your Rhythmbox playlist?"));
     dialog.SetDescription(TEXT("This will add all files from your Rhythmbox playlist."));
     dialog.SetOk(TEXT("Add All Files"));
     dialog.SetCancel();
-    ALERT_RESULT result = dialog.Run();
-    if (result == ALERT_RESULT::OK) view.OnActionImportFromRhythmbox();
+    gtkmm::ALERT_RESULT result = dialog.Run();
+    if (result == gtkmm::ALERT_RESULT::OK) view.OnActionImportFromRhythmbox();
   }
 
   void cGtkmmMainWindow::OnActionStopLoading()
@@ -994,17 +996,17 @@ void cGtkmmMainWindow::OnActionTrackMoveToFolder(const string_t& sDestinationFol
         if (!bOverwriteAll && spitfire::filesystem::FileExists(sDestinationPath)) {
           if (bDontOverwriteAll) continue;
 
-          cGtkmmAlertDialog dialog(*this);
+          gtkmm::cGtkmmAlertDialog dialog(*this);
           dialog.SetTitle(TEXT("File already exists. Do you want to replace it?"));
           dialog.SetDescription(TEXT("The file \"") + sDestinationPath + TEXT("\" already exists. Replacing it will overwrite its contents."));
           dialog.SetOk(TEXT("Replace"));
           dialog.SetOther(TEXT("No"));
           dialog.SetCancel();
           dialog.SetCheckBox(TEXT("Replace All"), false);
-          ALERT_RESULT result = dialog.Run();
-          if (result == ALERT_RESULT::CANCEL) {
+          gtkmm::ALERT_RESULT result = dialog.Run();
+          if (result == gtkmm::ALERT_RESULT::CANCEL) {
             break;
-          } else if (result == ALERT_RESULT::NO) {
+          } else if (result == gtkmm::ALERT_RESULT::NO) {
             bDontOverwriteAll = dialog.IsCheckBoxTicked();
             continue;
           }
@@ -1040,8 +1042,8 @@ void cGtkmmMainWindow::OnActionTrackMoveToFolderBrowse()
   std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToFolderBrowse A popup menu item was selected"<<std::endl;
 
   // Browse for the folder to move to
-  cGtkmmFolderDialog dialog;
-  dialog.SetType(cGtkmmFolderDialog::TYPE::SELECT);
+  gtkmm::cGtkmmFolderDialog dialog;
+  dialog.SetType(gtkmm::cGtkmmFolderDialog::TYPE::SELECT);
   dialog.SetCaption(TEXT("Move tracks to folder"));
   dialog.SetDefaultFolder(settings.GetLastMoveToFolderLocation());
   if (dialog.Run(*this)) {
@@ -1068,12 +1070,12 @@ void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
   std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToRubbishBin A popup menu item was selected"<<std::endl;
 
   // Ask if the user is sure about this
-  cGtkmmAlertDialog dialog(*this);
+  gtkmm::cGtkmmAlertDialog dialog(*this);
   dialog.SetTitle(TEXT("Move files to rubbish bin. Are you sure you want to do this?"));
   dialog.SetOk(TEXT("Move to rubbish bin"));
   dialog.SetCancel();
-  ALERT_RESULT result = dialog.Run();
-  if (result == ALERT_RESULT::OK) {
+  gtkmm::ALERT_RESULT result = dialog.Run();
+  if (result == gtkmm::ALERT_RESULT::OK) {
     // Collect the tracks to remove and move them to the rubbish bin
     std::list<trackid_t> tracks;
     cGtkmmTrackListSelectedIterator iter(*pTrackList);
@@ -1212,7 +1214,7 @@ void cGtkmmMainWindow::OnActionVolumeValueChanged(unsigned int uiVolume0To100)
   view.OnActionVolumeChanged(uiVolume0To100);
 }
 
-void cGtkmmMainWindow::OnActionSliderValueChanged(const cGtkmmSlider& slider, uint64_t uiValue)
+void cGtkmmMainWindow::OnActionSliderValueChanged(const gtkmm::cGtkmmSlider& slider, uint64_t uiValue)
 {
   if (&slider == pPositionSlider) OnActionPlaybackPositionValueChanged(uiValue);
   else OnActionVolumeValueChanged(uiValue);

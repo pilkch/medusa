@@ -7,6 +7,9 @@
 // gtkmm headers
 #include <gtkmm.h>
 
+// libgtkmm headers
+#include <libgtkmm/slider.h>
+
 // Spitfire headers
 #include <spitfire/audio/lastfm.h>
 #include <spitfire/platform/notifications.h>
@@ -44,10 +47,9 @@ namespace medusa
   };
 
   class cGtkmmView;
-  class cGtkmmSlider;
   class cGtkmmTrackList;
 
-class cGtkmmMainWindow : public Gtk::Window, public spitfire::operatingsystem::cNotificationHandler {
+class cGtkmmMainWindow : public Gtk::Window, public spitfire::operatingsystem::cNotificationHandler, public gtkmm::cGtkmmSliderHandler {
 public:
   cGtkmmMainWindow(cGtkmmView& view, cSettings& settings);
   virtual ~cGtkmmMainWindow() {}
@@ -84,7 +86,7 @@ public:
   void OnActionPlaybackPositionValueChanged(uint64_t uiValue);
   void OnActionVolumeValueChanged(unsigned int uiVolume0To100);
 
-  void OnActionSliderValueChanged(const cGtkmmSlider& slider, uint64_t uiValue);
+  virtual void OnActionSliderValueChanged(const gtkmm::cGtkmmSlider& slider, uint64_t uiValue) override;
 
   void OnThemeChanged();
 
@@ -189,7 +191,7 @@ private:
   // Controls
   Gtk::Label textCurrentlyPlaying;
   Gtk::Label textPosition;
-  cGtkmmSlider* pPositionSlider;
+  gtkmm::cGtkmmSlider* pPositionSlider;
   Gtk::Label textLength;
 
   Gtk::Button buttonAddFiles;
@@ -198,7 +200,7 @@ private:
   Gtk::ToggleButton buttonPlayPause;
   Gtk::Button buttonNext;
   Gtk::Label textVolumePlus;
-  cGtkmmSlider* pVolumeSlider;
+  gtkmm::cGtkmmSlider* pVolumeSlider;
   Gtk::Label textVolumeMinus;
   Gtk::ToggleButton buttonRepeat;
 

@@ -4,6 +4,9 @@
 // gtkmm headers
 #include <gtkmm.h>
 
+// libgtkmm headers
+#include <libgtkmm/dispatcher.h>
+
 // Spitfire headers
 #include <spitfire/util/thread.h>
 
@@ -11,7 +14,6 @@
 #include "settings.h"
 #include "view.h"
 #include "gstreamermmplayer.h"
-#include "gtkmmdispatcher.h"
 #include "gtkmmmainwindow.h"
 #include "webserver.h"
 
@@ -224,7 +226,7 @@ private:
 
   const cTrack* pCurrentTrack;
 
-  cGtkmmNotifyMainThread notifyMainThread;
+  gtkmm::cGtkmmNotifyMainThread notifyMainThread;
   spitfire::util::cSignalObject soAction;
   spitfire::util::cThreadSafeQueue<cGtkmmViewEvent> eventQueue;
 
