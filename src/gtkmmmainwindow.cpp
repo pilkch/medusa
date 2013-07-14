@@ -1212,6 +1212,10 @@ void cGtkmmMainWindow::OnActionPlaybackPositionValueChanged(uint64_t uiValue)
 void cGtkmmMainWindow::OnActionVolumeValueChanged(unsigned int uiVolume0To100)
 {
   view.OnActionVolumeChanged(uiVolume0To100);
+
+  // Update our settings
+  settings.SetVolume0To100(uiVolume0To100);
+  settings.Save();
 }
 
 void cGtkmmMainWindow::OnActionSliderValueChanged(const gtkmm::cGtkmmSlider& slider, uint64_t uiValue)
