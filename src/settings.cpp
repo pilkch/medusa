@@ -152,29 +152,12 @@ void cSettings::SetLastFMPassword(const string_t& sPassword)
 
   void cSettings::GetRecentMoveToFolders(std::vector<string_t>& folders) const
   {
-    folders.clear();
-
-    // Get the count
-    const size_t n = document.GetValue(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocationCount"), 0);
-
-    // Get each path
-    string_t sValue;
-    for (size_t i = 0; i < n; i++) {
-      sValue = document.GetValue<string_t>(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocation") + spitfire::string::ToString(i), TEXT(""));
-      if (!sValue.empty()) folders.push_back(sValue);
-    }
+    document.GetListOfValues(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocation"), folders);
   }
 
   void cSettings::SetRecentMoveToFolders(const std::vector<string_t>& folders)
   {
-    // Set the count
-    const size_t n = folders.size();
-    document.SetValue(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocationCount"), n);
-
-    // Add each path
-    for (size_t i = 0; i < n; i++) {
-      document.SetValue(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocation") + spitfire::string::ToString(i), folders[i]);
-    }
+    document.SetListOfValues(TEXT("settings"), TEXT("path"), TEXT("recentMoveToFolderLocation"), folders);
   }
 
   bool cSettings::IsWebServerEnabled() const
