@@ -128,7 +128,7 @@ cGtkmmView::cGtkmmView(int argc, char** argv) :
   eventQueue(soAction),
   mutexSettings("settings")
 {
-  if (argc >= 1) sExecutableFolder = spitfire::filesystem::GetPath(spitfire::string::ToString_t(argv[0]));
+  if (argc >= 1) sExecutableFolder = spitfire::filesystem::GetFolder(spitfire::string::ToString_t(argv[0]));
 
   InstallDesktopFile();
 
