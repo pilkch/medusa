@@ -76,6 +76,8 @@ public:
   void SetStatePaused(trackid_t id);
 
   trackid_t GetTrackIDForRow(const Gtk::TreeModel::Row& row) const;
+  string_t GetFilePathForRow(const Gtk::TreeModel::Row& row) const;
+  string_t GetFilePathForTrackID(trackid_t id) const;
   bool GetPropertiesForRow(const Gtk::TreeModel::Row& row, string_t& sFilePath, spitfire::audio::cMetaData& metaData, TRACK_STATUS& status) const;
   bool GetPropertiesForRow(trackid_t id, string_t& sFilePath, spitfire::audio::cMetaData& metaData, TRACK_STATUS& status) const;
 

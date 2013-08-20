@@ -187,6 +187,26 @@ trackid_t cGtkmmTrackList::GetTrackIDForRow(const Gtk::TreeModel::Row& row) cons
   return id;
 }
 
+  string_t cGtkmmTrackList::GetFilePathForRow(const Gtk::TreeModel::Row& row) const
+  {
+    cUserDataPtr pUserData = row[columns.userdata];
+    ASSERT(pUserData);
+    return pUserData->sFilePath;
+  }
+
+  string_t cGtkmmTrackList::GetFilePathForTrackID(trackid_t id) const
+  {
+    Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
+    while (iter) {
+      Gtk::TreeModel::Row row = *iter;
+      if (id == row[columns.id]) return GetFilePathForRow(row);
+
+      iter++;
+    }
+
+    return "";
+  }
+
 bool cGtkmmTrackList::GetPropertiesForRow(const Gtk::TreeModel::Row& row, string_t& sFilePath, spitfire::audio::cMetaData& metaData, TRACK_STATUS& status) const
 {
   cUserDataPtr pUserData = row[columns.userdata];

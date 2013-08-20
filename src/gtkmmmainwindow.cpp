@@ -172,7 +172,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   pVolumeSlider(nullptr),
   textVolumeMinus("-"),
   dummyCategories("Categories"),
-  statusBar("0 tracks"),
+  statusBar("Loading tracks"),
   nTracksLoading(0),
   pTrackList(nullptr),
   bIsTogglingPlayPause(false),
@@ -1075,13 +1075,10 @@ void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
       std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToRubbishBin Item was selected"<<std::endl;
       const Gtk::TreeModel::Row& row = iter.GetRow();
       trackid_t id = pTrackList->GetTrackIDForRow(row);
-      tracks.push_back(pTrackList->GetTrackIDForRow(row));
+      tracks.push_back(id);
 
       // Move the file to the rubbish bin
-      string_t sFilePath;
-      spitfire::audio::cMetaData metaData;
-      TRACK_STATUS status = TRACK_STATUS::OK;
-      pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status);
+      const string_t sFilePath = pTrackList->GetFilePathForRow(row);
       spitfire::filesystem::MoveFileToTrash(sFilePath);
 
       iter.Next();
@@ -1108,13 +1105,9 @@ void cGtkmmMainWindow::OnActionTrackShowInFileManager()
   while (iter.IsValid()) {
     std::cout<<"cGtkmmMainWindow::OnActionTrackShowInFileManager Item was selected"<<std::endl;
     const Gtk::TreeModel::Row& row = iter.GetRow();
-    trackid_t id = pTrackList->GetTrackIDForRow(row);
 
     // Show the file in the file manager
-    string_t sFilePath;
-    spitfire::audio::cMetaData metaData;
-    TRACK_STATUS status = TRACK_STATUS::OK;
-    pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status);
+    const string_t sFilePath = pTrackList->GetFilePathForRow(row);
     spitfire::filesystem::ShowFile(sFilePath);
 
     break;
@@ -1646,10 +1639,8 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
     std::cout<<"cGtkmmMainWindow::OnWebServerTrackMoveToRubbishBin"<<std::endl;
 
     // Get the data for the track
-    string_t sFilePath;
-    spitfire::audio::cMetaData metaData;
-    TRACK_STATUS status = TRACK_STATUS::OK;
-    if (!pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status)) {
+    const string_t sFilePath = pTrackList->GetFilePathForTrackID(id);
+    if (sFilePath.empty()) {
       std::cout<<"cGtkmmMainWindow::OnWebServerTrackMoveToRubbishBin Track has already been removed, returning"<<std::endl;
       return;
     }
