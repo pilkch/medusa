@@ -513,6 +513,20 @@ namespace medusa
   void cModel::StopLoading()
   {
     loadingProcessInterface.SetStop();
+
+    // Remove all the remaining events
+    ClearEventQueue();
+  }
+
+  void cModel::ClearEventQueue()
+  {
+    // Remove and delete all events on the queue
+    while (true) {
+      cModelEvent* pEvent = eventQueue.RemoveItemFromFront();
+      if (pEvent == nullptr) break;
+
+      spitfire::SAFE_DELETE(pEvent);
+    }
   }
 
   void cModel::ThreadFunction()
@@ -548,12 +562,7 @@ namespace medusa
     SavePlaylist();
 
     // Remove any further events because we don't care any more
-    while (true) {
-      cModelEvent* pEvent = eventQueue.RemoveItemFromFront();
-      if (pEvent == nullptr) break;
-
-      spitfire::SAFE_DELETE(pEvent);
-    }
+    ClearEventQueue();
   }
 
   void cModel::Start()

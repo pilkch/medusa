@@ -56,6 +56,8 @@ namespace medusa
   private:
     virtual void ThreadFunction();
 
+    void ClearEventQueue();
+
     void LoadPlaylist();
     void SavePlaylist() const;
 
