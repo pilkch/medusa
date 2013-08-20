@@ -80,7 +80,7 @@ AUX_SOURCE_DIRECTORY(./../src/ PROJECT_SOURCE_FILES)
 
 SET(LIBRARY_LIBGTKMM_SOURCE_DIRECTORY libgtkmm/)
 SET(LIBRARY_LIBGTKMM_SOURCE_FILES
-alertdialog.cpp dispatcher.cpp filebrowse.cpp slider.cpp)
+alertdialog.cpp dispatcher.cpp filebrowse.cpp icontheme.cpp slider.cpp)
 
 PREFIX_PATHS(${LIBRARY_LIBGTKMM_SOURCE_DIRECTORY} ${LIBRARY_LIBGTKMM_SOURCE_FILES})
 SET(OUTPUT_LIBRARY_LIBGTKMM_SOURCE_FILES ${OUTPUT_FILES})

@@ -599,14 +599,6 @@ void cGtkmmMainWindow::OnThemeChanged()
   SetPlaybackButtonIcons();
 }
 
-const char* sICON_ADD = "gtk-add";
-const char* sICON_DIRECTORY = "gtk-directory";
-const char* sICON_MEDIA_PREVIOUS = "gtk-media-previous-ltr";
-const char* sICON_MEDIA_PLAY = "gtk-media-play-ltr";
-const char* sICON_MEDIA_NEXT = "gtk-media-next-ltr";
-const char* sICON_REPEAT_TOGGLE = "gtk-goto-top";
-const char* sICON_STOP = "gtk-stop";
-
 void cGtkmmMainWindow::SetPlaybackButtonIcons()
 {
   Gtk::Image* pImageFile = new Gtk::Image;

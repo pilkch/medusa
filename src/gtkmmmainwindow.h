@@ -8,6 +8,7 @@
 #include <gtkmm.h>
 
 // libgtkmm headers
+#include <libgtkmm/icontheme.h>
 #include <libgtkmm/slider.h>
 
 // Spitfire headers
@@ -18,7 +19,6 @@
 // Medusa headers
 #include "settings.h"
 #include "track.h"
-#include "gtkmmicontheme.h"
 
 namespace medusa
 {
@@ -154,7 +154,7 @@ private:
 
   cFolderList recentMovedToFolders;
 
-  cGtkmmIconTheme iconTheme;
+  gtkmm::cIconTheme iconTheme;
 
   // Status icon
   bool bIsIconified;
