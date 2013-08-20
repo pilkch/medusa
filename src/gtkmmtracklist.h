@@ -1,6 +1,9 @@
 #ifndef gtkmmtracklist_h
 #define gtkmmtracklist_h
 
+// Standard headers
+#include <unordered_set>
+
 // gtkmm headers
 #include <gtkmm.h>
 
@@ -104,6 +107,7 @@ private:
   void AddTrack(trackid_t id, const cTrack& track);
 
   void DeleteTrack(trackid_t id);
+  void DeleteTracks(const std::unordered_set<trackid_t>& tracks);
   void DeleteAll();
   void DeleteAllSelected();
 

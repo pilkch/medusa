@@ -259,6 +259,11 @@ void cGtkmmView::OnActionAddTracksFromFolder(const string_t& sFolderPath)
     pController->RemoveTracks(tracks);
   }
 
+  void cGtkmmView::OnActionRemoveTracks(const std::unordered_set<trackid_t>& tracks)
+  {
+    pController->RemoveTracks(tracks);
+  }
+
   void cGtkmmView::OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath)
   {
     pController->UpdateTrackFilePath(id, sFilePath);

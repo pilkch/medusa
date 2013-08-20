@@ -92,6 +92,16 @@ namespace medusa
     std::list<trackid_t> tracks;
   };
 
+  class cModelEventRemoveTracksUnorderedSet : public cModelEvent
+  {
+  public:
+    explicit cModelEventRemoveTracksUnorderedSet(const std::unordered_set<trackid_t>& tracks);
+
+    virtual void EventFunction(cModel& model) override;
+
+    std::unordered_set<trackid_t> tracks;
+  };
+
   class cModelEventPlayingTrack : public cModelEvent
   {
   public:
@@ -154,6 +164,16 @@ namespace medusa
   }
 
   void cModelEventRemoveTracks::EventFunction(cModel& model)
+  {
+    model.RemoveTracks(tracks);
+  }
+
+  cModelEventRemoveTracksUnorderedSet::cModelEventRemoveTracksUnorderedSet(const std::unordered_set<trackid_t>& _tracks) :
+    tracks(_tracks)
+  {
+  }
+
+  void cModelEventRemoveTracksUnorderedSet::EventFunction(cModel& model)
   {
     model.RemoveTracks(tracks);
   }
@@ -308,6 +328,30 @@ namespace medusa
       // For each track to remove
       std::list<const cTrack*>::const_iterator iterRemove = tracksToRemove.begin();
       const std::list<const cTrack*>::const_iterator iterRemoveEnd = tracksToRemove.end();
+      while (iterRemove != iterRemoveEnd) {
+        // Find the track in the list and remove it
+        cTrack* pTrack = const_cast<cTrack*>(*iterRemove);
+        std::set<cTrack*>::iterator iter = tracks.find(pTrack);
+        if (iter != tracks.end()) tracks.erase(iter);
+
+        iterRemove++;
+      }
+
+      // Keep the saved playlist up to date in case we crash
+      // TODO: This seems to corrupt memory which is used later on for some reason?
+      SavePlaylist();
+    }
+  }
+
+  void cModel::RemoveTracks(const std::unordered_set<trackid_t>& tracksToRemove)
+  {
+    if (spitfire::util::IsMainThread()) {
+      cModelEventRemoveTracksUnorderedSet* pEvent = new cModelEventRemoveTracksUnorderedSet(tracksToRemove);
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      // For each track to remove
+      std::unordered_set<const cTrack*>::const_iterator iterRemove = tracksToRemove.begin();
+      const std::unordered_set<const cTrack*>::const_iterator iterRemoveEnd = tracksToRemove.end();
       while (iterRemove != iterRemoveEnd) {
         // Find the track in the list and remove it
         cTrack* pTrack = const_cast<cTrack*>(*iterRemove);

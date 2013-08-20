@@ -1,5 +1,6 @@
 // Standard headers
 #include <iostream>
+#include <unordered_set>
 
 // libgtkmm headers
 #include <libgtkmm/about.h>
@@ -250,6 +251,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackShowInFileManager));
   m_refActionGroup->add(Gtk::Action::create("FileProperties", "Properties"),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnActionTrackProperties));
+  m_refActionGroup->add(Gtk::Action::create("FileRemoveMissingAndDuplicates", "Remove missing and duplicates"),
+          sigc::mem_fun(*this, &cGtkmmMainWindow::OnMenuFileRemoveMissingAndDuplicates));
   m_refActionGroup->add(Gtk::Action::create("FileQuit", Gtk::Stock::QUIT),
           sigc::mem_fun(*this, &cGtkmmMainWindow::OnMenuFileQuit));
 
@@ -306,6 +309,8 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
       "      <menuitem action='FileMoveToRubbishBin'/>"
       "      <menuitem action='FileShowInFileManager'/>"
       "      <menuitem action='FileProperties'/>"
+      "      <separator/>"
+      "      <menuitem action='FileRemoveMissingAndDuplicates'/>"
       "      <separator/>"
       "      <menuitem action='FileQuit'/>"
       "    </menu>"
@@ -749,6 +754,56 @@ void cGtkmmMainWindow::OnMenuHelpAbout()
   gtkmm::cGtkmmAboutDialog about;
   about.Run(*this);
 }
+
+  void cGtkmmMainWindow::OnMenuFileRemoveMissingAndDuplicates()
+  {
+    LOG<<"cGtkmmMainWindow::OnMenuFileRemoveMissingAndDuplicates"<<std::endl;
+
+    std::unordered_set<string_t> paths;
+
+    // Collect the tracks to remove
+    std::unordered_set<trackid_t> tracks;
+    cGtkmmTrackListIterator iter(*pTrackList);
+    while (iter.IsValid()) {
+      const Gtk::TreeModel::Row& row = iter.GetRow();
+      trackid_t id = pTrackList->GetTrackIDForRow(row);
+
+      const string_t sFilePath = pTrackList->GetFilePathForRow(row);
+
+      // Remove the track if it is missing
+      if (!spitfire::filesystem::FileExists(sFilePath)) {
+        tracks.insert(id);
+        iter.Next();
+        continue;
+      }
+
+      // Remove the track if it is a duplicate
+      if (paths.find(sFilePath) != paths.end()) {
+        tracks.insert(id);
+        iter.Next();
+        continue;
+      }
+
+      paths.insert(sFilePath);
+
+      iter.Next();
+    }
+
+    // If we are removing one track then find out if it is the currently playing track and if we should skip to the next one
+    if ((tracks.size() == 1) && (pTrackList->GetTrackCount() != 1)) {
+      trackid_t track = *(tracks.begin());
+      if (view.GetCurrentTrackID() == track) OnPlaybackNextClicked();
+    }
+
+    // Tell the view that we are removing these tracks
+    view.OnActionRemoveTracks(tracks);
+
+    // Remove these tracks
+    pTrackList->DeleteTracks(tracks);
+
+    // Update our selection in case any of the tracks were selected
+    OnActionPlaylistSelectionChanged();
+  }
 
 void cGtkmmMainWindow::OnMenuFileQuit()
 {

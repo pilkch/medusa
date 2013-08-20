@@ -1,6 +1,9 @@
 #ifndef gtkmmview_h
 #define gtkmmview_h
 
+// Standard headers
+#include <unordered_set>
+
 // gtkmm headers
 #include <gtkmm.h>
 
@@ -181,6 +184,7 @@ protected:
   void OnActionImportFromRhythmbox();
   void OnActionStopLoading();
   void OnActionRemoveTracks(const std::list<trackid_t>& tracks);
+  void OnActionRemoveTracks(const std::unordered_set<trackid_t>& tracks);
   void OnActionTrackMoveToFolder(trackid_t id, const string_t& sFilePath);
   void OnActionPlayTrack(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData);
   void OnActionPlaybackPositionChanged(uint64_t seconds);

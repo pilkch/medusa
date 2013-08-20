@@ -4,6 +4,7 @@
 // Standard headers
 #include <list>
 #include <set>
+#include <unordered_set>
 
 // Spitfire headers
 #include <spitfire/spitfire.h>
@@ -49,6 +50,7 @@ namespace medusa
     void AddTracksFromFolder(const string_t& sFolderPath);
     void StopLoading();
     void RemoveTracks(const std::list<trackid_t>& tracks);
+    void RemoveTracks(const std::unordered_set<trackid_t>& tracks);
     void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
 
     void SetPlayingTrack(trackid_t id);

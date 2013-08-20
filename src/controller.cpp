@@ -65,6 +65,11 @@ namespace medusa
     model.RemoveTracks(tracks);
   }
 
+  void cController::RemoveTracks(const std::unordered_set<trackid_t>& tracks)
+  {
+    model.RemoveTracks(tracks);
+  }
+
   void cController::UpdateTrackFilePath(trackid_t id, const string_t& sFilePath)
   {
     model.UpdateTrackFilePath(id, sFilePath);

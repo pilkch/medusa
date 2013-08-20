@@ -378,6 +378,20 @@ void cGtkmmTrackList::DeleteTrack(trackid_t id)
   OnListSelectionChanged();
 }
 
+  void cGtkmmTrackList::DeleteTracks(const std::unordered_set<trackid_t>& tracks)
+  {
+    Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
+    while (iter) {
+      Gtk::TreeModel::Row row = *iter;
+      if (tracks.find(row[columns.id]) != tracks.end()) {
+        playlistTreeModelRef->erase(iter);
+        nTracks--;
+      }
+
+      iter++;
+    }
+  }
+
 void cGtkmmTrackList::DeleteAll()
 {
   playlistTreeModelRef.clear();
