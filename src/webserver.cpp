@@ -275,6 +275,7 @@ namespace medusa
     spitfire::network::http::cResponse response;
     response.SetStatus(status);
     response.SetContentTypeTextPlainUTF8();
+    response.SetCacheControlNoCache();
     response.SetContentLengthBytes(sContentUTF8.length());
     connection.SendResponse(response);
 
@@ -519,6 +520,7 @@ namespace medusa
 
     // TODO: Fill out the response from the request
     spitfire::network::http::cResponse response;
+    response.SetCacheControlNoCache();
     response.SetContentLengthBytes(sContentUTF8.length());
     response.SetConnectionClose();
     connection.SendResponse(response);
