@@ -413,10 +413,11 @@ namespace medusa
       std::map<std::string, std::string>::const_iterator iter = values.find("action");
       if (iter == values.end()) {
         LOG<<"cWebServer::HandleRequest Action was not found"<<std::endl;
-        ServePlainTextContent(connection, spitfire::network::http::STATUS::BAD_REQUEST, "An action must be specified");
+        ServePlainTextContent(connection, spitfire::network::http::STATUS::BAD_REQUEST, "No action was found, an action must be specified");
         return true;
       }
 
+      LOG<<"cWebServer::HandleRequest Action \""<<iter->second<<"\""<<std::endl;
       if (iter->second == "playback_previous") {
         // Notify the view
         view.OnWebServerPreviousTrack();
@@ -460,11 +461,12 @@ namespace medusa
 
         // Remove the entry from our previously played tracks
         RemoveSongEntry(track);
+
         // Notify the view
         view.OnWebServerTrackMoveToRubbishBin(track);
       } else {
         LOG<<"cWebServer::HandleRequest Unknown action \""<<iter->second<<"\""<<std::endl;
-        ServePlainTextContent(connection, spitfire::network::http::STATUS::BAD_REQUEST, "Unknown action, valid actions are \"playback_previous\", \"playback_play\", \"playback_next\", \"volume_mute\", \"volume_full\", \"file_trash\", ");
+        ServePlainTextContent(connection, spitfire::network::http::STATUS::BAD_REQUEST, "Unknown action \"" + iter->second + "\", valid actions are \"playback_previous\", \"playback_play\", \"playback_next\", \"volume_mute\", \"volume_full\", \"file_trash\", ");
         return true;
       }
 
