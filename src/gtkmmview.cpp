@@ -78,6 +78,16 @@ namespace medusa
     view.OnWebServerPlayPause();
   }
 
+  cGtkmmViewEventWebServerPlayTrack::cGtkmmViewEventWebServerPlayTrack(trackid_t _id) :
+    id(_id)
+  {
+  }
+
+  void cGtkmmViewEventWebServerPlayTrack::EventFunction(cGtkmmView& view)
+  {
+    view.OnWebServerPlayTrack(id);
+  }
+
   void cGtkmmViewEventWebServerNextTrack::EventFunction(cGtkmmView& view)
   {
     view.OnWebServerNextTrack();
@@ -433,6 +443,19 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
       notifyMainThread.Notify();
     } else {
       pMainWindow->OnWebServerPlayPause();
+    }
+  }
+
+  void cGtkmmView::OnWebServerPlayTrack(trackid_t id)
+  {
+    LOG<<"cGtkmmView::OnWebServerPlayTrack"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventWebServerPlayTrack* pEvent = new cGtkmmViewEventWebServerPlayTrack(id);
+      eventQueue.AddItemToBack(pEvent);
+      notifyMainThread.Notify();
+    } else {
+      pMainWindow->OnWebServerPlayTrack(id);
     }
   }
 

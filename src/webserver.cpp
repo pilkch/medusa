@@ -129,7 +129,11 @@ namespace medusa
           const cWebServerSongEntry& entry = *iter;
 
           writer.WriteLine("  <tr id=\"entry_" + spitfire::string::ToString(intptr_t(entry.id)) + "\" class=\"table_border\">");
-          writer.WriteLine("    <th class=\"table_border\">" + util::FormatArtistAndTitle(entry.sArtist, entry.sTitle) + "</th>");
+          writer.WriteLine("    <th class=\"table_border\">");
+          writer.WriteLine("      <a href=\"javascript:;\" onclick=\"OnActionPlayTrack(" + spitfire::string::ToString(intptr_t(entry.id)) + ")\">");
+          writer.WriteLine("        " + util::FormatArtistAndTitle(entry.sArtist, entry.sTitle));
+          writer.WriteLine("      </a>");
+          writer.WriteLine("    </th>");
           writer.WriteLine("    <th class=\"table_border\">" + medusa::util::FormatTime(entry.uiDurationMilliSeconds) + "</th>");
           writer.WriteLine("    <th class=\"table_border\">");
           writer.WriteLine("      <a href=\"download/" + spitfire::filesystem::GetFile(entry.sFilePath) + "\"><img src=\"images/file_save.png\" alt=\"Save File\" width=\"" + spitfire::string::ToString(nSize) + "\" height=\"" + spitfire::string::ToString(nSize) + "\"/></a>");
@@ -400,8 +404,22 @@ namespace medusa
         // Notify the view
         view.OnWebServerPreviousTrack();
       } else if (iter->second == "playback_play") {
-        // Notify the view
-        view.OnWebServerPlayPause();
+        LOG<<"cWebServer::HandleRequest playback_play"<<std::endl;
+        iter = values.find("track");
+        if (iter != values.end()) {
+          LOG<<"cWebServer::HandleRequest playback_play has track"<<std::endl;
+          // Play a specific track
+          const std::string sTrack = iter->second;
+
+          trackid_t track = trackid_t(uintptr_t(spitfire::string::ToUnsignedInt(sTrack)));
+
+          // Notify the view
+          view.OnWebServerPlayTrack(track);
+        } else {
+          LOG<<"cWebServer::HandleRequest playback_play no track"<<std::endl;
+          // Just a normal play/pause event, notify the view
+          view.OnWebServerPlayPause();
+        }
       } else if (iter->second == "playback_next") {
         // Notify the view
         view.OnWebServerNextTrack();

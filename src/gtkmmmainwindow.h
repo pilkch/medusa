@@ -98,6 +98,7 @@ public:
 
   void OnWebServerPreviousTrack();
   void OnWebServerPlayPause();
+  void OnWebServerPlayTrack(trackid_t id);
   void OnWebServerNextTrack();
   void OnWebServerSetVolumeMute();
   void OnWebServerSetVolumeFull();

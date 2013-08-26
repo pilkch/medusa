@@ -103,6 +103,16 @@ namespace medusa
     virtual void EventFunction(cGtkmmView& view) override;
   };
 
+  class cGtkmmViewEventWebServerPlayTrack : public cGtkmmViewEvent
+  {
+  public:
+    explicit cGtkmmViewEventWebServerPlayTrack(trackid_t id);
+
+    virtual void EventFunction(cGtkmmView& view) override;
+
+    trackid_t id;
+  };
+
   class cGtkmmViewEventWebServerNextTrack : public cGtkmmViewEvent
   {
   public:
@@ -158,6 +168,7 @@ public:
   friend class cGtkmmViewEventTracksAdded;
   friend class cGtkmmViewEventWebServerPreviousTrack;
   friend class cGtkmmViewEventWebServerPlayPause;
+  friend class cGtkmmViewEventWebServerPlayTrack;
   friend class cGtkmmViewEventWebServerNextTrack;
   friend class cGtkmmViewEventWebServerSetVolumeMute;
   friend class cGtkmmViewEventWebServerSetVolumeFull;
@@ -203,6 +214,7 @@ protected:
 
   void OnWebServerPreviousTrack();
   void OnWebServerPlayPause();
+  void OnWebServerPlayTrack(trackid_t id);
   void OnWebServerNextTrack();
   void OnWebServerSetVolumeMute();
   void OnWebServerSetVolumeFull();

@@ -1,5 +1,7 @@
 function PostAction(action)
 {
+  console.log("PostAction(\"%s\")", action);
+
   if (window.XMLHttpRequest) {
     // Send an AJAX request
     // Works in modern browsers
@@ -42,6 +44,11 @@ function OnActionVolumeMute()
 function OnActionVolumeFull()
 {
   PostAction("volume_full");
+}
+
+function OnActionPlayTrack(id)
+{
+  PostAction("playback_play&track=" + id);
 }
 
 function OnActionDeleteTrack(id)

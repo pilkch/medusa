@@ -1674,6 +1674,15 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
     OnPlaybackPlayPauseButtonToggled();
   }
 
+  void cGtkmmMainWindow::OnWebServerPlayTrack(trackid_t id)
+  {
+    LOG<<"cGtkmmMainWindow::OnWebServerPlayTrack"<<std::endl;
+    string_t sFilePath;
+    spitfire::audio::cMetaData metaData;
+    TRACK_STATUS status = TRACK_STATUS::OK;
+    if (pTrackList->GetPropertiesForRow(id, sFilePath, metaData, status)) OnActionPlayTrack(id, sFilePath, metaData);
+  }
+
   void cGtkmmMainWindow::OnWebServerNextTrack()
   {
     OnPlaybackNextClicked();
