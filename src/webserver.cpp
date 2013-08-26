@@ -234,6 +234,22 @@ namespace medusa
     }
   }
 
+  void cWebServer::RemoveSongEntry(trackid_t id)
+  {
+    spitfire::util::cLockObject lock(mutexEntries);
+
+    std::list<cWebServerSongEntry>::iterator iter(entries.begin());
+    const std::list<cWebServerSongEntry>::iterator iterEnd(entries.end());
+    while (iter != iterEnd) {
+      if (iter->id == id) {
+        entries.erase(iter);
+        break;
+      }
+
+      iter++;
+    }
+  }
+
   bool cWebServer::GetFilePathFromFileName(const string_t& sFileName, string_t& sFilePath)
   {
     spitfire::util::cLockObject lock(mutexEntries);
@@ -441,6 +457,8 @@ namespace medusa
 
         trackid_t track = trackid_t(uintptr_t(spitfire::string::ToUnsignedInt(sTrack)));
 
+        // Remove the entry from our previously played tracks
+        RemoveSongEntry(track);
         // Notify the view
         view.OnWebServerTrackMoveToRubbishBin(track);
       } else {

@@ -43,6 +43,7 @@ namespace medusa
     bool IsTrackInList(trackid_t id, const std::list<cWebServerSongEntry>& knownEntries) const;
     std::list<cWebServerSongEntry> GetNewEntries(const std::list<cWebServerSongEntry>& knownEntries);
 
+    void RemoveSongEntry(trackid_t id);
     bool GetFilePathFromFileName(const string_t& sFileName, string_t& sFilePath);
 
     void ServePlainTextContent(spitfire::network::http::cConnectedClient& connection, spitfire::network::http::STATUS status, const std::string& sContentUTF8);
