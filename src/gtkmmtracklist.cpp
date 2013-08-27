@@ -84,7 +84,8 @@ const Gtk::TreeRow& cGtkmmTrackListSelectedIterator::GetRow()
 
 cGtkmmTrackList::cGtkmmTrackList(cGtkmmMainWindow& _mainWindow) :
   mainWindow(_mainWindow),
-  nTracks(0)
+  nTracks(0),
+  idPlayingOrPausedItem(INVALID_TRACK)
 {
   // Add the TreeView, inside a ScrolledWindow, with the button underneath
   playlistScrolledWindow.add(*this);
@@ -375,6 +376,9 @@ void cGtkmmTrackList::DeleteTrack(trackid_t id)
     iter++;
   }
 
+  // Invalidate our playing or pause item
+  if (idPlayingOrPausedItem == id) idPlayingOrPausedItem = INVALID_TRACK;
+
   OnListSelectionChanged();
 }
 
@@ -386,6 +390,9 @@ void cGtkmmTrackList::DeleteTrack(trackid_t id)
       if (tracks.find(row[columns.id]) != tracks.end()) {
         playlistTreeModelRef->erase(iter);
         nTracks--;
+
+        // Invalidate our playing or pause item
+        if (idPlayingOrPausedItem == row[columns.id]) idPlayingOrPausedItem = INVALID_TRACK;
       }
 
       iter++;
@@ -397,6 +404,9 @@ void cGtkmmTrackList::DeleteAll()
   playlistTreeModelRef.clear();
 
   nTracks = 0;
+
+  // Invalidate our playing or pause item
+  idPlayingOrPausedItem = INVALID_TRACK;
 
   OnListSelectionChanged();
 }
@@ -419,6 +429,10 @@ void cGtkmmTrackList::DeleteAllSelected()
         Gtk::TreeModel::iterator treeiter = playlistTreeModelRef->get_iter(iter->get_path());
         playlistTreeModelRef->erase(treeiter);
         nTracks--;
+
+        // Invalidate our playing or pause item
+        Gtk::TreeModel::Row row = *treeiter;
+        if (row[columns.id] == idPlayingOrPausedItem) idPlayingOrPausedItem = INVALID_TRACK;
       }
     }
   }
@@ -428,17 +442,46 @@ void cGtkmmTrackList::DeleteAllSelected()
 
   void cGtkmmTrackList::SetIcon(trackid_t id, const std::string& sFile)
   {
-    // Update the icons in the tree view
+    // Clear the icon for the currently playing or paused item
+    if (idPlayingOrPausedItem != INVALID_TRACK) {
+      Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
+      while (iter) {
+        Gtk::TreeModel::Row row = *iter;
+        if (row[columns.id] == idPlayingOrPausedItem) {
+          std::string sIconName = "blank";
+          cUserDataPtr pUserData = row[columns.userdata];
+          if (pUserData) {
+            if (pUserData->status != TRACK_STATUS::OK) sIconName = GetIconFileNameForStatus(pUserData->status);
+          }
+          row[columns.pixbuf] = Gdk::Pixbuf::create_from_file(("data/" + sIconName + ".xpm").c_str());
+
+          break;
+        }
+
+        iter++;
+      }
+
+      idPlayingOrPausedItem = INVALID_TRACK;
+    }
+
+    // Update the icon in the new row
     if (id != INVALID_TRACK) {
       Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
       while (iter) {
         Gtk::TreeModel::Row row = *iter;
-        std::string sIconName = (row[columns.id] == id) ? sFile : "blank";
-        cUserDataPtr pUserData = row[columns.userdata];
-        if (pUserData) {
-          if (pUserData->status != TRACK_STATUS::OK) sIconName = GetIconFileNameForStatus(pUserData->status);
+        if (row[columns.id] == id) {
+          std::string sIconName = sFile;
+          cUserDataPtr pUserData = row[columns.userdata];
+          if (pUserData) {
+            if (pUserData->status != TRACK_STATUS::OK) sIconName = GetIconFileNameForStatus(pUserData->status);
+          }
+          row[columns.pixbuf] = Gdk::Pixbuf::create_from_file(("data/" + sIconName + ".xpm").c_str());
+
+          // Update our playing or paused item
+          idPlayingOrPausedItem = id;
+
+          break;
         }
-        row[columns.pixbuf] = Gdk::Pixbuf::create_from_file(("data/" + sIconName + ".xpm").c_str());
 
         iter++;
       }

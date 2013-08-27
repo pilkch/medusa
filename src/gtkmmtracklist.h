@@ -168,6 +168,8 @@ private:
   Glib::RefPtr<Gtk::TreeSelection> playlistTreeSelectionRef;
 
   size_t nTracks;
+
+  trackid_t idPlayingOrPausedItem;
 };
 }
 
