@@ -8,6 +8,13 @@
     color:white;
   }
 
+  h3 {
+    font-size: 1.1em
+  }
+  th {
+    font-size: 1.1em
+  }
+
   /* Grey link styling */
   a:link { color:#CCCCCC; }
   a:visited { color:#666666; }
