@@ -98,6 +98,8 @@ protected:
 private:
   std::string GetIconFileNameForStatus(TRACK_STATUS status) const;
 
+  void SetIcon(trackid_t id, const std::string& sFile);
+
   bool OnSelectFunction(const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool path_currently_selected);
   void OnListSelectionChanged();
   bool OnListButtonPressEvent(GdkEventButton* event);

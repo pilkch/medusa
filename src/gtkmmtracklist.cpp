@@ -426,42 +426,35 @@ void cGtkmmTrackList::DeleteAllSelected()
   OnListSelectionChanged();
 }
 
+  void cGtkmmTrackList::SetIcon(trackid_t id, const std::string& sFile)
+  {
+    // Update the icons in the tree view
+    if (id != INVALID_TRACK) {
+      Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
+      while (iter) {
+        Gtk::TreeModel::Row row = *iter;
+        std::string sIconName = (row[columns.id] == id) ? sFile : "blank";
+        cUserDataPtr pUserData = row[columns.userdata];
+        if (pUserData) {
+          if (pUserData->status != TRACK_STATUS::OK) sIconName = GetIconFileNameForStatus(pUserData->status);
+        }
+        row[columns.pixbuf] = Gdk::Pixbuf::create_from_file(("data/" + sIconName + ".xpm").c_str());
+
+        iter++;
+      }
+    }
+  }
+
 void cGtkmmTrackList::SetStatePlaying(trackid_t id)
 {
   // Update the icons in the tree view
-  if (id != INVALID_TRACK) {
-    Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
-    while (iter) {
-      Gtk::TreeModel::Row row = *iter;
-      std::string sIconName = (row[columns.id] == id) ? "playing" : "blank";
-      cUserDataPtr pUserData = row[columns.userdata];
-      if (pUserData) {
-        if (pUserData->status != TRACK_STATUS::OK) sIconName = GetIconFileNameForStatus(pUserData->status);
-      }
-      row[columns.pixbuf] = Gdk::Pixbuf::create_from_file(("data/" + sIconName + ".xpm").c_str());
-
-      iter++;
-    }
-  }
+  SetIcon(id, "playing");
 }
 
 void cGtkmmTrackList::SetStatePaused(trackid_t id)
 {
   // Update the icons in the tree view
-  if (id != INVALID_TRACK) {
-    Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
-    while (iter) {
-      Gtk::TreeModel::Row row = *iter;
-      std::string sIconName = (row[columns.id] == id) ? "paused" : "blank";
-      cUserDataPtr pUserData = row[columns.userdata];
-      if (pUserData) {
-        if (pUserData->status != TRACK_STATUS::OK) sIconName = GetIconFileNameForStatus(pUserData->status);
-      }
-      row[columns.pixbuf] = Gdk::Pixbuf::create_from_file(("data/" + sIconName + ".xpm").c_str());
-
-      iter++;
-    }
-  }
+  SetIcon(id, "paused");
 }
 
   size_t cGtkmmTrackList::GetTrackCount() const
