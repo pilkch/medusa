@@ -349,13 +349,13 @@ namespace medusa
       spitfire::util::SleepThisThreadMS(1000);
 
       std::list<cWebServerSongEntry> newEntries = GetNewEntries(knownEntries);
+      //LOG<<"cWebServer::HandleRequest "<<newEntries.size()<<" new tracks"<<std::endl;
       if (!newEntries.empty()) {
         std::list<cWebServerSongEntry>::const_iterator iter(newEntries.begin());
         const std::list<cWebServerSongEntry>::const_iterator iterEnd(newEntries.end());
         while (iter != iterEnd) {
-          LOG<<"cWebServer::HandleRequest Sending update"<<std::endl;
-
           const cWebServerSongEntry& entry = *iter;
+          LOG<<"cWebServer::HandleRequest Sending track \""<<entry.sArtist<<" - "<<entry.sTitle<<"\""<<std::endl;
 
           // Send an "OnActionPlayTrack" event
           connection.Write("event: OnActionPlayTrack\n");
