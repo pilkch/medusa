@@ -354,7 +354,12 @@ namespace medusa
         // Find the track in the list and remove it
         cTrack* pTrack = const_cast<cTrack*>(*iterRemove);
         std::set<cTrack*>::iterator iter = tracks.find(pTrack);
-        if (iter != tracks.end()) tracks.erase(iter);
+        if (iter != tracks.end()) {
+          tracks.erase(iter);
+
+          // Delete the track
+          delete pTrack;
+        }
 
         iterRemove++;
       }
@@ -378,7 +383,12 @@ namespace medusa
         // Find the track in the list and remove it
         cTrack* pTrack = const_cast<cTrack*>(*iterRemove);
         std::set<cTrack*>::iterator iter = tracks.find(pTrack);
-        if (iter != tracks.end()) tracks.erase(iter);
+        if (iter != tracks.end()) {
+          tracks.erase(iter);
+
+          // Delete the track
+          delete pTrack;
+        }
 
         iterRemove++;
       }
@@ -407,6 +417,9 @@ namespace medusa
 
           // Move the file to the trash
           if (spitfire::filesystem::FileExists(pTrack->sFilePath)) spitfire::filesystem::MoveFileToTrash(pTrack->sFilePath);
+
+          // Delete the track
+          delete pTrack;
         }
 
         iterRemove++;
