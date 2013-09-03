@@ -17,6 +17,12 @@ public:
   void Load();
   void Save();
 
+  void GetMainWindowSize(size_t& width, size_t& height) const;
+  void SetMainWindowSize(size_t width, size_t height);
+
+  bool IsMainWindowMaximised() const;
+  void SetMainWindowMaximised(bool bMaximised);
+
   bool IsShowMainWindow() const;
   void SetShowMainWindow(bool bShowMainWindow);
 

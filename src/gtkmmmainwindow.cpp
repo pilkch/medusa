@@ -185,7 +185,14 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   //set_skip_taskbar_hint(true); // Minimise to status icon
   set_size_request(400, 300);
   set_default_size(800, 400);
-  resize(400, 300);
+
+    // Restore the window size
+    size_t width = 800;
+    size_t height = 400;
+    settings.GetMainWindowSize(width, height);
+    resize(width, height);
+
+    if (settings.IsMainWindowMaximised()) maximize();
 
   // Set icon list
   std::vector<Glib::RefPtr<Gdk::Pixbuf> > icons;
@@ -819,6 +826,17 @@ void cGtkmmMainWindow::OnMenuFileQuit()
 
   // Save the window settings
   settings.SetShowMainWindow(!bIsIconified);
+
+  // Save the window size if we are not currently maximized
+  const bool bMaximised = ((get_state() & GDK_WINDOW_STATE_MAXIMIZED) != 0);
+  if (!bMaximised) {
+    int width = 800;
+    int height = 800;
+    get_size(width, height);
+    settings.SetMainWindowSize(width, height);
+  }
+
+  settings.SetMainWindowMaximised(bMaximised);
 
   // Save volume settings
   settings.SetVolume0To100(pVolumeSlider->GetValue());
