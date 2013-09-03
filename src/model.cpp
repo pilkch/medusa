@@ -102,6 +102,16 @@ namespace medusa
     std::unordered_set<trackid_t> tracks;
   };
 
+  class cModelEventMoveTracksToTrash : public cModelEvent
+  {
+  public:
+    explicit cModelEventMoveTracksToTrash(const std::list<trackid_t>& tracks);
+
+    virtual void EventFunction(cModel& model) override;
+
+    std::list<trackid_t> tracks;
+  };
+
   class cModelEventPlayingTrack : public cModelEvent
   {
   public:
@@ -177,6 +187,18 @@ namespace medusa
   {
     model.RemoveTracks(tracks);
   }
+
+
+  cModelEventMoveTracksToTrash::cModelEventMoveTracksToTrash(const std::list<trackid_t>& _tracks) :
+    tracks(_tracks)
+  {
+  }
+
+  void cModelEventMoveTracksToTrash::EventFunction(cModel& model)
+  {
+    model.MoveTracksToTrash(tracks);
+  }
+
 
   cModelEventPlayingTrack::cModelEventPlayingTrack(trackid_t _id) :
     id(_id)
@@ -357,6 +379,35 @@ namespace medusa
         cTrack* pTrack = const_cast<cTrack*>(*iterRemove);
         std::set<cTrack*>::iterator iter = tracks.find(pTrack);
         if (iter != tracks.end()) tracks.erase(iter);
+
+        iterRemove++;
+      }
+
+      // Keep the saved playlist up to date in case we crash
+      // TODO: This seems to corrupt memory which is used later on for some reason?
+      SavePlaylist();
+    }
+  }
+
+  void cModel::MoveTracksToTrash(const std::list<trackid_t>& tracksToRemove)
+  {
+    if (spitfire::util::IsMainThread()) {
+      cModelEventMoveTracksToTrash* pEvent = new cModelEventMoveTracksToTrash(tracksToRemove);
+      eventQueue.AddItemToBack(pEvent);
+    } else {
+      // For each track to remove
+      std::list<const cTrack*>::const_iterator iterRemove = tracksToRemove.begin();
+      const std::list<const cTrack*>::const_iterator iterRemoveEnd = tracksToRemove.end();
+      while (iterRemove != iterRemoveEnd) {
+        // Find the track in the list and remove it
+        cTrack* pTrack = const_cast<cTrack*>(*iterRemove);
+        std::set<cTrack*>::iterator iter = tracks.find(pTrack);
+        if (iter != tracks.end()) {
+          tracks.erase(iter);
+
+          // Move the file to the trash
+          if (spitfire::filesystem::FileExists(pTrack->sFilePath)) spitfire::filesystem::MoveFileToTrash(pTrack->sFilePath);
+        }
 
         iterRemove++;
       }

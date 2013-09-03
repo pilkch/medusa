@@ -51,6 +51,7 @@ namespace medusa
     void StopLoading();
     void RemoveTracks(const std::list<trackid_t>& tracks);
     void RemoveTracks(const std::unordered_set<trackid_t>& tracks);
+    void MoveTracksToTrash(const std::list<trackid_t>& tracks);
     void UpdateTrackFilePath(trackid_t id, const string_t& sFilePath);
 
     void SetPlayingTrack(trackid_t id);

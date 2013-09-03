@@ -70,6 +70,11 @@ namespace medusa
     model.RemoveTracks(tracks);
   }
 
+  void cController::MoveTracksToTrash(const std::list<trackid_t>& tracks)
+  {
+    model.MoveTracksToTrash(tracks);
+  }
+
   void cController::UpdateTrackFilePath(trackid_t id, const string_t& sFilePath)
   {
     model.UpdateTrackFilePath(id, sFilePath);

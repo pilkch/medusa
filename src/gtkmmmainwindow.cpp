@@ -1132,10 +1132,6 @@ void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
       trackid_t id = pTrackList->GetTrackIDForRow(row);
       tracks.push_back(id);
 
-      // Move the file to the rubbish bin
-      const string_t sFilePath = pTrackList->GetFilePathForRow(row);
-      spitfire::filesystem::MoveFileToTrash(sFilePath);
-
       iter.Next();
     }
 
@@ -1146,7 +1142,7 @@ void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
     }
 
     // Tell the view that we are removing these tracks
-    view.OnActionRemoveTracks(tracks);
+    view.OnActionMoveTracksToTrash(tracks);
 
     // Remove the selected tracks
     pTrackList->DeleteAllSelected();
@@ -1709,9 +1705,6 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
       return;
     }
 
-    // Move the file to the rubbish bin
-    spitfire::filesystem::MoveFileToTrash(sFilePath);
-
     // We are removing one track, so find out if it is the currently playing track and if we should skip to the next one
     if (pTrackList->GetTrackCount() != 1) {
       if (view.GetCurrentTrackID() == id) OnPlaybackNextClicked();
@@ -1720,7 +1713,7 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
     // Tell the view that we are removing these tracks
     std::list<trackid_t> tracks;
     tracks.push_back(id);
-    view.OnActionRemoveTracks(tracks);
+    view.OnActionMoveTracksToTrash(tracks);
 
     // Remove the selected tracks
     pTrackList->DeleteTrack(id);
