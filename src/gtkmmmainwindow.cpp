@@ -1134,9 +1134,23 @@ void cGtkmmMainWindow::OnActionTrackMoveToRubbishBin()
 {
   std::cout<<"cGtkmmMainWindow::OnActionTrackMoveToRubbishBin A popup menu item was selected"<<std::endl;
 
+  const size_t nTracks = pTrackList->GetSelectedTrackCount();
+  if (nTracks == 0) return;
+
+  string_t sTitle = TEXT("Move ") + spitfire::string::ToString(nTracks) + TEXT(" files to rubbish bin. Are you sure you want to do this?");
+  if (nTracks == 1) {
+    // If it is a single track then we can just show the file path
+    cGtkmmTrackListSelectedIterator iter(*pTrackList);
+    while (iter.IsValid()) {
+      const Gtk::TreeModel::Row& row = iter.GetRow();
+      sTitle = TEXT("Move \"") + pTrackList->GetFilePathForRow(row) + TEXT("\" to rubbish bin.  Are you sure you want to do this?");
+      break;
+    }
+  }
+
   // Ask if the user is sure about this
   gtkmm::cGtkmmAlertDialog dialog(*this);
-  dialog.SetTitle(TEXT("Move files to rubbish bin. Are you sure you want to do this?"));
+  dialog.SetTitle(sTitle);
   dialog.SetOk(TEXT("Move to rubbish bin"));
   dialog.SetCancel();
   gtkmm::ALERT_RESULT result = dialog.Run();
