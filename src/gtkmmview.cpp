@@ -140,6 +140,12 @@ cGtkmmView::cGtkmmView(int argc, char** argv) :
 {
   if (argc >= 1) sExecutableFolder = spitfire::filesystem::GetFolder(spitfire::string::ToString_t(argv[0]));
 
+  {
+    // Set our preference for dark themes before we create any widgets
+    // http://stackoverflow.com/questions/15997464/how-do-i-make-my-gtk-app-use-the-dark-theme
+    Gtk::Settings::get_default()->property_gtk_application_prefer_dark_theme().set_value(true);
+  }
+
   InstallDesktopFile();
 
   settings.Load();
