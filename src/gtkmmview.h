@@ -224,8 +224,6 @@ protected:
 private:
   void InstallDesktopFile();
 
-  void OnNotify();
-
   void _Run();
 
   // Called by the update checker
@@ -243,9 +241,7 @@ private:
 
   const cTrack* pCurrentTrack;
 
-  gtkmm::cGtkmmNotifyMainThread notifyMainThread;
-  spitfire::util::cSignalObject soAction;
-  spitfire::util::cThreadSafeQueue<cGtkmmViewEvent> eventQueue;
+  gtkmm::cGtkmmRunOnMainThread<cGtkmmView, cGtkmmViewEvent> notify;
 
   // TODO: Move this to a separate class
   spitfire::util::cMutex mutexSettings;

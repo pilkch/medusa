@@ -134,8 +134,7 @@ cGtkmmView::cGtkmmView(int argc, char** argv) :
   player(*this),
   webServer(*this),
   pCurrentTrack(nullptr),
-  soAction("cGtkmmView_soAction"),
-  eventQueue(soAction),
+  notify(*this),
   mutexSettings("settings")
 {
   if (argc >= 1) sExecutableFolder = spitfire::filesystem::GetFolder(spitfire::string::ToString_t(argv[0]));
@@ -154,7 +153,7 @@ cGtkmmView::cGtkmmView(int argc, char** argv) :
 
   player.Create(argc, argv);
 
-  notifyMainThread.Create(*this, &cGtkmmView::OnNotify);
+  notify.Create();
 }
 
 cGtkmmView::~cGtkmmView()
@@ -163,11 +162,7 @@ cGtkmmView::~cGtkmmView()
   if (webServer.IsRunning()) webServer.Stop();
 
   // Destroy any further events
-  while (true) {
-    cGtkmmViewEvent* pEvent = eventQueue.RemoveItemFromFront();
-    if (pEvent == nullptr) break;
-    else spitfire::SAFE_DELETE(pEvent);
-  }
+  notify.ClearEventQueue();
 
   player.Destroy();
 
@@ -335,23 +330,11 @@ void cGtkmmView::OnPlayerUpdatePlaybackPosition()
   pMainWindow->SetPlaybackPositionMS(player.GetPlaybackPositionMS());
 }
 
-void cGtkmmView::OnNotify()
-{
-  std::cout<<"cGtkmmView::OnNotify"<<std::endl;
-  assert(spitfire::util::IsMainThread());
-  cGtkmmViewEvent* pEvent = eventQueue.RemoveItemFromFront();
-  if (pEvent != nullptr) {
-    pEvent->EventFunction(*this);
-    spitfire::SAFE_DELETE(pEvent);
-  }
-}
-
 void cGtkmmView::OnPlayerAboutToFinish()
 {
   if (!spitfire::util::IsMainThread()) {
     cGtkmmViewEventPlayerAboutToFinish* pEvent = new cGtkmmViewEventPlayerAboutToFinish;
-    eventQueue.AddItemToBack(pEvent);
-    notifyMainThread.Notify();
+    notify.PushEventToMainThread(pEvent);
   } else {
     // TODO: Should we just tell the player which track to play and not actually start playing it yet?
 
@@ -363,8 +346,7 @@ void cGtkmmView::OnPlayerAboutToFinish()
   {
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventPlayerError* pEvent = new cGtkmmViewEventPlayerError;
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       // Pause at the current track
       pMainWindow->SetStatePaused();
@@ -378,8 +360,7 @@ void cGtkmmView::OnPlayerAboutToFinish()
   {
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventLoadingFilesToLoadIncrement* pEvent = new cGtkmmViewEventLoadingFilesToLoadIncrement(nFiles);
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnLoadingFilesToLoadIncrement(nFiles);
     }
@@ -389,8 +370,7 @@ void cGtkmmView::OnPlayerAboutToFinish()
   {
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventLoadingFilesToLoadDecrement* pEvent = new cGtkmmViewEventLoadingFilesToLoadDecrement(nFiles);
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnLoadingFilesToLoadDecrement(nFiles);
     }
@@ -400,8 +380,7 @@ void cGtkmmView::OnPlayerAboutToFinish()
   {
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventPlaylistLoading* pEvent = new cGtkmmViewEventPlaylistLoading;
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnPlaylistLoading();
     }
@@ -411,8 +390,7 @@ void cGtkmmView::OnPlayerAboutToFinish()
   {
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventPlaylistLoaded* pEvent = new cGtkmmViewEventPlaylistLoaded(idLastPlayed);
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnPlaylistLoaded(idLastPlayed);
     }
@@ -424,8 +402,7 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
 
   if (!spitfire::util::IsMainThread()) {
     cGtkmmViewEventTracksAdded* pEvent = new cGtkmmViewEventTracksAdded(ids, tracks);
-    eventQueue.AddItemToBack(pEvent);
-    notifyMainThread.Notify();
+    notify.PushEventToMainThread(pEvent);
   } else {
     pMainWindow->OnTracksAdded(ids, tracks);
   }
@@ -437,8 +414,7 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
 
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventWebServerPreviousTrack* pEvent = new cGtkmmViewEventWebServerPreviousTrack();
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnWebServerPreviousTrack();
     }
@@ -450,8 +426,7 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
 
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventWebServerPlayPause* pEvent = new cGtkmmViewEventWebServerPlayPause();
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnWebServerPlayPause();
     }
@@ -463,8 +438,7 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
 
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventWebServerPlayTrack* pEvent = new cGtkmmViewEventWebServerPlayTrack(id);
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnWebServerPlayTrack(id);
     }
@@ -476,8 +450,7 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
 
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventWebServerNextTrack* pEvent = new cGtkmmViewEventWebServerNextTrack();
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnWebServerNextTrack();
     }
@@ -489,8 +462,7 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
 
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventWebServerSetVolumeMute* pEvent = new cGtkmmViewEventWebServerSetVolumeMute();
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnWebServerSetVolumeMute();
     }
@@ -502,8 +474,7 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
 
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventWebServerSetVolumeFull* pEvent = new cGtkmmViewEventWebServerSetVolumeFull();
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnWebServerSetVolumeFull();
     }
@@ -515,8 +486,7 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
 
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventWebServerTrackMoveToRubbishBin* pEvent = new cGtkmmViewEventWebServerTrackMoveToRubbishBin(id);
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnWebServerTrackMoveToRubbishBin(id);
     }
@@ -528,8 +498,7 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
 
     if (!spitfire::util::IsMainThread()) {
       cGtkmmViewEventUpdateCheckerNewVersionFound* pEvent = new cGtkmmViewEventUpdateCheckerNewVersionFound(iNewMajorVersion, iNewMinorVersion, sDownloadPage);
-      eventQueue.AddItemToBack(pEvent);
-      notifyMainThread.Notify();
+      notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnNewVersionFound(iNewMajorVersion, iNewMinorVersion, sDownloadPage);
     }
