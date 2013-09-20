@@ -28,7 +28,7 @@ SET(LIBRARY_INCLUDE "${CMAKE_SOURCE_DIR}/include/")
 SET(LIBRARY_SRC "${CMAKE_SOURCE_DIR}/src/")
 
 # Add definitions, compiler switches, etc.
-ADD_DEFINITIONS("-Wall -W -Wextra -Werror -Wformat -Wformat-y2k -Winit-self -Wunknown-pragmas -Wundef -Wcast-qual -Wwrite-strings -Wno-unused-parameter -Wpointer-arith -Wno-switch -Woverloaded-virtual -Wmissing-include-dirs -Wuninitialized -Wc++0x-compat -std=c++0x -ffor-scope -ffast-math -O2")
+ADD_DEFINITIONS("-Wall -W -Wextra -Werror -Wformat -Wformat-y2k -Winit-self -Wunknown-pragmas -Wundef -Wwrite-strings -Wno-unused-parameter -Wpointer-arith -Wno-switch -Woverloaded-virtual -Wmissing-include-dirs -Wuninitialized -Wc++0x-compat -std=c++0x -ffor-scope -ffast-math -O2")
 IF(WIN32)
 ADD_DEFINITIONS("-DUNICODE -D_UNICODE")
 ENDIF()
@@ -93,7 +93,7 @@ audio/lastfm.cpp audio/metadata.cpp audio/playlist.cpp
 communication/http.cpp communication/network.cpp
 platform/notifications.cpp platform/operatingsystem.cpp platform/pipe.cpp
 storage/csv.cpp storage/document.cpp storage/file.cpp storage/filesystem.cpp storage/settings.cpp storage/xml.cpp
-util/datetime.cpp util/lang.cpp util/string.cpp util/thread.cpp util/updatechecker.cpp)
+util/cConsoleApplication.cpp util/datetime.cpp util/lang.cpp util/string.cpp util/thread.cpp util/updatechecker.cpp)
 
 PREFIX_PATHS(${LIBRARY_SPITFIRE_SOURCE_DIRECTORY} ${LIBRARY_SPITFIRE_SOURCE_FILES})
 SET(OUTPUT_LIBRARY_SPITFIRE_SOURCE_FILES ${OUTPUT_FILES})
