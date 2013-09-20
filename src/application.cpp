@@ -29,7 +29,7 @@ namespace medusa
   {
     std::cout<<"Usage: "<<spitfire::string::ToUTF8(GetApplicationName())<<" [OPTIONS]"<<std::endl;
     std::cout<<std::endl;
-    std::cout<<" -light, --light Use the light version of our current GTK theme if available"<<std::endl;
+    std::cout<<" -dark, --dark Use the dark version of our current GTK theme if available"<<std::endl;
     std::cout<<" -help, --help Display this help and exit"<<std::endl;
     std::cout<<" -version, --version Display version information and exit"<<std::endl;
   }
@@ -47,8 +47,8 @@ namespace medusa
     char** _argv = (char**)(argv);
     Gtk::Main kit(argc, _argv);
 
-    const bool bIsLight = (IsArgumentPresent("-light") || IsArgumentPresent("--light"));
-    if (!bIsLight) {
+    const bool bIsDark = (IsArgumentPresent("-dark") || IsArgumentPresent("--dark"));
+    if (bIsDark) {
       // Set our preference for dark themes before we create any widgets
       // http://stackoverflow.com/questions/15997464/how-do-i-make-my-gtk-app-use-the-dark-theme
       Gtk::Settings::get_default()->property_gtk_application_prefer_dark_theme().set_value(true);
