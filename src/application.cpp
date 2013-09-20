@@ -47,8 +47,8 @@ namespace medusa
     char** _argv = (char**)(argv);
     Gtk::Main kit(argc, _argv);
 
-    const bool bIsDark = (IsArgumentPresent("-dark") || IsArgumentPresent("--dark"));
-    if (bIsDark) {
+    const bool bIsLight = (IsArgumentPresent("-light") || IsArgumentPresent("--light"));
+    if (!bIsLight) {
       // Set our preference for dark themes before we create any widgets
       // http://stackoverflow.com/questions/15997464/how-do-i-make-my-gtk-app-use-the-dark-theme
       Gtk::Settings::get_default()->property_gtk_application_prefer_dark_theme().set_value(true);
