@@ -748,19 +748,7 @@ void cGtkmmMainWindow::OnNotificationAction(size_t actionID)
     ASSERT(spitfire::util::IsMainThread());
 
     // Get our current version
-    const string_t sVersion = BUILD_APPLICATION_VERSION_STRING;
-    spitfire::string::cStringParser sp(sVersion);
-    string_t sMajorVersion;
-    ASSERT(sp.GetToStringAndSkip(".", sMajorVersion));
-    const string_t sMinorVersion = sp.GetToEnd();
-    const int iMajorVersion = spitfire::string::ToUnsignedInt(sMajorVersion);
-    const int iMinorVersion = spitfire::string::ToUnsignedInt(sMinorVersion);
-
-    LOG<<"cGtkmmMainWindow::OnNewVersionFound current="<<iMajorVersion<<"."<<iMinorVersion<<", new="<<iNewMajorVersion<<"."<<iNewMinorVersion<<", url="<<sDownloadPage<<std::endl;
-
-    const int iVersion = (10 * iMajorVersion) + iMinorVersion;
-    const int iNewVersion = (10 * iNewMajorVersion) + iNewMinorVersion;
-    if (iNewVersion > iVersion) {
+    if (updateChecker.IsNewerThanCurrentVersion(iNewMajorVersion, iNewMinorVersion)) {
       const string_t sNewVersion = spitfire::string::ToString(iNewMajorVersion) + TEXT(".") + spitfire::string::ToString(iNewMinorVersion);
 
       // Check if we should ignore this version
