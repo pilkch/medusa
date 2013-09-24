@@ -891,6 +891,7 @@ void cGtkmmMainWindow::OnMenuFileQuit()
 void cGtkmmMainWindow::OnMenuEditPreferences()
 {
   std::cout<<"cGtkmmMainWindow::OnMenuEditPreferences"<<std::endl;
+
   cGtkmmPreferencesDialog dialog(settings, *this);
   if (dialog.Run()) {
     // Update our state from the settings
@@ -1220,7 +1221,7 @@ void cGtkmmMainWindow::OnActionTrackShowInFileManager()
 
     // Show the file in the file manager
     const string_t sFilePath = pTrackList->GetFilePathForRow(row);
-    spitfire::filesystem::ShowFile(sFilePath);
+    spitfire::operatingsystem::ShowFile(sFilePath);
 
     break;
   }
