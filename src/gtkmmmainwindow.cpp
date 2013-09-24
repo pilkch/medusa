@@ -770,7 +770,7 @@ void cGtkmmMainWindow::OnNotificationAction(size_t actionID)
       if (!bIgnoreThisVersion) {
         gtkmm::cGtkmmAlertDialog dialog(*this);
         dialog.SetTitle(TEXT("There is a newer version available, ") + sNewVersion + TEXT("."));
-        dialog.SetDescription(TEXT("Would you like to visit the Medusa website?"));
+        dialog.SetDescription(TEXT("Would you like to visit the ") TEXT(BUILD_APPLICATION_NAME) TEXT(" website?"));
         dialog.SetOk(TEXT("Open Web Page"));
         dialog.SetOther(TEXT("Skip This Version"));
         dialog.SetCancel();
