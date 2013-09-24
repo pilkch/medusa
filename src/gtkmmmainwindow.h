@@ -104,6 +104,9 @@ public:
   void OnWebServerSetVolumeFull();
   void OnWebServerTrackMoveToRubbishBin(trackid_t id);
 
+  // For handling lastfm errors
+  void OnLastFMErrorUserNameOrPasswordIncorrect();
+
   // For handling new version notifications
   void OnNewVersionFound(int iMajorVersion, int iMinorVersion, const string_t& sDownloadPage);
 
@@ -143,6 +146,8 @@ private:
   void OnPlaybackRepeatButtonToggled();
   void OnPlaybackPlayPauseButtonToggled();
 
+  void OnInfoBarResponse(int response);
+
   // For handling popup notifications
   virtual void OnNotificationClicked(size_t notificationID) override;
   virtual void OnNotificationAction(size_t actionID) override;
@@ -157,6 +162,9 @@ private:
   cFolderList recentMovedToFolders;
 
   gtkmm::cIconTheme iconTheme;
+
+  Gtk::InfoBar infoBar;
+  Gtk::Label infoBarMessageLabel;
 
   // Status icon
   bool bIsIconified;

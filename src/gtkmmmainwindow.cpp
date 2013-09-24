@@ -160,6 +160,7 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   view(_view),
   settings(_settings),
   updateChecker(view),
+  lastfm(view),
   bIsIconified(false),
   pMenuPopup(nullptr),
   pMenuPopupRecentMoveToFolder(nullptr),
@@ -555,6 +556,14 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
 
   // Controls
 
+  // Add the message label to the InfoBar
+  Gtk::Container* pInfoBarContainer = static_cast<Gtk::Container*>(infoBar.get_content_area());
+  if (pInfoBarContainer != nullptr) pInfoBarContainer->add(infoBarMessageLabel);
+
+  // Add an ok button to the InfoBar
+  infoBar.add_button(Gtk::Stock::OK, 0);
+
+
   // Set the currently playing song information
   textCurrentlyPlaying.set_use_markup(true);
   textCurrentlyPlaying.set_markup("");
@@ -592,13 +601,22 @@ cGtkmmMainWindow::cGtkmmMainWindow(cGtkmmView& _view, cSettings& _settings) :
   boxStatusBar.pack_start(statusBar, Gtk::PACK_SHRINK);
   boxStatusBar.pack_start(buttonStopLoading, Gtk::PACK_SHRINK);
 
+  boxMainWindow.pack_start(infoBar, Gtk::PACK_SHRINK);
+
   boxMainWindow.pack_start(boxControlsAndToolbar, Gtk::PACK_EXPAND_WIDGET);
   boxMainWindow.pack_start(boxStatusBar, Gtk::PACK_SHRINK);
 
   // Add the box layout to the main window
   add(boxMainWindow);
 
+
+    // Install the event handlers
+  infoBar.signal_response().connect(sigc::mem_fun(*this, &cGtkmmMainWindow::OnInfoBarResponse));
+
   show_all_children();
+
+  // Hide the infobar until we have a message to show
+  infoBar.hide();
 
   // Hide the stop button until we start loading some files
   buttonStopLoading.hide();
@@ -711,6 +729,17 @@ void cGtkmmMainWindow::OnNotificationAction(size_t actionID)
     }
   };
 }
+
+  void cGtkmmMainWindow::OnLastFMErrorUserNameOrPasswordIncorrect()
+  {
+    LOG<<"cGtkmmMainWindow::OnLastFMErrorUserNameOrPasswordIncorrect"<<std::endl;
+
+    ASSERT(spitfire::util::IsMainThread());
+
+    infoBarMessageLabel.set_text("Last.fm could not log in, please check your user name and password");
+    infoBar.set_message_type(Gtk::MESSAGE_INFO);
+    infoBar.show();
+  }
 
   void cGtkmmMainWindow::OnNewVersionFound(int iNewMajorVersion, int iNewMinorVersion, const string_t& sDownloadPage)
   {
@@ -1577,6 +1606,10 @@ void cGtkmmMainWindow::ApplySettings()
   // Start Last.fm controller
   if (settings.IsLastFMEnabled()) {
     std::cout<<"cGtkmmMainWindow::ApplySettings Starting lastfm"<<std::endl;
+
+    // Hide the infobar until we have a message to show
+    infoBar.hide();
+
     lastfm.Start(discombobulator::GetSecretLastfmKeyUTF8(), discombobulator::GetSecretLastfmSecretUTF8(), settings.GetLastFMUserName(), settings.GetLastFMPassword());
   }
 
@@ -1590,6 +1623,13 @@ void cGtkmmMainWindow::ApplySettings()
 
   std::cout<<"cGtkmmMainWindow::ApplySettings returning"<<std::endl;
 }
+
+  void cGtkmmMainWindow::OnInfoBarResponse(int response)
+  {
+    // Clear the message and hide the info bar
+    infoBarMessageLabel.set_text("");
+    infoBar.hide();
+  }
 
   void cGtkmmMainWindow::UpdateStatusBar()
   {
