@@ -141,6 +141,12 @@ namespace medusa
     trackid_t id;
   };
 
+  class cGtkmmViewEventLastFMErrorUserNameOrPasswordIncorrect : public cGtkmmViewEvent
+  {
+  public:
+    virtual void EventFunction(cGtkmmView& view) override;
+  };
+
   class cGtkmmViewEventUpdateCheckerNewVersionFound : public cGtkmmViewEvent
   {
   public:
@@ -153,7 +159,7 @@ namespace medusa
     string_t sDownloadPage;
   };
 
-class cGtkmmView : public cView, public spitfire::util::cUpdateCheckerHandler
+class cGtkmmView : public cView, public spitfire::util::cUpdateCheckerHandler, public spitfire::audio::lastfm::cLastFMErrorHandler
 {
 public:
   friend class cGtkmmMainWindow;
@@ -173,6 +179,7 @@ public:
   friend class cGtkmmViewEventWebServerSetVolumeMute;
   friend class cGtkmmViewEventWebServerSetVolumeFull;
   friend class cGtkmmViewEventWebServerTrackMoveToRubbishBin;
+  friend class cGtkmmViewEventLastFMErrorUserNameOrPasswordIncorrect;
   friend class cGtkmmViewEventUpdateCheckerNewVersionFound;
 
   cGtkmmView(int argc, char** argv);
@@ -225,6 +232,9 @@ private:
   void InstallDesktopFile();
 
   void _Run();
+
+  // Called by lastfm
+  virtual void OnLastFMErrorUserNameOrPasswordIncorrect() override;
 
   // Called by the update checker
   virtual void OnNewVersionFound(int iMajorVersion, int iMinorVersion, const string_t& sDownloadPage) override;

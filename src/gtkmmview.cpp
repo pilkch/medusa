@@ -113,6 +113,11 @@ namespace medusa
     view.OnWebServerTrackMoveToRubbishBin(id);
   }
 
+  void cGtkmmViewEventLastFMErrorUserNameOrPasswordIncorrect::EventFunction(cGtkmmView& view)
+  {
+    view.OnLastFMErrorUserNameOrPasswordIncorrect();
+  }
+
   cGtkmmViewEventUpdateCheckerNewVersionFound::cGtkmmViewEventUpdateCheckerNewVersionFound(int _iMajorVersion, int _iMinorVersion, const string_t& _sDownloadPage) :
     iMajorVersion(_iMajorVersion),
     iMinorVersion(_iMinorVersion),
@@ -489,6 +494,20 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
       notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnWebServerTrackMoveToRubbishBin(id);
+    }
+  }
+
+
+
+  void cGtkmmView::OnLastFMErrorUserNameOrPasswordIncorrect()
+  {
+    std::cout<<"cGtkmmView::OnLastFMErrorUserNameOrPasswordIncorrect"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventLastFMErrorUserNameOrPasswordIncorrect* pEvent = new cGtkmmViewEventLastFMErrorUserNameOrPasswordIncorrect;
+      notify.PushEventToMainThread(pEvent);
+    } else {
+      pMainWindow->OnLastFMErrorUserNameOrPasswordIncorrect();
     }
   }
 
