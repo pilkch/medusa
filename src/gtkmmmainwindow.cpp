@@ -974,12 +974,18 @@ void cGtkmmMainWindow::OnActionBrowseFolder()
   dialog.SetType(gtkmm::cGtkmmFolderDialog::TYPE::SELECT);
   dialog.SetCaption(TEXT("Add audio folder"));
   dialog.SetDefaultFolder(settings.GetLastAddLocation());
+  dialog.SetSelectMultipleFolders(true);
   if (dialog.Run(*this)) {
     std::cout<<"cGtkmmMainWindow::OnActionBrowseFolder Selected folder"<<std::endl;
     settings.SetLastAddLocation(dialog.GetSelectedFolder());
     settings.Save();
-    const string_t sSelectedFolder = dialog.GetSelectedFolder();
-    view.OnActionAddTracksFromFolder(sSelectedFolder);
+
+    // Add the selected folders
+    const std::list<string_t>& folders = dialog.GetSelectedFolders();
+    const std::list<string_t>::const_iterator iterEnd(folders.end());
+    for (std::list<string_t>::const_iterator iter(folders.begin()); iter != iterEnd; iter++) {
+      view.OnActionAddTracksFromFolder(*iter);
+    }
   }
 }
 
