@@ -10,7 +10,6 @@
 
 // Spitfire headers
 #include <spitfire/storage/filesystem.h>
-#include <spitfire/platform/notifications.h>
 #include <spitfire/platform/operatingsystem.h>
 #include <spitfire/platform/pipe.h>
 
@@ -867,6 +866,8 @@ void cGtkmmMainWindow::OnMenuFileQuit()
   // Tell the lastfm thread to stop now
   if (lastfm.IsRunning()) lastfm.Stop();
 
+  // Close our notification
+  notification.Close();
   view.OnActionMainWindowQuitNow();
 
   // Stop handling popup notifications
@@ -1327,7 +1328,7 @@ void cGtkmmMainWindow::OnActionPlayTrack(trackid_t id, const string_t& sFilePath
   if (IsScreenSaverActive()) return;
 
   // Show a notification message bubble
-  spitfire::operatingsystem::cNotification notification(NOTIFICATION_PLAYBACK);
+  spitfire::operatingsystem::cNotificationSettings settings(NOTIFICATION_PLAYBACK);
 
   std::ostringstream oTitle;
   if (!metaData.sArtist.empty()) oTitle<<spitfire::string::ToUTF8(metaData.sArtist);
@@ -1342,10 +1343,11 @@ void cGtkmmMainWindow::OnActionPlayTrack(trackid_t id, const string_t& sFilePath
     oDescription<<spitfire::string::ToUTF8(metaData.sAlbum);
   }
 
-  notification.SetTitle(oTitle.str());
-  notification.SetDescription(oDescription.str());
-  notification.SetActionsMusicPlayer(NOTIFICATION_PREVIOUS, NOTIFICATION_PAUSE, NOTIFICATION_NEXT);
-  spitfire::operatingsystem::NotificationShow(notification, 8000);
+  settings.SetTitle(oTitle.str());
+  settings.SetDescription(oDescription.str());
+  settings.SetActionsMusicPlayer(NOTIFICATION_PREVIOUS, NOTIFICATION_PAUSE, NOTIFICATION_NEXT);
+
+  notification.Show(settings, 8000);
 }
 
 void cGtkmmMainWindow::OnPlaybackPlayPauseMenuToggled()

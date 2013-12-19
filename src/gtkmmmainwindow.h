@@ -159,6 +159,8 @@ private:
 
   spitfire::audio::lastfm::cLastFM lastfm;
 
+  spitfire::operatingsystem::cNotification notification;
+
   cFolderList recentMovedToFolders;
 
   gtkmm::cIconTheme iconTheme;
