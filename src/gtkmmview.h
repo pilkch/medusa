@@ -239,8 +239,6 @@ private:
   // Called by the update checker
   virtual void OnNewVersionFound(int iMajorVersion, int iMinorVersion, const string_t& sDownloadPage) override;
 
-  Gtk::Main kit;
-
   string_t sExecutableFolder;
 
   cGtkmmMainWindow* pMainWindow;
