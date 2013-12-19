@@ -1723,6 +1723,28 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
     updateChecker.Run();
   }
 
+  void cGtkmmMainWindow::TrackMoveToRubbishBin(trackid_t id)
+  {
+    std::cout<<"cGtkmmMainWindow::TrackMoveToRubbishBin"<<std::endl;
+
+    // Get the data for the track
+    const string_t sFilePath = pTrackList->GetFilePathForTrackID(id);
+    if (sFilePath.empty()) {
+      std::cout<<"cGtkmmMainWindow::TrackMoveToRubbishBin Track has already been removed, returning"<<std::endl;
+      return;
+    }
+
+    // We are removing one track, so find out if it is the currently playing track and if we should skip to the next one
+    if ((pTrackList->GetTrackCount() != 1) && (view.GetCurrentTrackID() == id)) OnPlaybackNextClicked();
+
+    // Tell the view that we are removing these tracks
+    std::list<trackid_t> tracks;
+    tracks.push_back(id);
+    view.OnActionMoveTracksToTrash(tracks);
+
+    // Remove the selected tracks
+    pTrackList->DeleteTrack(id);
+  }
   void cGtkmmMainWindow::OnWebServerPreviousTrack()
   {
     OnPlaybackPreviousClicked();
@@ -1759,26 +1781,6 @@ void cGtkmmMainWindow::OnTracksAdded(const std::list<trackid_t>& ids, const std:
 
   void cGtkmmMainWindow::OnWebServerTrackMoveToRubbishBin(trackid_t id)
   {
-    std::cout<<"cGtkmmMainWindow::OnWebServerTrackMoveToRubbishBin"<<std::endl;
-
-    // Get the data for the track
-    const string_t sFilePath = pTrackList->GetFilePathForTrackID(id);
-    if (sFilePath.empty()) {
-      std::cout<<"cGtkmmMainWindow::OnWebServerTrackMoveToRubbishBin Track has already been removed, returning"<<std::endl;
-      return;
-    }
-
-    // We are removing one track, so find out if it is the currently playing track and if we should skip to the next one
-    if (pTrackList->GetTrackCount() != 1) {
-      if (view.GetCurrentTrackID() == id) OnPlaybackNextClicked();
-    }
-
-    // Tell the view that we are removing these tracks
-    std::list<trackid_t> tracks;
-    tracks.push_back(id);
-    view.OnActionMoveTracksToTrash(tracks);
-
-    // Remove the selected tracks
-    pTrackList->DeleteTrack(id);
+    TrackMoveToRubbishBin(id);
   }
 }

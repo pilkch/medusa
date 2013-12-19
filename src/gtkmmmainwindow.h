@@ -127,6 +127,8 @@ private:
 
   void ApplySettings();
 
+  void TrackMoveToRubbishBin(trackid_t id);
+
   // Overridden
   bool on_delete_event(GdkEventAny* event);
 
