@@ -1242,7 +1242,10 @@ void cGtkmmMainWindow::OnActionTrackProperties()
 void cGtkmmMainWindow::OnActionJumpToPlaying()
 {
   trackid_t id = view.GetCurrentTrackID();
-  if (id != INVALID_TRACK) pTrackList->EnsureRowIsVisible(id);
+  if (id != INVALID_TRACK) {
+    pTrackList->SelectRow(id);
+    pTrackList->EnsureRowIsVisible(id);
+  }
 }
 
 void cGtkmmMainWindow::OnActionPlaylistRightClick(GdkEventButton* event)

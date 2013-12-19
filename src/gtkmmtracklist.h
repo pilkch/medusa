@@ -87,6 +87,7 @@ public:
   void SetPropertiesForRow(const Gtk::TreeModel::Row& row, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData, TRACK_STATUS status);
   void SetPropertiesForRow(trackid_t id, const string_t& sFilePath, const spitfire::audio::cMetaData& metaData, TRACK_STATUS status);
 
+  void SelectRow(trackid_t id);
   void EnsureRowIsVisible(trackid_t id);
 
   size_t GetTrackCount() const;

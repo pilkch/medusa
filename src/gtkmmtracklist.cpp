@@ -513,6 +513,31 @@ void cGtkmmTrackList::SetStatePaused(trackid_t id)
     return 0;
   }
 
+  void cGtkmmTrackList::SelectRow(trackid_t id)
+  {
+    if (id != INVALID_TRACK) {
+      Glib::RefPtr<Gtk::TreeView::Selection> selectionRef(get_selection());
+      if (!selectionRef) LOG<<"cGtkmmTrackList::SelectRow Error getting the selection"<<std::endl;
+      else {
+        // Unselect all rows
+        selectionRef->unselect_all();
+
+        // Find the requested row
+        Gtk::TreeModel::iterator iter = playlistTreeModelRef->children().begin();
+        while (iter) {
+          Gtk::TreeModel::Row row = *iter;
+          if (row[columns.id] == id) {
+            // Set the selection to the requested row
+            selectionRef->select(row);
+            break;
+          }
+
+          iter++;
+        }
+      }
+    }
+  }
+
   void cGtkmmTrackList::EnsureRowIsVisible(trackid_t id)
   {
     if (id != INVALID_TRACK) {
