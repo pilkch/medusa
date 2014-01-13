@@ -740,6 +740,30 @@ void cGtkmmMainWindow::OnNotificationAction(size_t actionID)
     infoBar.show();
   }
 
+  void cGtkmmMainWindow::OnLastFMTracksQueuedUpdated(size_t nTracksQueued)
+  {
+    LOG<<"cGtkmmMainWindow::OnLastFMTracksQueuedUpdated"<<std::endl;
+
+    ASSERT(spitfire::util::IsMainThread());
+
+    cLastfmStatistics statistics = settings.GetLastFmStatistics();
+    statistics.nTracksQueued = nTracksQueued;
+    settings.SetLastFmStatistics(statistics);
+  }
+
+  void cGtkmmMainWindow::OnLastFMTracksSubmitted(size_t nTracksSubmitted, const spitfire::audio::cMetaData& metaDataLastTrack, const spitfire::util::cDateTime& dateTime)
+  {
+    LOG<<"cGtkmmMainWindow::OnLastFMTracksSubmitted"<<std::endl;
+
+    ASSERT(spitfire::util::IsMainThread());
+
+    cLastfmStatistics statistics = settings.GetLastFmStatistics();
+    statistics.nTracksSubmitted += nTracksSubmitted;
+    statistics.sLastTrackArtistAndTitle = util::FormatArtistAndTitle(metaDataLastTrack.sArtist, metaDataLastTrack.sTitle);
+    statistics.lastSubmittedDateTime = dateTime;
+    settings.SetLastFmStatistics(statistics);
+  }
+
   void cGtkmmMainWindow::OnNewVersionFound(int iNewMajorVersion, int iNewMinorVersion, const string_t& sDownloadPage)
   {
     LOG<<"cGtkmmMainWindow::OnNewVersionFound"<<std::endl;

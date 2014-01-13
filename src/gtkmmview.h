@@ -147,6 +147,28 @@ namespace medusa
     virtual void EventFunction(cGtkmmView& view) override;
   };
 
+  class cGtkmmViewEventLastFMTracksQueuedUpdated : public cGtkmmViewEvent
+  {
+  public:
+    explicit cGtkmmViewEventLastFMTracksQueuedUpdated(size_t nTracksQueued);
+
+    virtual void EventFunction(cGtkmmView& view) override;
+
+    size_t nTracksQueued;
+  };
+
+  class cGtkmmViewEventLastFMTracksSubmitted : public cGtkmmViewEvent
+  {
+  public:
+    cGtkmmViewEventLastFMTracksSubmitted(size_t nTracksSubmitted, const spitfire::audio::cMetaData& metaDataLastTrack, const spitfire::util::cDateTime& dateTime);
+
+    virtual void EventFunction(cGtkmmView& view) override;
+
+    size_t nTracksSubmitted;
+    spitfire::audio::cMetaData metaDataLastTrack;
+    spitfire::util::cDateTime dateTime;
+  };
+
   class cGtkmmViewEventUpdateCheckerNewVersionFound : public cGtkmmViewEvent
   {
   public:
@@ -180,6 +202,8 @@ public:
   friend class cGtkmmViewEventWebServerSetVolumeFull;
   friend class cGtkmmViewEventWebServerTrackMoveToRubbishBin;
   friend class cGtkmmViewEventLastFMErrorUserNameOrPasswordIncorrect;
+  friend class cGtkmmViewEventLastFMTracksQueuedUpdated;
+  friend class cGtkmmViewEventLastFMTracksSubmitted;
   friend class cGtkmmViewEventUpdateCheckerNewVersionFound;
 
   cGtkmmView(int argc, char** argv);
@@ -235,6 +259,8 @@ private:
 
   // Called by lastfm
   virtual void OnLastFMErrorUserNameOrPasswordIncorrect() override;
+  virtual void OnLastFMTracksQueuedUpdated(size_t nTracksQueued) override;
+  virtual void OnLastFMTracksSubmitted(size_t nTracksSubmitted, const spitfire::audio::cMetaData& metaDataLastTrack, const spitfire::util::cDateTime& dateTime) override;
 
   // Called by the update checker
   virtual void OnNewVersionFound(int iMajorVersion, int iMinorVersion, const string_t& sDownloadPage) override;

@@ -22,6 +22,8 @@ public:
   bool Run();
 
 private:
+  void OnLastfmStatisticsClicked();
+
   void OnResponse(int response_id);
   void OnEnableControls();
 
@@ -49,6 +51,7 @@ private:
   Gtk::HBox boxLastfmSignup;
   Gtk::Label lastfmNewToLastfmDescription;
   Gtk::LinkButton lastfmSignUpForAnAccount;
+  Gtk::Button lastfmStatistics;
 
   // Web Server
   Gtk::Frame groupWebServer;

@@ -106,6 +106,8 @@ public:
 
   // For handling lastfm errors
   void OnLastFMErrorUserNameOrPasswordIncorrect();
+  void OnLastFMTracksQueuedUpdated(size_t nTracksQueued);
+  void OnLastFMTracksSubmitted(size_t nTracksSubmitted, const spitfire::audio::cMetaData& metaDataLastTrack, const spitfire::util::cDateTime& dateTime);
 
   // For handling new version notifications
   void OnNewVersionFound(int iMajorVersion, int iMinorVersion, const string_t& sDownloadPage);

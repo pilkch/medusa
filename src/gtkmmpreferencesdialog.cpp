@@ -1,5 +1,9 @@
 // Spitfire headers
 #include <spitfire/communication/network.h>
+#include <spitfire/util/datetime.h>
+
+// libgtkmm headers
+#include <libgtkmm/alertdialog.h>
 
 // Medusa headers
 #include "gtkmmpreferencesdialog.h"
@@ -20,6 +24,7 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Wind
   lastfmPasswordDescription("Password:"),
   lastfmNewToLastfmDescription("New to Last.fm?"),
   lastfmSignUpForAnAccount("http://www.last.fm/join", "Sign up for an account"),
+  lastfmStatistics("Statistics"),
   groupWebServer("Playback"),
   webServerEnabled("Enable web server"),
   pOkButton(nullptr)
@@ -47,6 +52,7 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Wind
 
   // Last.fm
   lastfmEnabled.signal_toggled().connect(sigc::mem_fun(*this, &cGtkmmPreferencesDialog::OnEnableControls));
+  lastfmStatistics.signal_clicked().connect(sigc::mem_fun(*this, &cGtkmmPreferencesDialog::OnLastfmStatisticsClicked));
 
   lastfmEnabled.set_active(settings.IsLastFMEnabled());
   lastfmUserName.set_text(spitfire::string::ToUTF8(settings.GetLastFMUserName()).c_str());
@@ -74,6 +80,7 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Wind
   boxLastfm.pack_start(boxLastfmSignup, Gtk::PACK_SHRINK);
   boxLastfmSignup.pack_start(lastfmNewToLastfmDescription, Gtk::PACK_SHRINK);
   boxLastfmSignup.pack_start(lastfmSignUpForAnAccount, Gtk::PACK_SHRINK);
+  boxLastfmSignup.pack_start(lastfmStatistics, Gtk::PACK_SHRINK);
 
   // Web server
   webServerEnabled.set_active(settings.IsWebServerEnabled());
@@ -120,6 +127,26 @@ cGtkmmPreferencesDialog::cGtkmmPreferencesDialog(cSettings& _settings, Gtk::Wind
   {
     const size_t n = webServerLinks.size();
     for (size_t i = 0; i < n; i++) delete webServerLinks[i];
+  }
+
+  void cGtkmmPreferencesDialog::OnLastfmStatisticsClicked()
+  {
+    const cLastfmStatistics lastfmStatistics = settings.GetLastFmStatistics();
+
+    spitfire::ostringstream_t o;
+    o<<"Status: Ok\n";
+    o<<"Queued tracks: "<<lastfmStatistics.nTracksQueued<<"\n";
+    o<<"Tracks submitted: "<<lastfmStatistics.nTracksSubmitted<<"\n";
+    if (lastfmStatistics.nTracksSubmitted != 0) o<<"Last track submitted: "<<lastfmStatistics.sLastTrackArtistAndTitle<<", "<<lastfmStatistics.lastSubmittedDateTime.GetFriendlyRelativeString();
+    else o<<"Last track submitted: -";
+
+    gtkmm::cGtkmmAlertDialog dialog(*this);
+
+    dialog.SetTitle("Statistics");
+    dialog.SetDescription(o.str());
+    dialog.SetOk("Done");
+
+    dialog.Run();
   }
 
 void cGtkmmPreferencesDialog::OnResponse(int response_id)

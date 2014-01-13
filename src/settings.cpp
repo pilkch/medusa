@@ -155,6 +155,35 @@ void cSettings::SetLastFMPassword(const string_t& sPassword)
   document.SetValue(TEXT("settings"), TEXT("lastfm"), TEXT("password"), sPassword);
 }
 
+  cLastfmStatistics cSettings::GetLastFmStatistics() const
+  {
+    cLastfmStatistics statistics;
+
+    statistics.nTracksQueued = document.GetValue<size_t>(TEXT("settings"), TEXT("lastfm"), TEXT("statistics_tracks_queued"), 0);
+    statistics.nTracksSubmitted = document.GetValue<size_t>(TEXT("settings"), TEXT("lastfm"), TEXT("statistics_tracks_submitted"), 0);
+    statistics.sLastTrackArtistAndTitle = document.GetValue<string_t>(TEXT("settings"), TEXT("lastfm"), TEXT("statistics_last_submitted_track_artist_and_title"), TEXT(""));
+    const string_t sValue = document.GetValue<string_t>(TEXT("settings"), TEXT("lastfm"), TEXT("statistics_last_submitted_datetime"), TEXT(""));
+    if (!sValue.empty()) {
+      LOG<<"cSettings::GetLastFmStatistics Before \""<<sValue<<"\""<<std::endl;
+      statistics.lastSubmittedDateTime.SetFromISO8601UTCString(sValue);
+      LOG<<"cSettings::GetLastFmStatistics After"<<std::endl;
+    }
+
+    return statistics;
+  }
+
+  void cSettings::SetLastFmStatistics(const cLastfmStatistics& statistics)
+  {
+    document.SetValue(TEXT("settings"), TEXT("lastfm"), TEXT("statistics_tracks_queued"), statistics.nTracksQueued);
+    document.SetValue(TEXT("settings"), TEXT("lastfm"), TEXT("statistics_tracks_submitted"), statistics.nTracksSubmitted);
+    if (statistics.nTracksSubmitted != 0) {
+      LOG<<"cSettings::SetLastFmStatistics Before"<<std::endl;
+      document.SetValue(TEXT("settings"), TEXT("lastfm"), TEXT("statistics_last_submitted_track_artist_and_title"), statistics.sLastTrackArtistAndTitle);
+      document.SetValue(TEXT("settings"), TEXT("lastfm"), TEXT("statistics_last_submitted_datetime"), statistics.lastSubmittedDateTime.GetISO8601UTCString());
+      LOG<<"cSettings::SetLastFmStatistics After"<<std::endl;
+    }
+  }
+
   string_t cSettings::GetLastAddLocation() const
   {
     return document.GetValue<string_t>(TEXT("settings"), TEXT("path"), TEXT("lastAddLocation"), spitfire::filesystem::GetHomeMusicDirectory());

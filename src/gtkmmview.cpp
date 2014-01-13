@@ -118,6 +118,28 @@ namespace medusa
     view.OnLastFMErrorUserNameOrPasswordIncorrect();
   }
 
+  cGtkmmViewEventLastFMTracksQueuedUpdated::cGtkmmViewEventLastFMTracksQueuedUpdated(size_t _nTracksQueued) :
+    nTracksQueued(_nTracksQueued)
+  {
+  }
+
+  void cGtkmmViewEventLastFMTracksQueuedUpdated::EventFunction(cGtkmmView& view)
+  {
+    view.OnLastFMTracksQueuedUpdated(nTracksQueued);
+  }
+
+  cGtkmmViewEventLastFMTracksSubmitted::cGtkmmViewEventLastFMTracksSubmitted(size_t _nTracksSubmitted, const spitfire::audio::cMetaData& _metaDataLastTrack, const spitfire::util::cDateTime& _dateTime) :
+    nTracksSubmitted(_nTracksSubmitted),
+    metaDataLastTrack(_metaDataLastTrack),
+    dateTime(_dateTime)
+  {
+  }
+
+  void cGtkmmViewEventLastFMTracksSubmitted::EventFunction(cGtkmmView& view)
+  {
+    view.OnLastFMTracksSubmitted(nTracksSubmitted, metaDataLastTrack, dateTime);
+  }
+
   cGtkmmViewEventUpdateCheckerNewVersionFound::cGtkmmViewEventUpdateCheckerNewVersionFound(int _iMajorVersion, int _iMinorVersion, const string_t& _sDownloadPage) :
     iMajorVersion(_iMajorVersion),
     iMinorVersion(_iMinorVersion),
@@ -501,6 +523,30 @@ void cGtkmmView::OnTracksAdded(const std::list<trackid_t>& ids, const std::list<
       notify.PushEventToMainThread(pEvent);
     } else {
       pMainWindow->OnLastFMErrorUserNameOrPasswordIncorrect();
+    }
+  }
+
+  void cGtkmmView::OnLastFMTracksQueuedUpdated(size_t nTracksQueued)
+  {
+    std::cout<<"cGtkmmView::OnLastFMTracksQueuedUpdated"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventLastFMTracksQueuedUpdated* pEvent = new cGtkmmViewEventLastFMTracksQueuedUpdated(nTracksQueued);
+      notify.PushEventToMainThread(pEvent);
+    } else {
+      pMainWindow->OnLastFMTracksQueuedUpdated(nTracksQueued);
+    }
+  }
+
+  void cGtkmmView::OnLastFMTracksSubmitted(size_t nTracksSubmitted, const spitfire::audio::cMetaData& metaDataLastTrack, const spitfire::util::cDateTime& dateTime)
+  {
+    std::cout<<"cGtkmmView::OnLastFMTracksSubmitted"<<std::endl;
+
+    if (!spitfire::util::IsMainThread()) {
+      cGtkmmViewEventLastFMTracksSubmitted* pEvent = new cGtkmmViewEventLastFMTracksSubmitted(nTracksSubmitted, metaDataLastTrack, dateTime);
+      notify.PushEventToMainThread(pEvent);
+    } else {
+      pMainWindow->OnLastFMTracksSubmitted(nTracksSubmitted, metaDataLastTrack, dateTime);
     }
   }
 

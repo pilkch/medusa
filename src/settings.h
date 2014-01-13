@@ -3,12 +3,30 @@
 
 // Spitfire headers
 #include <spitfire/storage/settings.h>
+#include <spitfire/util/datetime.h>
 
 // Medusa headers
 #include "medusa.h"
 
 namespace medusa
 {
+  // ** cLastFmStatistics
+
+  struct cLastfmStatistics
+  {
+    cLastfmStatistics() :
+      nTracksQueued(0),
+      nTracksSubmitted(0)
+    {
+    }
+
+    size_t nTracksQueued;
+    size_t nTracksSubmitted;
+    string_t sLastTrackArtistAndTitle;
+    spitfire::util::cDateTime lastSubmittedDateTime;
+  };
+
+
 // ** cSettings
 
 class cSettings
@@ -52,6 +70,9 @@ public:
 
   string_t GetLastFMPassword() const;
   void SetLastFMPassword(const string_t& sPassword);
+
+  cLastfmStatistics GetLastFmStatistics() const;
+  void SetLastFmStatistics(const cLastfmStatistics& statistics);
 
   string_t GetLastAddLocation() const;
   void SetLastAddLocation(const string_t& sLastAddLocation);
