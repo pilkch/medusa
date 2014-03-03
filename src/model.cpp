@@ -246,7 +246,7 @@ namespace medusa
         std::list<string_t>::const_iterator iter = files.begin();
         const std::list<string_t>::const_iterator iterEnd = files.end();
         while (iter != iterEnd) {
-          if (IsFileTypeSupported(spitfire::filesystem::GetExtension(*iter))) supportedFiles.push_back(*iter);
+          if (util::IsFileTypeSupported(spitfire::filesystem::GetExtension(*iter))) supportedFiles.push_back(*iter);
 
           iter++;
         }
