@@ -15,12 +15,6 @@ namespace medusa
 {
   const size_t INVALID_TRACK_INDEX = std::numeric_limits<size_t>::max();
 
-  bool IsFileTypeSupported(const string_t& sFileExtension)
-  {
-    const string_t sFileExtensionLower = spitfire::string::ToLower(sFileExtension);
-    return ((sFileExtensionLower == TEXT(".mp3")) || (sFileExtensionLower == TEXT(".wav")));
-  }
-
   template <typename T>
   inline void UpdateStatusOnTracks(T& tracks)
   {
