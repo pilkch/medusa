@@ -18,6 +18,12 @@ namespace medusa
 {
   namespace util
   {
+    bool IsFileTypeSupported(const string_t& sFileExtension)
+    {
+      const string_t sFileExtensionLower = spitfire::string::ToLower(sFileExtension);
+      return ((sFileExtensionLower == TEXT(".mp3")) || (sFileExtensionLower == TEXT(".wav")));
+    }
+
     string_t FormatArtistAndTitle(const string_t& sArtist, const string_t& sTitle)
     {
       if (sArtist.empty() && sTitle.empty()) return "Unknown artist - Unknown title";
